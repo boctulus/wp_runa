@@ -1,6 +1,9 @@
 <?php
 
 return [
+    // Dejar vacio ('') para no cambiarlo
+    'add_to_cart_button_text' => 'Cotizar', // 'Agregar al carrito'
+    
     /*
         API
     */
