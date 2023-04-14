@@ -2,8 +2,10 @@
 
 use boctulus\SW\libs\Alia;
 use boctulus\SW\core\libs\XML;
+use boctulus\SW\libs\RunaSync;
 use boctulus\SW\core\libs\Date;
 use boctulus\SW\core\libs\Files;
+use boctulus\SW\core\libs\Strings;
 use boctulus\SW\core\libs\ApiClient;
 use boctulus\SW\core\libs\Validator;
 use boctulus\SW\libs\AliaBotQuestions;
@@ -29,62 +31,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // ...
 
-function get_xml(){
-	$cfg = config();
+if (php_sapi_name() == "cli"){
+	$file = $argv[0];
 
-	$url = $cfg['api_base_url'] . $cfg['endpoints']['stock_xml_gen'];
-
-	$client = ApiClient::instance();
-
-	$client
-	->disableSSL()
-	->setUrl($url)
-	->cache(1800)
-	->get()
-	->getResponse();
-
-	$status = $client->getStatus();
-
-	if ($status != 200){
-		throw new \Exception($client->error());
+	if (Strings::contains('/', $file)){
+		$dir = Strings::beforeLast($file, '/');
+		chdir($dir);
 	}
 
-	// Doy tiempo a que se genere el archivo XML
-
-	if (!get_transient('xml_generado')){
-		sleep(15);
-		set_transient('xml_generado', true, 1800);
-	} 
-
-	$url = $cfg['api_base_url'] . $cfg['endpoints']['stock_xml_get'];
-
-	$client = ApiClient::instance();
-
-	$client
-	->disableSSL()
-	->setUrl($url)
-	->cache(1800)
-	->get()
-	->getResponse();
-
-	$status = $client->getStatus();
-
-	if ($status != 200){
-		throw new \Exception($client->error());
+	if ($argc >1){
+		$codes = $argv[1];
 	}
+} 
 
-	//dd($client->getCachePath(), 'CACHE');
-
-	return $client->data();
-}
+RunaSync::init($codes ?? null);
 
 
-$stock_xml = get_xml();
 
-if (empty($stock_xml)){
-	throw new \Exception("No stock?");
-}
-
-$stock = XML::toArray($stock_xml);
-
-dd($stock);
