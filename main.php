@@ -2,7 +2,6 @@
 
 use boctulus\SW\core\libs\Users;
 
-
 function sw_init_session() {
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
@@ -67,3 +66,43 @@ add_filter( 'woocommerce_product_single_add_to_cart_text', 'woocommerce_add_to_c
 add_filter( 'woocommerce_product_add_to_cart_text',        'woocommerce_add_to_cart_button_text' );  
 
 
+/*
+    Cambiar el texto del boton "proceed to checkout" y la url del checkout
+*/
+
+function custom_button_proceed_to_checkout() {
+    $text = "Proceed to checkout";
+    
+    if (!Users::isLogged()){
+        $text = "Cotizar pedido";
+    }
+
+    echo '<a href="'.esc_url(wc_get_checkout_url()).'" class="checkout-button button alt wc-forward">' .
+    __($text, "woocommerce") . '</a>';
+}
+
+remove_action( 'woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20 );
+add_action( 'woocommerce_proceed_to_checkout', 'custom_button_proceed_to_checkout', 20 );
+
+function my_change_checkout_url( $url ) {
+    if (!Users::isLogged()){
+        $url = "/bla/bla/cotizar-pedido";
+    }
+    
+    return $url;
+}
+
+add_filter( 'woocommerce_get_checkout_url', 'my_change_checkout_url', 30 );
+
+
+/*
+    More
+*/
+
+
+function my_custom_checkout_button_text() {
+	return 'Colocar la órden';
+}
+
+// Change checkout page button to place the order (Realizar el pedido)
+// add_filter( 'woocommerce_order_button_text', 'my_custom_checkout_button_text' );
