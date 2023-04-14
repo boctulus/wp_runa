@@ -607,7 +607,7 @@ class ApiClient
             return null;
         }
 
-        $path[$this->url] = sys_get_temp_dir() . '/' . $filename;
+        $path[$this->url] = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $filename;
         return $path[$this->url];
     }
 

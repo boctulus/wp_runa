@@ -25,6 +25,13 @@ function assets(){
 
 // enqueue('assets');
 
+/*
+    Me aseguro que la extension SimpleXML este instalada
+*/
+if (!in_array('SimpleXML', get_loaded_extensions())){
+    Files::logger("Advertencia: Extension de PHP 'SimpleXML' no instalada!");
+    admin_notice("Favor de instalar la extension de PHP 'SimpleXML'", 'error');
+}
 
 /*
 	Oculta el precio si el usuario no esta logueado
@@ -39,29 +46,24 @@ function customized_price_html( $price, $product ) {
 	
 add_filter( 'woocommerce_get_price_html', 'customized_price_html', 100, 2 ); 
 
+/*
+    Cambio el boton de "Agrear al carrito" por otro como "Cotizar" si el usuario
+    no esta lougueado
+*/
+function woocommerce_add_to_cart_button_text() {  
+    $text = 'Add to cart';
+
+    if (!Users::isLogged()){
+        $text = config()['add_to_cart_button_text'] ?? 'Add to cart';
+    }
+
+    return __($text, 'woocommerce' ); 
+}
 
 // Change add to cart text on single product page
-add_filter( 'woocommerce_product_single_add_to_cart_text', 'woocommerce_add_to_cart_button_text_single' ); 
-
-function woocommerce_add_to_cart_button_text_single() {  
-    $text = 'Add to cart';
-
-    if (!Users::isLogged()){
-        $text = config()['add_to_cart_button_text'] ?? 'Add to cart';
-    }
-
-    return __($text, 'woocommerce' ); 
-}
+add_filter( 'woocommerce_product_single_add_to_cart_text', 'woocommerce_add_to_cart_button_text' ); 
 
 // Change add to cart text on product archives page
-add_filter( 'woocommerce_product_add_to_cart_text', 'woocommerce_add_to_cart_button_text_archives' );  
+add_filter( 'woocommerce_product_add_to_cart_text',        'woocommerce_add_to_cart_button_text' );  
 
-function woocommerce_add_to_cart_button_text_archives() {
-    $text = 'Add to cart';
 
-    if (!Users::isLogged()){
-        $text = config()['add_to_cart_button_text'] ?? 'Add to cart';
-    }
-
-    return __($text, 'woocommerce' ); 
-}
