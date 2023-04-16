@@ -24,6 +24,7 @@ function assets(){
 
 // enqueue('assets');
 
+
 /*
     Me aseguro que la extension SimpleXML este instalada
 */
@@ -68,6 +69,9 @@ add_filter( 'woocommerce_product_add_to_cart_text',        'woocommerce_add_to_c
 
 /*
     Cambiar el texto del boton "proceed to checkout" y la url del checkout
+
+    Otra forma de cambiar textos:
+    https://stackoverflow.com/a/34290090/980631
 */
 
 function custom_button_proceed_to_checkout() {
@@ -86,7 +90,7 @@ add_action( 'woocommerce_proceed_to_checkout', 'custom_button_proceed_to_checkou
 
 function my_change_checkout_url( $url ) {
     if (!Users::isLogged()){
-        $url = "/bla/bla/cotizar-pedido";
+        $url = "/bla/bla/cotizar-pedido";  // quizas no quiera cambiar la url
     }
     
     return $url;

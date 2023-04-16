@@ -53,6 +53,8 @@ foreach ($helper_dirs as $dir){
     }    
 }
     
+require_once __DIR__ . '/core/scripts/admin.php';
+
 
 if (defined('WP_DEBUG_DISPLAY') && WP_DEBUG_DISPLAY){
 	ini_set('display_errors', 1);
