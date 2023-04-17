@@ -38,6 +38,8 @@ class Schema
 	protected $query;
 	protected $exec = true;
 
+	protected $field;
+
 	function __construct(string $tb_name){
 		$this->tables = self::getTables();
 		$this->tb_name = $tb_name;
@@ -502,7 +504,7 @@ class Schema
 	}
 
 	function setCharset(string $val){
-		$this->chartset = $val;
+		$this->charset = $val;
 		return $this;
 	}
 

@@ -8,40 +8,44 @@ namespace boctulus\SW\core\libs;
 
 class SyncProducts
 {
+    protected static $errors    = 0;
+    protected static $processed = 0;
+
     static function delete(Array $skus){
         foreach($skus as $sku){
+            StdOut::pprint("Borrando producto con '$sku'");
             Products::deleteProductBySKU($sku);
         }
     }
 
     static function restore(Array $skus){
         foreach($skus as $sku){
-            Files::logger("Restaurando producto con SKU '$sku'");
+            StdOut::pprint("Restaurando producto con SKU '$sku'");
             Products::restoreBySKU($sku);
         }
     }
 
     static function import(Array $products, Array $simple_product_attrs = null)
     {
-        $errors    = [];
-        $processed = 0;
+        static::$errors    = [];
+        static::$processed = 0;
 
-        debug("Procesando ". count($products) . " productos");
+        StdOut::pprint("Procesando ". count($products) . " productos");
 
         foreach($products as $p)
         {
-            $processed++;
+            static::$processed++;
 
-            dd("Procesando el producto # $processed");
+            StdOut::pprint("Procesando el producto #".static::$processed);
 
             $sku = $p['sku'] ?? null;
 
             if ($sku == null){
-                debug("Skipping producto without SKU");
+                StdOut::pprint("Producto sin SKU *no* pudo ser procesado.");
                 continue;
             }
 
-            debug("...");
+            StdOut::pprint("...");
 
             try {
                 $pid = Products::getProductIdBySKU($sku);
@@ -51,7 +55,7 @@ class SyncProducts
                         SI existe, actualizo
                     */   
 
-                    debug("Actualizando producto existente con SKU '$sku' (pid = $pid)");
+                    StdOut::pprint("Actualizando producto existente con SKU '$sku' (pid = $pid)");
                 
                     products::updateProductBySku($p);             
                 } else {
@@ -59,7 +63,7 @@ class SyncProducts
                         Sino existe, lo creo
                     */
 
-                    debug("Creando producto para SKU '$sku'");
+                    StdOut::pprint("Creando producto para SKU '$sku'");
 
                     $pid = Products::createProduct($p);   
                 }
@@ -75,19 +79,20 @@ class SyncProducts
                 }
 
             } catch (\Exception $e){
-                $msg      = $e->getMessage();
-                $errors[] = $msg;
+                $msg              = $e->getMessage();
+                static::$errors[] = $msg;
                 debug($msg);
             }    
         }
 
-        
-        return [
-            'errors'    => $errors,
-            'processed' => $processed
-        ];
-
+        return (static::$errors == 0);
     }
 
+    static function getErrors(){
+        return static::$errors;
+    }
 
+    static function getProcessed(){
+        return static::$processed;
+    }
 }
