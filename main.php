@@ -152,22 +152,27 @@ function my_custom_checkout_button_text() {
 
 ////////////////////////////////////////////
 
+
+// Encapsular lo siguiente --------------->
+
 add_action( 'init', function(){
 	ob_start();
 }, 0 );
 
 
-// $callback = function(&$content){
-//     $content = preg_replace('/Mi cuenta/', "Cuentaaa", $content);
-// };
+$replace_content_callback = function(&$content){
+    $content = preg_replace('/Mi cuenta/', "Cuentaaaaaaa", $content);
+};
 
 add_action( 'wp_footer', 'replace_content');
 
 function replace_content()
 {
+    global $replace_content_callback;
+
     $content = ob_get_contents();
 
-    $content = preg_replace('/Mi cuenta/', "Cuentaaa", $content);
+    $replace_content_callback($content);
     ob_end_clean(); // debe ser antes del echo
 
     echo $content;
