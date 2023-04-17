@@ -1,8 +1,9 @@
 <?php
 
+use boctulus\SW\core\libs\Page;
 use boctulus\SW\core\libs\Users;
-use boctulus\SW\core\libs\Template;
 use boctulus\SW\core\libs\Logger;
+use boctulus\SW\core\libs\Template;
 
 function sw_init_session() {
     if (session_status() === PHP_SESSION_NONE) {
@@ -153,28 +154,6 @@ function my_custom_checkout_button_text() {
 ////////////////////////////////////////////
 
 
-// Encapsular lo siguiente --------------->
-
-add_action( 'init', function(){
-	ob_start();
-}, 0 );
-
-
-$replace_content_callback = function(&$content){
-    $content = preg_replace('/Mi cuenta/', "Cuentaaaaaaa", $content);
-};
-
-add_action( 'wp_footer', 'replace_content');
-
-function replace_content()
-{
-    global $replace_content_callback;
-
-    $content = ob_get_contents();
-
-    $replace_content_callback($content);
-    ob_end_clean(); // debe ser antes del echo
-
-    echo $content;
-
-} 
+Page::replaceContent(function(&$content){
+    $content = preg_replace('/Mi cuenta/', "CuentaaaaaaaX", $content);
+});

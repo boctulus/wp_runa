@@ -6,7 +6,16 @@ class Template
 {
     static $template;
 
-    static function set($template)
+    /*
+        Cambia temporalmente el "theme" de WordPress 
+
+        Ejemplo de uso:
+
+        Template::set('kadence');
+
+        @param string $template
+    */  
+    static function set(string $template)
     {
         require_once (ABSPATH . WPINC . '/pluggable.php');
 

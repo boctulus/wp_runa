@@ -69,4 +69,29 @@ class Page
         return get_page_by_path(static::getSlug(), ARRAY_A, $post_type );
     }
 
+    /*
+        @param callable $callback
+
+        Ejemplo de uso:
+
+        Page::replaceContent(function(&$content){
+            $content = preg_replace('/Mi cuenta/', "CuentaaaaaaaX", $content);
+        });
+    */
+    static function replaceContent(callable $callback){
+        add_action( 'init', function(){
+            ob_start();
+        }, 0 );
+        
+        add_action('wp_footer', function() use ($callback)
+        {       
+            $content = ob_get_contents();
+        
+            $callback($content);
+            ob_end_clean(); 
+        
+            echo $content;        
+        });
+    }
+
 }
