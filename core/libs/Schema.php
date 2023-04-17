@@ -2,11 +2,13 @@
 
 namespace boctulus\SW\core\libs;
 
-use boctulus\SW\core\libs\Model;
 use boctulus\SW\core\libs\DB;
-use boctulus\SW\core\libs\Strings;
 use boctulus\SW\core\libs\Debug;
+use boctulus\SW\core\libs\Model;
 use boctulus\SW\core\libs\Factory;
+use boctulus\SW\core\libs\Strings;
+use boctulus\SW\exceptions\EmptySchemaException;
+use boctulus\SW\exceptions\TableAlreadyExistsException;
 
 /*
 	Schema Builder
@@ -29,6 +31,7 @@ class Schema
 	
 	protected $raw_lines = [];
 	protected $fields  = [];
+	protected $field;  
 	protected $current_field;
 	protected $indices = []; // 'PRIMARY', 'UNIQUE', 'INDEX', 'FULLTEXT', 'SPATIAL'
 	protected $fks = [];
@@ -37,8 +40,6 @@ class Schema
 	protected $commands = [];
 	protected $query;
 	protected $exec = true;
-
-	protected $field;
 
 	function __construct(string $tb_name){
 		$this->tables = self::getTables();
@@ -343,7 +344,7 @@ class Schema
 		$filename = $date . '_'. $secs . '_' . Strings::camelToSnake($tb_name) . '.php'; 
 
 		// destination
-		return __DIR__ . '/../migrations' . $filename;
+		return MIGRATIONS_PATH . $filename;
 	}
 
 	static function getDatabases(string $conn_id = null){
@@ -541,14 +542,23 @@ class Schema
 		return $this;		
 	}	
 
-	function id(){		
-		$this->bigint('id')->unsigned();
+	function big(string $name){
+		return $this->bigint($name);		
+	}	
+
+	function ubig(string $name){
+		$this->bigint($name)->unsigned();
+		return $this;		
+	}
+
+	function id(string $name = 'id'){		
+		$this->ubig($name);
 		$this->primary();
 		return $this;		
 	}
 
-	function increments(){
-		$this->id();
+	function increments(string $name = 'id'){
+		$this->id($name);
 		$this->auto();
 		return $this;
 	}
@@ -1213,15 +1223,23 @@ class Schema
 		}
 	} 
 
-	function createTable(bool $ignore_if_exists = false){
+	function createTable(bool $ignore_if_exists = false, bool $ignore_warnings = true){
 		if (!$ignore_if_exists){
 			if ($this->tableExists()){
-				throw new \Exception("Table {$this->tb_name} already exists");
+				if ($ignore_warnings){
+					return false;
+				}
+
+				throw new TableAlreadyExistsException("Table {$this->tb_name} already exists");
 			}
 		}		
 
 		if (empty($this->fields)){
-			throw new \Exception("No fields!");
+			if ($ignore_warnings){
+				return false;
+			}
+
+			throw new EmptySchemaException("No fields!");
 		}	
 
 		if ($this->engine == NULL){
@@ -1314,15 +1332,12 @@ class Schema
 			// };
 
 			foreach($this->commands as $change){     
-				$st = $conn->prepare($change);
-				$res = $st->execute();
+				$res = DB::statement($change);
 			}
 
 			DB::commit();
 
 		} catch (\PDOException $e) {
-			d($change, 'SQL with error');
-			d($e->getMessage(), "PDO error");
 			DB::rollback();
 			throw $e;		
         } catch (\Exception $e) {;
@@ -1870,8 +1885,8 @@ class Schema
 		
 	}
 
-	function dd(bool $sql_formater = false){
-		return Model::sqlFormatter(Strings::removeMultipleSpaces($this->query), $sql_formater);
+	function dd(bool $sql_formatter = false){
+		return Model::sqlFormatter(Strings::removeMultipleSpaces($this->query), $sql_formatter);
 	}
 	
 	function change()
@@ -2051,7 +2066,7 @@ class Schema
 			$conn_id = DB::getCurrentConnectionId();
 		}
 
-		$files = Files::glob(__DIR__ . '/../schemas/' . $conn_id, '*.php');
+		$files = Files::glob(SCHEMA_PATH . $conn_id, '*.php');
 
         $excluded = ['Pivots.php', 'Relations.php'];
         
@@ -2067,4 +2082,3 @@ class Schema
 	}
 
 }
-
