@@ -1,6 +1,8 @@
 <?php
 
 use boctulus\SW\core\libs\Users;
+use boctulus\SW\core\libs\Template;
+use boctulus\SW\core\libs\Logger;
 
 function sw_init_session() {
     if (session_status() === PHP_SESSION_NONE) {
@@ -20,10 +22,11 @@ function assets(){
     //css_file('/css/styles.css');
     //js_file('/js/utilities.js');
     //js_file('/js/sweetalert.js');
+
+    js_file('/js/wp_runa.js');
 }
 
-// enqueue('assets');
-
+enqueue('assets');
 
 /*
     Me aseguro que la extension SimpleXML este instalada
@@ -88,20 +91,55 @@ function custom_button_proceed_to_checkout() {
 remove_action( 'woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20 );
 add_action( 'woocommerce_proceed_to_checkout', 'custom_button_proceed_to_checkout', 20 );
 
-function my_change_checkout_url( $url ) {
+function new_checkout_url( $url ) {
     if (!Users::isLogged()){
-        $url = "/bla/bla/cotizar-pedido";  // quizas no quiera cambiar la url
+        $url = "/bla/bla/mi_nuevo_checkout";  // quizas no quiera cambiar la url
     }
     
     return $url;
 }
+add_filter( 'woocommerce_get_checkout_url', 'new_checkout_url', 30 );
 
-add_filter( 'woocommerce_get_checkout_url', 'my_change_checkout_url', 30 );
 
+/*
+    Hide prices del cart
+*/
+
+function hide_cart_item_prices( $price, $cart_item, $cart_item_key ) {
+    return '';
+}
+add_filter( 'woocommerce_cart_item_price', 'hide_cart_item_prices', 10, 3 );
+
+function hide_cart_totals( $value ) {
+    return '';
+}
+add_filter( 'woocommerce_cart_totals_order_total_html', 'hide_cart_totals' );
+
+function hide_cart_item_totals( $total, $cart_item, $cart_item_key ) {
+    return '';
+}
+add_filter( 'woocommerce_cart_item_subtotal', 'hide_cart_item_totals', 10, 3 );
+
+
+/*
+    Extras, por si las dudas
+*/
+
+if (!Users::isLogged()){
+    remove_action( 'woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart' );
+    remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_price', 10 );
+    remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30 );
+    remove_action( 'woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_price', 10 );
+
+    //add_filter( 'woocommerce_is_purchasable', '__return_false' );
+    //add_filter( 'woocommerce_get_price_html', '__return_empty_string' );
+}
 
 /*
     More
 */
+
+//Template::set('kadence');
 
 
 function my_custom_checkout_button_text() {
@@ -110,3 +148,28 @@ function my_custom_checkout_button_text() {
 
 // Change checkout page button to place the order (Realizar el pedido)
 // add_filter( 'woocommerce_order_button_text', 'my_custom_checkout_button_text' );
+
+
+////////////////////////////////////////////
+
+add_action( 'init', function(){
+	ob_start();
+}, 0 );
+
+
+// $callback = function(&$content){
+//     $content = preg_replace('/Mi cuenta/', "Cuentaaa", $content);
+// };
+
+add_action( 'wp_footer', 'replace_content');
+
+function replace_content()
+{
+    $content = ob_get_contents();
+
+    $content = preg_replace('/Mi cuenta/', "Cuentaaa", $content);
+    ob_end_clean(); // debe ser antes del echo
+
+    echo $content;
+
+} 

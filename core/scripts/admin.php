@@ -1,7 +1,7 @@
 <?php
 
 /*
-    Este script provee de la funcion is_admin() en el frontend
+    Este script provee de la funcion is_admin_page() en el frontend
 
     Es incluido automaticamente por app.php
 */
@@ -11,7 +11,7 @@ function check_if_is_admin(){
 
     ?>
         <script type="text/javascript">
-            let is_admin = () => {
+            let is_admin_page = () => {
                 return Boolean('<?= $is_admin ?>');
             }
         </script>

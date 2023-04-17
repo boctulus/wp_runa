@@ -26,96 +26,12 @@ class Files
 	static function isAllowUrlFopenEnabled(){
 		return ini_get('allow_url_fopen');
 	}
-
+	
 	/*
-		Resultado:
-
-		<?php 
-
-		$arr = array (
-		'x' => 'Z',
-		);
+		Remover en siguientes versiones
 	*/
-	static function varExport($data, $path = null, $variable = null){
-		if ($path === null){
-			$path = LOGS_PATH . 'exported.php';
-		} else {
-			if (!Strings::contains('/', $path) && !Strings::contains(DIRECTORY_SEPARATOR, $path)){
-				$path = LOGS_PATH . $path;
-			}
-		}
-
-		if ($variable === null){
-			$bytes = file_put_contents($path, '<?php '. "\r\n\r\n" . 'return ' . var_export($data, true). ';');
-		} else {
-			if (!Strings::startsWith('$', $variable)){
-				$variable = '$'. $variable;
-			}
-			
-			$bytes = file_put_contents($path, '<?php '. "\r\n\r\n" . $variable . ' = ' . var_export($data, true). ';');
-		}
-
-		return ($bytes > 0);
-	}
-
-	static function JSONExport($data, ?string $path = null){
-		if ($path === null){
-			$path = LOGS_PATH . 'exported.json';
-		} else {
-			if (!Strings::contains('/', $path) && !Strings::contains(DIRECTORY_SEPARATOR, $path)){
-				$path = LOGS_PATH . $path;
-			}
-		}
-
-		$bytes = file_put_contents($path, json_encode($data));
-		return ($bytes > 0);
-	}
-
-	static function logger($data, ?string $path = null, $append = true){	
-		if ($path === null){
-			$path = LOGS_PATH . (config()['log_file'] ?? 'log.txt');
-		} else {
-			if (!Strings::contains('/', $path) && !Strings::contains(DIRECTORY_SEPARATOR, $path)){
-				$path = LOGS_PATH . $path;
-			}
-		}
-
-		if (is_array($data) || is_object($data))
-			$data = json_encode($data);
-		
-		$data = date("Y-m-d H:i:s"). "\t" .$data;
-
-		return static::writeOrFail($path, $data. "\n",  $append ? FILE_APPEND : 0);
-	}
-
-	static function dump($object, ?string $path = null, $append = false){
-		if ($path === null){
-			$path = LOGS_PATH . (config()['log_file'] ?? 'log.txt');
-		} else {
-			if (!Strings::contains('/', $path) && !Strings::contains(DIRECTORY_SEPARATOR, $path)){
-				$path = LOGS_PATH . $path;
-			}
-		}
-
-		if ($append){
-			static::writeOrFail($path, var_export($object,  true) . "\n", FILE_APPEND);
-		} else {
-			static::writeOrFail($path, var_export($object,  true) . "\n");
-		}		
-	}
-
-	static function logError($error){
-		if ($error instanceof \Exception){
-			$error = $error->getMessage();
-		}
-
-		Files::logger($error, 'errors.txt');
-	}
-
-	static function logSQL(string $sql_str){
-		$config = config();
-
-		Files::logger($sql_str, 'sql_log.txt');
+	static function logger($data, ?string $path = null, $append = true){
+		return Logger::log($data, $path, $append);
 	}
 
 	/*
@@ -992,7 +908,7 @@ class Files
 	static function writeOrFail(string $path, string $string, int $flags = 0){
 		if (is_dir($path)){
 			$path = realpath($path);
-			throw new \InvalidArgumentException("$path is not a valid file. It's a directory!");
+			throw new \InvalidArgumentException("'$path' is not a valid file. It's a directory!");
 		} 
 
 		$dir = static::getDir($path);
@@ -1093,7 +1009,7 @@ class Files
 	static function fileExtension(string $filename){
 		return Strings::last($filename, '.');
 	}
-} 
+}  
 
 
 

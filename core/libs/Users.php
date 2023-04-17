@@ -9,6 +9,7 @@ namespace boctulus\SW\core\libs;
 class Users
 {
     static function isLogged(){
+        // return is_user_logged_in();
         return !empty(get_current_user_id());
     }
 

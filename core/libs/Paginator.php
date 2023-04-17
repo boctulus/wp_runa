@@ -13,6 +13,7 @@ class Paginator
     protected $attributes = [];
     protected $query = '';
     protected $binding = [];
+    protected $order;
 
     const TOP    = 'TOP';
     const BOTTOM = 'BOTTOM';

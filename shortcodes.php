@@ -4,10 +4,11 @@ use boctulus\SW\core\libs\Url;
 
 /** Shortcodes */
 
-// shortcode
-function my_sc()
+// shortcode [runa-cotizador]
+function runa_cotizador()
 {
     ?>
+       XX XX XX
                 
     <script>
 
@@ -81,4 +82,4 @@ function my_sc()
 }
 
 
-add_shortcode('my_sc', 'my_sc');
+add_shortcode('runa-cotizador', 'runa_cotizador');
