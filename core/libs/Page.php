@@ -4,28 +4,12 @@ namespace boctulus\SW\core\libs;
 
 class Page
 {
-
-    /*
-        Pages
-    */
-
     static function isPage(){
         return is_page();
     }
     
-    static function isHone(){
-        return is_home();
-    }
-
-    static function is404(){
-        return is_404();
-    }
-
-    /*
-        Para productos, devolveria 'product'
-    */
-    static function getType($post_type){
-        return get_post_type();
+    static function isArchive(){
+        return is_archive();
     }
 
     /*
@@ -35,6 +19,25 @@ class Page
     static function isSingular(){
         return is_singular();
     }
+
+    static function isHone(){
+        return is_home();
+    }
+
+    static function is404(){
+        return is_404();
+    }
+    
+    /*
+        Para productos, devolveria 'product'
+    */
+    static function getType(){
+        return get_post_type();
+    }
+
+    /*
+        WooCommerce
+    */
 
     static function isCart(){
         return is_cart();
