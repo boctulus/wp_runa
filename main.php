@@ -140,7 +140,8 @@ if (!Users::isLogged()){
     More
 */
 
-//Template::set('kadence');
+// Template::set('astra');
+// Template::printName();
 
 
 function my_custom_checkout_button_text() {

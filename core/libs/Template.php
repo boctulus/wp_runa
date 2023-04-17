@@ -2,9 +2,15 @@
 
 namespace boctulus\SW\core\libs;
 
+use boctulus\SW\core\libs\Page;
+
 class Template
 {
-    static $template;
+    static function printName(){
+        add_action('wp_head', function(){
+            echo get_template();
+        });      
+    }
 
     /*
         Cambia temporalmente el "theme" de WordPress 
@@ -19,21 +25,11 @@ class Template
     {
         require_once (ABSPATH . WPINC . '/pluggable.php');
 
-        static::$template = $template;
-
-        add_filter( 'template', function( $template ) {
-            if (!empty(static::$template)){
-                $template = static::$template;
-            }
-    
+        add_filter( 'template', function() use ($template) {
             return $template;
         });
 
-        add_filter( 'stylesheet', function( $template ) {
-            if (!empty(static::$template)){
-                $template = static::$template;
-            }
-    
+        add_filter( 'stylesheet', function() use ($template) {
             return $template;
         });
     }

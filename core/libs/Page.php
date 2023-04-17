@@ -8,6 +8,10 @@ class Page
     /*
         Pages
     */
+
+    static function isPage(){
+        return is_page();
+    }
     
     static function isHone(){
         return is_home();
