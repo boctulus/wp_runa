@@ -2,6 +2,7 @@
 
 use boctulus\SW\core\libs\Debug;
 use boctulus\SW\core\libs\Files;
+use boctulus\SW\core\libs\Logger;
 use boctulus\SW\core\libs\StdOut;
 use boctulus\SW\core\libs\VarDump;
 

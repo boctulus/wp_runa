@@ -24,6 +24,6 @@ function wp_namespace_autoload( $class ) {
     if ( file_exists( $path ) ) {
         include_once( $path );
     } else {
-        throw new \Exception("The file attempting to be loaded at '$path' does not exist." );
+        //throw new \Exception("The file attempting to be loaded at '$path' does not exist." );
     }
 }

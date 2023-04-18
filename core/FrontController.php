@@ -117,16 +117,18 @@ class FrontController
             // dd($method, 'METHOD:');
         }
 
+        if (is_numeric($class_name) || is_numeric($method)){
+            return;
+        }
+
         // dd($class_name, 'CLASS_NAME:');
         // dd($method, 'METHOD:');
 
         $class_name = str_replace('/', "\\", $class_name);
 
-
         if (!class_exists($class_name)) {
-            $res->error("CLASS_NOT_FOUND", 404, "Internal error - controller class $class_name not found");
+            return;
         }
-
 
         if (!method_exists($class_name, $method)) {
             if (php_sapi_name() != 'cli' || $method != self::DEFAULT_ACTION) {
