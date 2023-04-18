@@ -4,20 +4,28 @@ namespace boctulus\SW\core\libs;
 
 class Page
 {
-    static function isPage(){
-        return is_page();
+    // is the Post, a Page?
+    static function isPage(string $page = ''){
+        return is_page($page);
     }
     
     static function isArchive(){
         return is_archive();
     }
 
+    // is the Post, an Attachment?
+    static function isAttachment($attachment = ''){
+        return is_attachment($attachment);
+    }
+
     /*
+        Is this a Post?
+
         Si es una pagina de archives o categorias,
         devolveria false
     */
-    static function isSingular(){
-        return is_singular();
+    static function isSingular($post_types = ''){
+        return is_singular($post_types);
     }
 
     static function isHone(){
@@ -31,8 +39,8 @@ class Page
     /*
         Para productos, devolveria 'product'
     */
-    static function getType(){
-        return get_post_type();
+    static function getType($post = null){
+        return get_post_type($post);
     }
 
     /*
@@ -55,8 +63,8 @@ class Page
         return is_product();
     }
 
-    static function isProductCategory(){
-        return is_product_category();
+    static function isProductCategory($term = ''){
+        return is_product_category($term);
     }
     
     /*

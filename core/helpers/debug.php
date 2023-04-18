@@ -53,9 +53,9 @@ function debug($val, $msg = null, bool $only_admin = false){
 	}
 
 	if (!empty($msg)){
-		Files::logger($msg. ': '. var_export($val, true));
+		Logger::log($msg. ': '. var_export($val, true));
 	} else {
-		Files::logger(var_export($val, true));
+		Logger::log(var_export($val, true));
 	}	
 }
 

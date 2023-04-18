@@ -1,8 +1,8 @@
 <?php
 
-namespace boctulus\SW\controllers;
+namespace boctulus\SW\controllers\formalidades;
 
-class Saludator
+class SaludoController
 {
     function saludar(){
         dd('Te saludo');

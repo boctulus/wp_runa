@@ -121,7 +121,7 @@ class RunaSync
             } catch (\Exception $e){
                 $msg = $e->getMessage();
                 debug($msg);
-                Files::logger($msg);
+                Logger::log($msg);
             }           
 
         } // end foreach

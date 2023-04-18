@@ -1,6 +1,7 @@
 <?php
 
 use boctulus\SW\core\Router;
+use boctulus\SW\core\FrontController;
 
 /*
 	Plugin Name: WP RUNA
@@ -33,3 +34,11 @@ $routes = include __DIR__ . '/config/routes.php';
 
 Router::routes($routes);
 Router::getInstance();
+
+/*
+	Front controller
+*/
+
+if (config()['front_controller'] ?? false){        
+	FrontController::resolve();
+} 

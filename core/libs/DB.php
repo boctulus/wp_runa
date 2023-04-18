@@ -817,7 +817,7 @@ class DB
 				$count = false;
 
 		} catch (\Exception $e){
-			Files::logger($e->getMessage());
+			Logger::log($e->getMessage());
 			throw new \Exception($e->getMessage());
 				
 		} finally {

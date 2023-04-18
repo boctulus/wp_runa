@@ -10,7 +10,7 @@ function logger($data, ?string $path = null, $append = true){
         return;
     }
 
-    return Files::logger($data, $path, $append);
+    return Logger::log($data, $path, $append);
 }
 
 /*
@@ -21,7 +21,7 @@ function dump($object, ?string $path = null, $append = false){
         return;
     }
 
-    return Files::dump($object, $path, $append);
+    return Logger::dump($object, $path, $append);
 }
 
 /*

@@ -1117,7 +1117,7 @@ class MakeControllerBase
             if ($field['Key'] == 'PRI'){ 
                 // if ($id_name != NULL){
                 //     $msg = "A table should have simple Primary Key by convention for table \"$name\"";
-                //     Files::logger($msg);      
+                //     Logger::log($msg);      
                 // }
                 
                 $id_name = $field['Field'];
@@ -1171,7 +1171,7 @@ class MakeControllerBase
                 $id_name = $autoinc; 
             } else {
                 //$msg = "A table should have simple Primary Key by convention for table \"$name\"";
-                //Files::logger($msg);  
+                //Logger::log($msg);  
                 //dd($msg, 'WARNING'); 
             }
         }

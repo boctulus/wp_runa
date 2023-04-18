@@ -23,10 +23,12 @@ return [
 
     // No editar desde aqui -->
 
-    "namespace" => "boctulus\SW",
+    'namespace' => "boctulus\SW",
 
-	"composer_autoload" => false,
+	'composer_autoload' => false,
 
     'debug'     => env('DEBUG'),  
+
+    'front_controller' => true
 ];
 

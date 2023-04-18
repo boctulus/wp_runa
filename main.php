@@ -33,9 +33,10 @@ enqueue('assets');
     Me aseguro que la extension SimpleXML este instalada
 */
 if (!in_array('SimpleXML', get_loaded_extensions())){
-    Files::logger("Advertencia: Extension de PHP 'SimpleXML' no instalada!");
+    Logger::log("Advertencia: Extension de PHP 'SimpleXML' no instalada!");
     admin_notice("Favor de instalar la extension de PHP 'SimpleXML'", 'error');
 }
+
 
 /*
 	Oculta el precio si el usuario no esta logueado
@@ -156,5 +157,5 @@ function my_custom_checkout_button_text() {
 
 
 Page::replaceContent(function(&$content){
-    $content = preg_replace('/Mi cuenta/', "CuentaaaaaaaX", $content);
+    // $content = preg_replace('/Mi cuenta/', "CuentaaaaaaaX", $content);
 });

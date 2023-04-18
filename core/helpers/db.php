@@ -22,7 +22,7 @@ function log_db_dump(bool $to_file = false){
     ->get();
 
     if ($to_file){
-        Files::dump($rows, 'sql_log.txt');
+        Logger::dump($rows, 'sql_log.txt');
     }
 
     return $rows;

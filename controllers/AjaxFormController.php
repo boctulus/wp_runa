@@ -2,12 +2,12 @@
 
 namespace boctulus\SW\controllers;
 
-use boctulus\SW\core\libs\Files;
+use boctulus\SW\core\libs\Logger;
 use boctulus\SW\core\libs\Request;
 use boctulus\SW\core\libs\ApiClient;
 use boctulus\SW\core\libs\Validator;
 
-class AjaxForm
+class AjaxFormController
 {    
     function save_form(){
         $req  = Request::getInstance();
@@ -41,7 +41,7 @@ class AjaxForm
     
         $cfg = config();
 
-        Files::dump($data); //
+        Logger::dump($data); //
     
         try {
 
@@ -72,7 +72,7 @@ class AjaxForm
 
         } catch (\Exception $e){
             $err = "Error con el request " . $e->getMessage();
-            Files::logger($err);
+            Logger::log($err);
     
             return error($err);
         }   
