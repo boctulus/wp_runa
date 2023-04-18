@@ -2506,6 +2506,12 @@ class Products
         return $category->term_id;
     }
 
+    static function getCategoriesFromProductSKU($sku){
+        $pid = static::getProductIdBySKU($sku);
+        
+        return static::getCategoriesFromProductId($pid);
+    }
+
     static function getCategoSlugs(){
         $categos = static::getCategories();
     

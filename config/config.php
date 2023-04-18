@@ -4,7 +4,6 @@ return [
     // Dejar vacio ('') para no cambiarlo
     'add_to_cart_button_text' => 'Cotizar', // 'Agregar al carrito'
     
-
     'cotizador_slug' => '/2023/04/16/cotizador', //
 
 
@@ -23,11 +22,11 @@ return [
 
     // No editar desde aqui -->
 
+    'debug'     => env('DEBUG'),  
+
     'namespace' => "boctulus\SW",
 
 	'composer_autoload' => false,
-
-    'debug'     => env('DEBUG'),  
 
     'front_controller' => true
 ];

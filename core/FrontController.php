@@ -64,6 +64,15 @@ class FrontController
     
         //dd($_params, 'PARAMS:');
 
+        /*
+            Parche para WP porque no existe un default controller 
+            porque este seria ejecutar WP sin controladores
+        */
+        if (empty($_params) || (count($_params) == 1 && empty($_params[0]))){
+            return;
+        }
+
+
         $namespace = 'boctulus\\SW\\controllers\\';
 
         if (empty($_params) || $_params[0] == '') {
@@ -107,6 +116,9 @@ class FrontController
             // dd($class_name, 'CLASS_NAME:');
             // dd($method, 'METHOD:');
         }
+
+        // dd($class_name, 'CLASS_NAME:');
+        // dd($method, 'METHOD:');
 
         $class_name = str_replace('/', "\\", $class_name);
 

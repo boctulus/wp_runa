@@ -8,15 +8,8 @@ class CotizadorController
         return 'Cotizador';
     }
 
-    function cotizar(){
-        $params = request()->getParams();
-    
-        if (empty($params)){
-            return 'Nada que cotizar';
-        }
-
-        $prod = $params[0];
-
+    function cotizar($prod)
+    {
         switch($prod){
             case 'iphone':
                 return 1000;
