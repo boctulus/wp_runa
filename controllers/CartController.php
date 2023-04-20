@@ -8,6 +8,12 @@ use boctulus\SW\core\libs\Logger;
 
 class CartController
 {    
+    function count(){
+        response([
+            'count' => Cart::count(true)
+        ]);
+    }
+
     function set_qty($pid, $qty){
         try {
             Cart::setQuantity($pid, $qty);

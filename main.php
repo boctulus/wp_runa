@@ -8,24 +8,6 @@ use boctulus\SW\core\libs\Template;
 
 //Template::set('kadence');
 
-/*
-    Con esto puedo hacer endpoints donde podre acceder a funciones de WooCommerce directa o indirectamente
-
-    Ej:
-
-    get_header()
-*/
-add_action('wp_loaded', function(){
-    if (defined('WC_ABSPATH') && !is_admin()){
-        // ...
-        //dd(Cart::count(), 'ITEMs');
-
-        get_header();
-
-        exit;
-    }    
-});
-
 
 function sw_init_session() {
     if (session_status() === PHP_SESSION_NONE) {

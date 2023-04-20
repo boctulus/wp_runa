@@ -26,22 +26,39 @@ db_errors(false);
 
 require_once __DIR__ . '/main.php';
 
-/*
-	Router
-*/
-
-$routes = include __DIR__ . '/config/routes.php';
-
-Router::routes($routes);
-Router::getInstance();
 
 /*
-	Front controller
+    Con esto puedo hacer endpoints donde podre acceder a funciones de WooCommerce directa o indirectamente
+
+    Ej:
+
+    get_header()
+	get_footer()
 */
 
-if (config()['front_controller'] ?? false){        
-	FrontController::resolve();
-} 
+add_action('wp_loaded', function(){
+    if (defined('WC_ABSPATH') && !is_admin())
+	{
+       	/*
+			Router
+		*/
+
+		$routes = include __DIR__ . '/config/routes.php';
+
+		Router::routes($routes);
+		Router::getInstance();
+
+		/*
+			Front controller
+		*/
+
+		if (config()['front_controller'] ?? false){        
+			FrontController::resolve();
+		} 
+    }    
+});
+
+
 
 
 

@@ -34,7 +34,14 @@ class Cart
 		return WC()->cart;
 	}
 
-	static function count(){
+	/*
+		Devuelve la cantidad de productos distintos
+	*/
+	static function count(bool $distinct){
+		if (!$distinct){
+			return static::getCart()->get_cart_contents_count();
+		}
+
 		return count(static::getItems());
 	}
 
