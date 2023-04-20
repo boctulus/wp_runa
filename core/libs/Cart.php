@@ -10,7 +10,7 @@ class Cart
 {
 	static function count(){
 		global $woocommerce; 
-		
+
 		return $woocommerce->cart->cart_contents_count;
 	}
 
@@ -20,23 +20,25 @@ class Cart
     	$items = $woocommerce->cart->get_cart();
 
 		$arr = [];
-		foreach($items as $item => $vals) { 
-			$prod = wc_get_product( $vals['product_id'] );
+		foreach($items as $item) { 
+			$prod = wc_get_product( $item['product_id'] );
 
 			$p = [];
 
-			$p['id']            = $vals['data']->get_id();
+			$p['id']            = $item['data']->get_id();
 			$p['img']           = $prod->get_image(); // accepts 2 arguments ( size, attr )
 			$p['img_url']       = Strings::match($p['img'], '/< *img[^>]*src *= *["\']?([^"\']*)/i');
 			$p['title']         = $prod->get_title();
-			$p['qty']           = $vals['quantity'];
+			$p['url']           = get_post_permalink($item['id']);
+			$p['link']          = '<a href="'. get_post_permalink($p['id']). '">'. $p['title'] .'</a>';
+			$p['qty']           = $item['quantity'];
 
-			$p['line_subtotal']      = $vals['line_subtotal']; 
-			$p['line_subtotal_tax']  = $vals['line_subtotal_tax'];
+			$p['line_subtotal']      = $item['line_subtotal']; 
+			$p['line_subtotal_tax']  = $item['line_subtotal_tax'];
 
 			// gets the cart item total
-			$p['line_total']         = $vals['line_total'];
-			$p['line_tax']           = $vals['line_tax'];
+			$p['line_total']         = $item['line_total'];
+			$p['line_tax']           = $item['line_tax'];
 
 			// unit price of the product
 			$p['item_price']         = $p['line_subtotal'] / $p['qty'];
@@ -48,9 +50,10 @@ class Cart
 				Nota: los precios en el carrito pueden no corresponderse a los precios actuales
 			*/
 			
-			$p['price']         = get_post_meta($vals['product_id'] , '_price', true);
-			$p['regular_price'] = get_post_meta($vals['product_id'] , '_regular_price', true);
-			$p['sale_price']    = get_post_meta($vals['product_id'] , '_sale_price', true);
+			$p['price']         = get_post_meta($item['product_id'] , '_price', true);
+			$p['regular_price'] = get_post_meta($item['product_id'] , '_regular_price', true);
+			$p['sale_price']    = get_post_meta($item['product_id'] , '_sale_price', true);
+			$p['sku']			= get_post_meta($item['product_id'] , '_sku', true);
 			
 			$arr[] = $p;
 		}

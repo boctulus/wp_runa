@@ -10,7 +10,7 @@ use boctulus\SW\core\libs\Template;
 // shortcode [runa-cotizador]
 function runa_cotizador()
 {
-    //dd(Cart::getItems());
+    $items = Cart::getItems();
 ?>
     <style>
         .buttons_added {
@@ -35,29 +35,30 @@ function runa_cotizador()
                         </tr>
                     </thead>
                     <tbody>
+                        <?php foreach($items as $key => $item): ?>
 
                         <tr class="woocommerce-cart-form__cart-item cart_item">
 
                             <td class="product-remove">
-                                <a href="#" class="remove" aria-label="Borrar este artículo" data-product_id="9229" data-product_sku="YR0-446">×</a>
+                                <a href="#" class="remove" aria-label="Borrar este artículo" data-product_id="<?= $item['id'] ?>" data-product_sku="<?= $item['sku'] ?>">×</a>
                             </td>
 
                             <td class="product-thumbnail">
-                                <a href="http://woo1.lan/producto/001r00613-xerox-transfer-belt-cleaner/"><img width="247" height="296" src="http://woo1.lan/wp-content/uploads/2022/12/291220221672328146-247x296.jpeg" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="" decoding="async" loading="lazy"></a>
+                                <?= $item['img'] ?>
                             </td>
 
                             <td class="product-name" data-title="Producto">
-                                <a href="http://woo1.lan/producto/001r00613-xerox-transfer-belt-cleaner/">001R00613 Xerox Transfer belt Cleaner</a>
+                                <?= $item['link'] ?>
                                 <div class="show-for-small mobile-product-price">
-                                    <span class="mobile-product-price__qty">2 x </span>
+                                    <span class="mobile-product-price__qty"> <?= $item['qty'] ?> x </span>
                                 </div>
                             </td>
 
                     
                             <td class="product-quantity" data-title="Cantidad">
                                 <div class="quantity buttons_added">
-                                    <input type="button" value="-" class="minus button is-form"> <label class="screen-reader-text" for="quantity_6440efb7c72a9">001R00613 Xerox Transfer belt Cleaner cantidad</label>
-                                    <input type="number" id="quantity_6440efb7c72a9" class="input-text qty text" step="1" min="0" max="5" name="cart[471684d6c43cfc529b30d600113dae63][qty]" value="2" title="Cantidad" size="4" placeholder="" inputmode="numeric">
+                                    <input type="button" value="-" class="minus button is-form"> <label class="screen-reader-text"><?= $item['sku'] . ' '. $item['title'] ?></label>
+                                    <input type="number" class="input-text qty text" step="1" min="0" max="5" value="<?= $item['qty'] ?>" title="Cantidad" size="4" placeholder="" inputmode="numeric">
                                     <input type="button" value="+" class="plus button is-form">
                                 </div>
                             </td>
@@ -65,65 +66,9 @@ function runa_cotizador()
                             </td>
                         </tr>
 
+                        <?php endforeach; ?>
 
-                        <tr class="woocommerce-cart-form__cart-item cart_item">
-
-                            <td class="product-remove">
-                                <a href="#" class="remove" aria-label="Borrar este artículo" data-product_id="9141" data-product_sku="YR0-260">×</a>
-                            </td>
-
-                            <td class="product-thumbnail">
-                                <a href="http://woo1.lan/producto/006r01461-black-toner-p-wc7120/"><img width="247" height="296" src="http://woo1.lan/wp-content/uploads/2022/12/291220221672327976-247x296.jpeg" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="" decoding="async" loading="lazy"></a>
-                            </td>
-
-                            <td class="product-name" data-title="Producto">
-                                <a href="http://woo1.lan/producto/006r01461-black-toner-p-wc7120/">006R01461 Black Toner p/ WC7120</a>
-                                <div class="show-for-small mobile-product-price">
-                                    <span class="mobile-product-price__qty">1 x </span>
-                                </div>
-                            </td>
-
-                          
-
-                            <td class="product-quantity" data-title="Cantidad">
-                                <div class="quantity buttons_added">
-                                    <input type="button" value="-" class="minus button is-form"> <label class="screen-reader-text" for="quantity_6440efb7c7c04">006R01461 Black Toner p/ WC7120 cantidad</label>
-                                    <input type="number" id="quantity_6440efb7c7c04" class="input-text qty text" step="1" min="0" max="4" name="cart[3677481dc67fc92d2347a706e9a64285][qty]" value="1" title="Cantidad" size="4" placeholder="" inputmode="numeric">
-                                    <input type="button" value="+" class="plus button is-form">
-                                </div>
-                            </td>
-
-                            
-                        </tr>
-                        <tr class="woocommerce-cart-form__cart-item cart_item">
-
-                            <td class="product-remove">
-                                <a href="#" class="remove" aria-label="Borrar este artículo" data-product_id="9168" data-product_sku="YR0-308">×</a>
-                            </td>
-
-                            <td class="product-thumbnail">
-                                <a href="http://woo1.lan/producto/006r01518-yellow-toner-cartridge-p-wc7500-7835/"><img width="247" height="296" src="http://woo1.lan/wp-content/uploads/2022/12/291220221672328030-247x296.jpeg" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="" decoding="async" loading="lazy"></a>
-                            </td>
-
-                            <td class="product-name" data-title="Producto">
-                                <a href="http://woo1.lan/producto/006r01518-yellow-toner-cartridge-p-wc7500-7835/">006R01518 Yellow Toner Cartridge p/ WC7500-7835</a>
-                                <div class="show-for-small mobile-product-price">
-                                    <span class="mobile-product-price__qty">6 x </span>
-                                </div>
-                            </td>
-
-
-                            <td class="product-quantity" data-title="Cantidad">
-                                <div class="quantity buttons_added">
-                                    <input type="button" value="-" class="minus button is-form"> <label class="screen-reader-text" for="quantity_6440efb7c8664">006R01518 Yellow Toner Cartridge p/ WC7500-7835 cantidad</label>
-                                    <input type="number" id="quantity_6440efb7c8664" class="input-text qty text" step="1" min="0" max="12" name="cart[af086cdab7954f11a518e3af68dc2fce][qty]" value="6" title="Cantidad" size="4" placeholder="" inputmode="numeric">
-                                    <input type="button" value="+" class="plus button is-form">
-                                </div>
-                            </td>
-
-                          
-                        </tr>
-
+                        <!-- Extras -->
 
                         <tr>
                             <td colspan="6" class="actions clear">
