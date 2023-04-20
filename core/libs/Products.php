@@ -379,10 +379,10 @@ class Products
 	}
     
     // gets featured image
-    static function getImage($product){
+    static function getImage($product, $size = 'woocommerce_thumbnail', $attr = [], $placeholder = true){
         $p =  is_object($product) ? $product : static::getProduct($product);
 
-        $image = $p->get_image();
+        $image = $p->get_image($size, $attr, $placeholder);
 
         $src = Strings::match($image, '/< *img[^>]*src *= *["\']?([^"\']*)/i');
         return $src;

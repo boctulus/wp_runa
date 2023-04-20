@@ -5,6 +5,9 @@ use boctulus\SW\core\libs\Users;
 use boctulus\SW\core\libs\Logger;
 use boctulus\SW\core\libs\Template;
 
+//Template::set('kadence');
+
+
 function sw_init_session() {
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
@@ -20,7 +23,7 @@ function assets(){
 	#css_file('/css/bootstrap/bootstrap.min.css');
 	#js_file('/js/bootstrap/bootstrap.bundle.min.js');
 
-    //css_file('/css/styles.css');
+    css_file('/css/styles.css');
     //js_file('/js/utilities.js');
     //js_file('/js/sweetalert.js');
 

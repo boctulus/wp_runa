@@ -7,6 +7,6 @@
 */
 
 return [
-    '/cotizador'  => 'boctulus\SW\controllers\CotizadorController@index',
+    // '/cotizador'  => 'boctulus\SW\controllers\CotizadorController@index',
     // '/api/v1/form/save'  => 'boctulus\SW\controllers\AjaxFormController@save_form',
 ];
