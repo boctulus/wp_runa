@@ -11,6 +11,8 @@ use boctulus\SW\core\libs\Template;
 function runa_cotizador()
 {
     $items = Cart::getItems();
+    
+    //dd(Cart::count(), 'ITEMs');
 ?>
     <style>
         .buttons_added {
@@ -47,7 +49,7 @@ function runa_cotizador()
                                 <?= $item['img'] ?>
                             </td>
 
-                            <td class="product-name" data-title="Producto">
+                            <td class="product-name" data-title="Producto" data-product_id="<?= $item['id'] ?>">
                                 <?= $item['link'] ?>
                                 <div class="show-for-small mobile-product-price">
                                     <span class="mobile-product-price__qty"> <?= $item['qty'] ?> x </span>

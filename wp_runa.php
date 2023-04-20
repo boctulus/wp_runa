@@ -42,3 +42,7 @@ Router::getInstance();
 if (config()['front_controller'] ?? false){        
 	FrontController::resolve();
 } 
+
+
+
+

@@ -8,16 +8,38 @@ namespace boctulus\SW\core\libs;
 
 class Cart 
 {
-	static function count(){
-		global $woocommerce; 
+	static function getCart(){
+		// $WC_ABSPATH =  ABSPATH . "\wp-content\plugins\woocommerce";
 
-		return $woocommerce->cart->cart_contents_count;
+		// include_once $WC_ABSPATH . 'includes/wc-cart-functions.php';
+		// include_once $WC_ABSPATH . 'includes/class-wc-cart.php';
+    	// include_once $WC_ABSPATH . 'includes/wc-notice-functions.php';
+        // include_once $WC_ABSPATH . 'includes/wc-template-hooks.php';
+
+		// if ( null === WC()->session ) {
+		// 	$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
+		
+		// 	WC()->session = new $session_class();
+		// 	WC()->session->init();
+		// }
+		
+		// if ( null === WC()->customer ) {
+		// 	WC()->customer = new \WC_Customer( get_current_user_id(), true );
+		// }
+		
+		if ( null === WC()->cart ) {
+			WC()->cart = new \WC_Cart();
+		}
+		
+		return WC()->cart;
 	}
 
-	static function getItems($simple_format = true){
-    	global $woocommerce;
+	static function count(){
+		return count(static::getItems());
+	}
 
-    	$items = $woocommerce->cart->get_cart();
+	static function getItems(){
+    	$items = static::getCart()->get_cart();
 
 		$arr = [];
 		foreach($items as $item) { 
@@ -62,8 +84,10 @@ class Cart
 	}
 
 	static function find($product_id){
-		$product_cart_id = WC()->cart->generate_cart_id( $product_id );
-   		$cart_item_key   = WC()->cart->find_product_in_cart( $product_cart_id );
+		$cart = static::getCart();
+
+		$product_cart_id = $cart->generate_cart_id( $product_id );
+   		$cart_item_key   = $cart->find_product_in_cart( $product_cart_id );
 
 		return $cart_item_key;
 	}
@@ -75,12 +99,19 @@ class Cart
 		}
 
 		//Logger::log("Seteando '$qty' unidades de $product_id");
-		WC()->cart->set_quantity( $cart_item_key, $qty );
+		static::getCart()->set_quantity( $cart_item_key, $qty );
 	}
 
-	static function addToCart($product_id, $qty){
+	/*
+		Add to cart X units
+	*/
+	static function add($product_id, $qty){
 		//Logger::log("Agregando '$qty' unidades de $product_id");
-		WC()->cart->add_to_cart($product_id, $qty);
+		static::getCart()->add_to_cart($product_id, $qty);
+	}
+
+	static function remove($product_id){
+		static::setQuantity($product_id, 0);
 	}
 
 }

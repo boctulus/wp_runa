@@ -22,8 +22,11 @@ function my_admin_enqueue($hook_suffix) {
    check_if_is_admin();
 }
 
-add_action('admin_enqueue_scripts', 'my_admin_enqueue');
+if (!is_cli()){
+    add_action('admin_enqueue_scripts', 'my_admin_enqueue');
 
-add_action('wp_enqueue_scripts', function () {
-    check_if_is_admin();
-}, 1);
+    add_action('wp_enqueue_scripts', function () {
+        check_if_is_admin();
+    }, 1);
+}
+

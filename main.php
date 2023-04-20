@@ -1,11 +1,30 @@
 <?php
 
+use boctulus\SW\core\libs\Cart;
 use boctulus\SW\core\libs\Page;
 use boctulus\SW\core\libs\Users;
 use boctulus\SW\core\libs\Logger;
 use boctulus\SW\core\libs\Template;
 
 //Template::set('kadence');
+
+/*
+    Con esto puedo hacer endpoints donde podre acceder a funciones de WooCommerce directa o indirectamente
+
+    Ej:
+
+    get_header()
+*/
+add_action('wp_loaded', function(){
+    if (defined('WC_ABSPATH') && !is_admin()){
+        // ...
+        //dd(Cart::count(), 'ITEMs');
+
+        get_header();
+
+        exit;
+    }    
+});
 
 
 function sw_init_session() {
@@ -162,3 +181,7 @@ function my_custom_checkout_button_text() {
 Page::replaceContent(function(&$content){
     // $content = preg_replace('/Mi cuenta/', "CuentaaaaaaaX", $content);
 });
+
+//Cart::setQuantity(9141, 88);
+
+

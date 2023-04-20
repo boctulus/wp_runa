@@ -2,20 +2,50 @@
 
 namespace boctulus\SW\controllers;
 
+use boctulus\SW\core\libs\Cart;
 use boctulus\SW\core\libs\Logger;
-use boctulus\SW\core\libs\Request;
-use boctulus\SW\core\libs\ApiClient;
-use boctulus\SW\core\libs\Validator;
 
-class AjaxFormController
+
+class CartController
 {    
-    function dummy(){
-        $req  = Request::getInstance();
-        $data = $req->as_array()->getBody();
-
+    function set_qty($pid, $qty){
         try {
+            Cart::setQuantity($pid, $qty);
+
             response([
-                'Hiiiiiii'
+                'OK'
+            ]);
+
+        } catch (\Exception $e){
+            $err = "Error con el request " . $e->getMessage();
+            Logger::log($err);
+    
+            return error($err);
+        }   
+    }
+
+    function add($pid, $qty){
+        try {
+            Cart::add($pid, $qty);
+
+            response([
+                'OK'
+            ]);
+
+        } catch (\Exception $e){
+            $err = "Error con el request " . $e->getMessage();
+            Logger::log($err);
+    
+            return error($err);
+        }   
+    }
+
+    function delete($pid){
+        try {
+            Cart::remove($pid);
+
+            response([
+                'OK'
             ]);
 
         } catch (\Exception $e){
