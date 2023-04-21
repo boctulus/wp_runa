@@ -24,10 +24,12 @@ return [
 
     'debug'     => env('DEBUG'),  
 
+    'front_controller'  => true,
+
+    'router'            => true,
+
     'namespace' => "boctulus\SW",
 
 	'composer_autoload' => false,
-
-    'front_controller' => true
 ];
 

@@ -44,15 +44,18 @@ add_action('wp_loaded', function(){
 		*/
 
 		$routes = include __DIR__ . '/config/routes.php';
+		$cfg    = config();
 
-		Router::routes($routes);
-		Router::getInstance();
+		if ($cfg['router'] ?? true){ 
+			Router::routes($routes);
+			Router::getInstance();
+		}
 
 		/*
 			Front controller
 		*/
 
-		if (config()['front_controller'] ?? false){        
+		if ($cfg['front_controller'] ?? false){        
 			FrontController::resolve();
 		} 
     }    

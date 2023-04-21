@@ -5,7 +5,18 @@ namespace boctulus\SW\controllers;
 class CotizadorController
 {
     function index(){
-        return 'Cotizador';
+        get_header();
+        ?>
+        <div>
+            <h1>Hello World</h1>
+            
+            <br><br><br><br><br><br><br><br><br><br>
+            <br><br><br><br><br><br><br><br><br><br>
+            <br><br><br><br><br><br><br><br><br><br>
+        </div>
+
+        <?php
+        get_footer();
     }
 
     function cotizar($prod)

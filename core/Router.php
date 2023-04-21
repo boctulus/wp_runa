@@ -3,6 +3,7 @@
 namespace boctulus\SW\core;
 
 use boctulus\SW\core\libs\Url;
+use boctulus\SW\core\libs\Logger;
 use boctulus\SW\core\libs\Request;
 use boctulus\SW\core\libs\Strings;
 
@@ -23,7 +24,7 @@ class Router
 	}
 
 	static protected function setup(){
-		add_action('init', 'boctulus\SW\core\Router::router');
+		add_action('wp', 'boctulus\SW\core\Router::router');
 	}
 
 	// set routes
