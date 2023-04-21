@@ -6,12 +6,6 @@ use boctulus\SW\core\libs\Page;
 
 class Template
 {
-    static function printName(){
-        add_action('wp_head', function(){
-            echo get_template();
-        });      
-    }
-
     /*
         Cambia temporalmente el "theme" de WordPress 
 
@@ -32,5 +26,15 @@ class Template
         add_filter( 'stylesheet', function() use ($template) {
             return $template;
         });
+    }
+
+    static function getDirectory(){
+        return get_template_directory_uri();
+    }
+
+    static function printName(){
+        add_action('wp_head', function(){
+            echo get_template();
+        });      
     }
 }

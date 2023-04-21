@@ -99,6 +99,10 @@ class Cart
 		return $cart_item_key;
 	}
 
+	/*
+		Los siguientes metodos *no* funciona via Ajax y tampoco generaran error alguno
+	*/
+	
 	static function setQuantity($product_id, int $qty)
 	{
 		if (empty($cart_item_key)){
