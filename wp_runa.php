@@ -23,9 +23,7 @@ register_activation_hook( __FILE__, function(){
 
 db_errors(false);
 
-
 require_once __DIR__ . '/main.php';
-
 
 /*
     Con esto puedo hacer endpoints donde podre acceder a funciones de WooCommerce directa o indirectamente

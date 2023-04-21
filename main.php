@@ -9,6 +9,16 @@ use boctulus\SW\core\libs\Template;
 //Template::set('kadence');
 
 
+add_action('wp_loaded', function(){
+    if (defined('WC_ABSPATH') && !is_admin())
+	{
+        // Cart::setQuantity(9172, 99);
+    }    
+});
+
+
+
+
 function sw_init_session() {
     if (session_status() === PHP_SESSION_NONE) {
         session_start();

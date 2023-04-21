@@ -11,3 +11,21 @@ if (!is_admin_page()){
     jQuery('.header-cart-link').parent().replaceWith(new_button)
 }
 
+jQuery('tr > td > a.remove').click(function(e){  
+	let a   = jQuery(this)
+	let td  = a.parent()
+	let tr  = td.parent()  
+
+	let pid = a.data('product_id')
+
+	console.log(pid)
+
+	jQuery.get(`/my_cart/delete/${pid}`, function(data, status){
+	    console.log("Data: " + data + "\nStatus: " + status);
+	    tr.hide()
+	})
+	.fail(function(data) {
+    	console.log("error", data);
+  	});
+	
+});

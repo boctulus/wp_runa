@@ -6,7 +6,7 @@ use boctulus\SW\core\libs\Cart;
 use boctulus\SW\core\libs\Logger;
 
 
-class CartController
+class MyCartController
 {    
     function count(){
         response([
@@ -16,7 +16,7 @@ class CartController
 
     function set_qty($pid, $qty){
         try {
-            Cart::setQuantity($pid, $qty);
+            //Cart::setQuantity($pid, $qty);
 
             response([
                 'OK'
@@ -51,7 +51,7 @@ class CartController
             Cart::remove($pid);
 
             response([
-                'OK'
+                'message' => "Producto con pid=$pid fue exitosamente borrado del carrito"
             ]);
 
         } catch (\Exception $e){

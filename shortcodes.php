@@ -11,8 +11,9 @@ use boctulus\SW\core\libs\Template;
 function runa_cotizador()
 {
     $items = Cart::getItems();
-    
-    //dd(Cart::count(), 'ITEMs');
+
+    // dd(Cart::count(), 'ITEMs');
+    // Cart::setQuantity(9172, 0);
 ?>
     <style>
         .buttons_added {
