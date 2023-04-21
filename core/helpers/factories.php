@@ -22,5 +22,5 @@ function response($data = null, ?int $http_code = 200){
 */
 
 function error($error = null, ?int $http_code = null, $detail = null){
-    return response()->error($error, $http_code, $detail);
+    return Factory::response()->error($error, $http_code, $detail);
 }

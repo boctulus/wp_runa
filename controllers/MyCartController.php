@@ -48,7 +48,11 @@ class MyCartController
 
     function delete($pid){
         try {
-            Cart::remove($pid);
+            $ok = Cart::remove($pid);
+
+            if (!$ok){
+                error("No se pudo eliminar para pid=$pid  en el carrito");
+            }
 
             response([
                 'message' => "Producto con pid=$pid fue exitosamente borrado del carrito"

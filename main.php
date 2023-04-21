@@ -12,10 +12,12 @@ use boctulus\SW\core\libs\Template;
 add_action('wp_loaded', function(){
     if (defined('WC_ABSPATH') && !is_admin())
 	{
-        // Cart::setQuantity(9172, 99);
+        // $pid = 9166;
+
+        // dd( Cart::getQuantity($pid), 'COUNT');
+        // dd( Cart::remove($pid) );
     }    
 });
-
 
 
 
@@ -141,15 +143,24 @@ add_filter( 'woocommerce_cart_item_subtotal', 'hide_cart_item_totals', 10, 3 );
     Extras, por si las dudas
 */
 
-if (!Users::isLogged()){
-    remove_action( 'woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart' );
-    remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_price', 10 );
-    remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30 );
-    remove_action( 'woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_price', 10 );
+add_action('wp_loaded', function(){
+    if (defined('WC_ABSPATH') && !is_admin())
+	{
+       // dd(Users::isLogged(), 'Logged?');
 
-    //add_filter( 'woocommerce_is_purchasable', '__return_false' );
-    //add_filter( 'woocommerce_get_price_html', '__return_empty_string' );
-}
+        if (!Users::isLogged()){
+            remove_action( 'woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart' );
+            remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_price', 10 );
+            remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30 );
+            remove_action( 'woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_price', 10 );
+        
+            //add_filter( 'woocommerce_is_purchasable', '__return_false' );
+            //add_filter( 'woocommerce_get_price_html', '__return_empty_string' );
+        }
+    }    
+});
+
+
 
 /*
     More
