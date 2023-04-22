@@ -54,6 +54,31 @@ function runa_cotizador()
                 //console.log(pid)
             });
 
+            /*
+                Debe incluir el correo.....y hacer un Ajax call ...... al cotizador
+
+                ... el cual debe enviar un correo.... y notificar luego si hubo exito o no en la operacion
+            */
+            const quote_items = function()
+            {
+                let cart_items = []
+
+                jQuery('td.product-name').each((index, td) => { 
+                    const td_el = jQuery(td)
+
+                    const id = td_el.data('product_id');
+                    const a  = td_el.children('a');
+                    const text = a.text();
+                    const qty  = parseInt(td_el.parent().children('td.product-quantity').children('div').children('input.qty').val())
+
+                    console.log(id, qty, text);
+
+                    cart_items.push({
+                        id, qty, text
+                    })
+                });
+            }
+
         });
     </script>
 
@@ -120,8 +145,7 @@ function runa_cotizador()
                                 <input type="text" id="notification_email" class="regular-text" placeholder="Su correo @ lo-que-sea"/>
 
                                 <div class="continue-shopping pull-left text-left">
-                                    <a class="button-continue-shopping button primary is-outline" href="http://woo1.lan/tienda/">
-                                        Obtener cotización </a>
+                                    <a class="button-quote button primary is-outline" href="#" onclick="quote_items()">Obtener cotización </a>
                                 </div>
 
                             </td>
