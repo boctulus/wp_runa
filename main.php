@@ -4,18 +4,23 @@ use boctulus\SW\core\libs\Cart;
 use boctulus\SW\core\libs\Page;
 use boctulus\SW\core\libs\Users;
 use boctulus\SW\core\libs\Logger;
+use boctulus\SW\core\libs\Products;
 use boctulus\SW\core\libs\Template;
 
 //Template::set('kadence');
+
+Products::setStock(9852, 1003);
 
 
 add_action('wp_loaded', function(){
     if (defined('WC_ABSPATH') && !is_admin())
 	{
-        // $pid = 9166;
+
+        //dd(Products::dd($pid));
 
         // dd( Cart::getQuantity($pid), 'COUNT');
-        // dd( Cart::remove($pid) );
+        // dd( Cart::add($pid, 5) );
+        // dd( Cart::getQuantity($pid), 'COUNT');
     }    
 });
 

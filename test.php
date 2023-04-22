@@ -4,6 +4,7 @@ use boctulus\SW\libs\Alia;
 use boctulus\SW\core\libs\Cart;
 use boctulus\SW\core\libs\Date;
 use boctulus\SW\core\libs\Files;
+use boctulus\SW\core\libs\Products;
 use boctulus\SW\core\libs\ApiClient;
 use boctulus\SW\core\libs\Validator;
 use boctulus\SW\libs\AliaBotQuestions;
@@ -29,3 +30,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 /////////////////////////////////////////////////
 
 
+Products::setStock(9852, 1001);

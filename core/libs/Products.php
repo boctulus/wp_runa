@@ -226,6 +226,43 @@ class Products
         return $p->get_price();
     }
 
+    /*
+        Basado en 
+
+        https://stackoverflow.com/a/51940564/980631
+    */
+    static function setStock($product_id, $qty)
+    {
+        $stock_staus = $qty > 0 ? 'instock' : 'outofstock';
+
+        // 1. Updating the stock quantity
+        update_post_meta($product_id, '_stock', $qty);
+
+        // 2. Updating the stock quantity
+        update_post_meta( $product_id, '_stock_status', wc_clean( $stock_staus ) );
+
+        // 3. Updating post term relationship
+        wp_set_post_terms( $product_id, $stock_staus, 'product_visibility', true );
+
+        // And finally (optionally if needed)
+        wc_delete_product_transients( $product_id ); // Clear/refresh the variation cache
+    }
+
+    /*
+        Setea cantidades de 9999 para todos los productos a fines de poder hacer pruebas
+    */
+    static function setHighAvailability($pid = null){
+        if ($pid == null){
+            $pids = Products::getIDs();
+        } else {
+            $pids = [ $pid ];
+        }
+
+        foreach($pids as $pid){
+            Products::setStock($pid, 9999);
+        }   
+    }
+
     // alias
     static function updateStatus($pid, $status){
         return static::setStatus($pid, $status);
@@ -1729,6 +1766,11 @@ class Products
 		return $obj;		
 	}
 
+    // alias
+    static function dd($product){
+        return static::dumpProduct($product);
+    }
+
     static function addVariation( $pid, Array $args ){
         
         // Get the Variable product object (parent)
@@ -2103,7 +2145,7 @@ class Products
             //  ...
         )
     */
-    static function get_attr($att, $cat){
+    static function getAttr($att, $cat){
         $arr = [];
 
         if (!is_array($cat)){
