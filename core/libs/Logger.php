@@ -109,6 +109,10 @@ class Logger
 		}		
 	}
 
+	static function dd($data, $msg, bool $append = true){
+		static::log([$msg => $data], null, $append);
+	}
+
 	static function logError($error){
 		if ($error instanceof \Exception){
 			$error = $error->getMessage();

@@ -60,9 +60,11 @@ function runa_cotizador()
                     
                             <td class="product-quantity" data-title="Cantidad">
                                 <div class="quantity buttons_added">
-                                    <input type="button" value="-" class="minus button is-form"> <label class="screen-reader-text"><?= $item['sku'] . ' '. $item['title'] ?></label>
+                                    <input type="button" value="-" class="minus button is-form" data-product_id="<?= $item['id'] ?>"> <label class="screen-reader-text"><?= $item['sku'] . ' '. $item['title'] ?></label>
+
                                     <input type="number" class="input-text qty text" step="1" min="0" max="5" value="<?= $item['qty'] ?>" title="Cantidad" size="4" placeholder="" inputmode="numeric">
-                                    <input type="button" value="+" class="plus button is-form">
+                                    
+                                    <input type="button" value="+" class="plus button is-form" data-product_id="<?= $item['id'] ?>">
                                 </div>
                             </td>
 

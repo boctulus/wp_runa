@@ -30,4 +30,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /////////////////////////////////////////////////
 
 
-Products::setStock(9852, 1001);
+Cart::addRandomly();
+
+
+
+

@@ -548,6 +548,10 @@ class Products
     static function getRandomProductIds($qty = 1, $type = 'product'){
         global $wpdb;
 
+        if (empty($qty) || $qty < 0){
+            throw new \InvalidArgumentException("Quantity can not be 0 or null or negative");
+        }
+
         $sql = "SELECT ID FROM {$wpdb->prefix}posts WHERE post_type IN ('$type') ORDER BY RAND() LIMIT $qty";
 
         $res = $wpdb->get_results($sql, ARRAY_A);

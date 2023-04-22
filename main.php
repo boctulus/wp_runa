@@ -15,16 +15,9 @@ Products::setStock(9852, 1003);
 add_action('wp_loaded', function(){
     if (defined('WC_ABSPATH') && !is_admin())
 	{
-
-        //dd(Products::dd($pid));
-
-        // dd( Cart::getQuantity($pid), 'COUNT');
-        // dd( Cart::add($pid, 5) );
-        // dd( Cart::getQuantity($pid), 'COUNT');
+        //Cart::addRandomly(2);
     }    
 });
-
-
 
 function sw_init_session() {
     if (session_status() === PHP_SESSION_NONE) {

@@ -9,6 +9,11 @@ namespace boctulus\SW\core\libs;
 class Cart 
 {
 	static function getCart(){
+		if (is_cli()){
+			dd("Cart no puede funcionar sin session de usuario y por ende con modo 'cli'");	
+			exit;
+		}
+
 		// $WC_ABSPATH =  ABSPATH . "\wp-content\plugins\woocommerce";
 
 		// include_once $WC_ABSPATH . 'includes/wc-cart-functions.php';
@@ -141,10 +146,10 @@ class Cart
 		//Logger::log("Seteando '$qty' unidades de $product_id");
 		$cart->set_quantity( $cart_item_key, $qty );
 
-		//Logger::log(static::getQuantity($product_id), "Nueva cantidad para pid=$product_id en carrito");
+		//Logger::dd(static::getQuantity($product_id), "Nueva cantidad para pid=$product_id en carrito");
 
 		if (static::getQuantity($product_id) != $qty){
-			//Logger::log("No se pudo cambiar cantidad para item con pid=$product_id en carrito");
+			//Logger::dd("No se pudo cambiar cantidad para item con pid=$product_id en carrito");
 			return false;
 		}
 
@@ -159,7 +164,7 @@ class Cart
 
 		$prev_qty = static::getQuantity($product_id);
 
-		//Logger::log("Agregando '$qty' unidades de $product_id");
+		Logger::log("Agregando '$qty' unidades de $product_id");
 		$cart->add_to_cart($product_id, $qty);
 
 		$expected = $prev_qty + $qty;
@@ -168,13 +173,22 @@ class Cart
 			return false;
 		}
 
-		//Logger::log(static::getQuantity($product_id), "Nueva cantidad para pid=$product_id en carrito");
+		Logger::dd(static::getQuantity($product_id), "Nueva cantidad para pid=$product_id en carrito");
 
 		return true;
 	}
 
 	static function remove($product_id){
 		return static::setQuantity($product_id, 0);
+	}
+
+	static function addRandomly($qty = null, Array $product_ids = null){
+		$product_ids = Products::getRandomProductIds($qty ?? 10);
+
+		foreach ($product_ids as $pid){
+			static::add($pid, rand(1,10));
+		}
+
 	}
 
 }
