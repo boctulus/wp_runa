@@ -42,7 +42,16 @@ function runa_cotizador()
                 .fail(function(data) {
                     console.log("error", data);
                 });
-                
+            });
+
+            jQuery('input.minus').click(function(e){  
+                let pid = jQuery(this).data('product_id')
+                //console.log(pid)
+            });
+
+            jQuery('input.plus').click(function(e){  
+                let pid = jQuery(this).data('product_id')
+                //console.log(pid)
             });
 
         });
@@ -51,7 +60,10 @@ function runa_cotizador()
 
     <div class="col large-7 pb-0 ">
 
-        <form class="woocommerce-cart-form" action="http://woo1.lan/carrito/" method="post">
+        <!---  
+            Los atributos "data-product_id" son utilizados por codigo Javascript -> favor de conservar
+        -->
+        <form class="woocommerce-cart-form">
             <div class="cart-wrapper sm-touch-scroll">
 
 
@@ -82,12 +94,14 @@ function runa_cotizador()
                                 </div>
                             </td>
 
-                    
+                            <!---  
+                                Las clases "plus" y "minus" son utilizadas por codigo Javascript -> favor de conservar
+                            -->
                             <td class="product-quantity" data-title="Cantidad">
                                 <div class="quantity buttons_added">
                                     <input type="button" value="-" class="minus button is-form" data-product_id="<?= $item['id'] ?>"> <label class="screen-reader-text"><?= $item['sku'] . ' '. $item['title'] ?></label>
 
-                                    <input type="number" class="input-text qty text" step="1" min="0" max="5" value="<?= $item['qty'] ?>" title="Cantidad" size="4" placeholder="" inputmode="numeric">
+                                    <input type="number" class="input-text qty text" step="1" min="1" value="<?= $item['qty'] ?>" title="Cantidad" size="4" placeholder="" inputmode="numeric">
                                     
                                     <input type="button" value="+" class="plus button is-form" data-product_id="<?= $item['id'] ?>">
                                 </div>
