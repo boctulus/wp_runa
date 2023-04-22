@@ -23,8 +23,33 @@ function runa_cotizador()
         }
     </style>
 
-    <div class="col large-7 pb-0 ">
+    <script>
+        addEventListener("DOMContentLoaded", (event) => {
 
+            jQuery('tr > td > a.remove').click(function(e){  
+                let a   = jQuery(this)
+                let td  = a.parent()
+                let tr  = td.parent()  
+
+                let pid = a.data('product_id')
+
+                console.log(pid)
+
+                jQuery.get(`/my_cart/delete/${pid}`, function(data, status){
+                    console.log("Data: " + data + "\nStatus: " + status);
+                    tr.hide()
+                })
+                .fail(function(data) {
+                    console.log("error", data);
+                });
+                
+            });
+
+        });
+    </script>
+
+
+    <div class="col large-7 pb-0 ">
 
         <form class="woocommerce-cart-form" action="http://woo1.lan/carrito/" method="post">
             <div class="cart-wrapper sm-touch-scroll">
