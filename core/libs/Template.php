@@ -32,6 +32,10 @@ class Template
         return get_template_directory_uri();
     }
 
+    static function getCurrentTheme(){
+        return get_option('template');
+    }
+
     static function printName(){
         add_action('wp_head', function(){
             echo get_template();
