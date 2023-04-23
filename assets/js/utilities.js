@@ -16,6 +16,9 @@ const isPromise = p => {
     return p && Object.prototype.toString.call(p) === "[object Promise]";
 }
 
+/*
+    Trabaja con encodeProp() de PHP
+*/
 const decodeProp = (prop_id) => {
     const el = document.getElementById(prop_id);
 

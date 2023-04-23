@@ -40,7 +40,7 @@ function assets(){
     js_file('/js/notices.js');
 
     if (!Users::isLogged()){
-        js_file('/js/wp_runa.js');
+        js_file('/js/not_logged.js');
     }
 }
 

@@ -107,3 +107,7 @@ function view(string $view_path, array $vars  = null){
 
     include get_view_src($view_path);
 }
+
+function encodeProp($value){
+    return base64_encode(is_array($value) ? '--array--' . json_encode($value) : $value);
+}
