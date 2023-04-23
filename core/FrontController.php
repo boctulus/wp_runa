@@ -127,7 +127,7 @@ class FrontController
         $class_name = str_replace('/', "\\", $class_name);
 
         if (!class_exists($class_name)) {
-            return;
+            return; // *
         }
 
         if (!method_exists($class_name, $method)) {
@@ -136,7 +136,7 @@ class FrontController
                     Se agrego is_callable() para poder usarse con __call()
                 */
                 if (!method_exists($class_name, '__call') || !is_callable($class_name, $method)) {
-                    $res->error("Internal error - method $method was not found in $class_name", 404);
+                    return; // *
                 }
             } else {
                 $dont_exec = true;

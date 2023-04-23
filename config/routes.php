@@ -7,6 +7,5 @@
 */
 
 return [
-    '/productos/cotizar'  => 'boctulus\SW\controllers\CotizadorController@index',
-    // '/api/v1/form/save'  => 'boctulus\SW\controllers\AjaxFormController@save_form',
+    '/cart/quote'  => 'boctulus\SW\controllers\CartController@save_form',
 ];

@@ -25,6 +25,9 @@ function runa_cotizador()
 
     <script>
         addEventListener("DOMContentLoaded", (event) => {
+            if (typeof $ === 'undefined' && typeof jQuery !== 'undefined'){
+                $ = jQuery
+            }
 
             jQuery('tr > td > a.remove').click(function(e){  
                 let a   = jQuery(this)
@@ -35,7 +38,7 @@ function runa_cotizador()
 
                 console.log(pid)
 
-                jQuery.get(`/my_cart/delete/${pid}`, function(data, status){
+                jQuery.get(`/cart/delete/${pid}`, function(data, status){
                     console.log("Data: " + data + "\nStatus: " + status);
                     tr.hide()
                 })
@@ -53,33 +56,9 @@ function runa_cotizador()
                 let pid = jQuery(this).data('product_id')
                 //console.log(pid)
             });
-
-            /*
-                Debe incluir el correo.....y hacer un Ajax call ...... al cotizador
-
-                ... el cual debe enviar un correo.... y notificar luego si hubo exito o no en la operacion
-            */
-            const quote_items = function()
-            {
-                let cart_items = []
-
-                jQuery('td.product-name').each((index, td) => { 
-                    const td_el = jQuery(td)
-
-                    const id = td_el.data('product_id');
-                    const a  = td_el.children('a');
-                    const text = a.text();
-                    const qty  = parseInt(td_el.parent().children('td.product-quantity').children('div').children('input.qty').val())
-
-                    console.log(id, qty, text);
-
-                    cart_items.push({
-                        id, qty, text
-                    })
-                });
-            }
-
         });
+
+        
     </script>
 
 
@@ -87,8 +66,10 @@ function runa_cotizador()
 
         <!---  
             Los atributos "data-product_id" son utilizados por codigo Javascript -> favor de conservar
+
+            El id "quote-cart-form" es utilizado para bindear el form --conservar--
         -->
-        <form class="woocommerce-cart-form">
+        <form class="woocommerce-cart-form" id="quote-cart-form">
             <div class="cart-wrapper sm-touch-scroll">
 
 
@@ -142,11 +123,15 @@ function runa_cotizador()
                         <tr>
                             <td colspan="6" class="actions clear">
  
-                                <input type="text" id="notification_email" class="regular-text" placeholder="Su correo @ lo-que-sea"/>
+                                <input type="email" id="notification_email" class="regular-text" required placeholder="Su correo @ lo-que-sea"/>
 
                                 <div class="continue-shopping pull-left text-left">
-                                    <a class="button-quote button primary is-outline" href="#" onclick="quote_items()">Obtener cotización </a>
+                                    <a class="button-quote button primary is-outline" href="#" id="ajax_call_btn">Obtener cotización </a>
                                 </div>
+
+                                <!-- id es usado por JS, favor de conservar -->
+                                <div id="loading-text"></div>
+                                
 
                             </td>
                         </tr>
@@ -159,8 +144,7 @@ function runa_cotizador()
 
     <script>
         const base_url = '<?= Url::getBaseUrl() ?>'
-        const url = base_url + '/api/v1/form/save'; /// apuntar al endpoint reg. en rutas
-
+       
         function setNotification(msg) {
             $('#response-output').show()
             $('#response-output').html(msg);
@@ -179,22 +163,62 @@ function runa_cotizador()
             document.getElementById("loading-text").innerHTML = "";
         }
 
-        function do_it(e) {
+        /*
+            Debe incluir el correo.....y hacer un Ajax call ...... al cotizador
+
+            ... el cual debe enviar un correo.... y notificar luego si hubo exito o no en la operacion
+        */
+        const get_form_data = function()
+        {
+            const email    = jQuery('#notification_email').val()
+
+            if (email == ''){
+                throw "email esta vacio"
+            }
+  
+            let cart_items = []
+
+            jQuery('td.product-name').each((index, td) => { 
+                const td_el = jQuery(td)
+
+                const id    = td_el.data('product_id');
+                const a     = td_el.children('a');
+                const text  = a.text();
+                const qty   = parseInt(td_el.parent().children('td.product-quantity').children('div').children('input.qty').val())
+
+                cart_items.push({
+                    id, qty //, text
+                })
+            });
+
+            const obj      = {
+                cart_items,
+                email
+            }
+
+            const data    = JSON.stringify(obj)
+
+            return data
+        }
+
+        function do_ajax_call(e) {
             e.preventDefault();
 
-            let jsonData = getFormData(e.currentTarget, false)
+            let data = get_form_data() //getFormData(e.currentTarget, false)
 
-            // ...
+            console.log(data)
 
             loadingAjaxNotification()
 
+            const url = base_url + '/cart/quote'; /// apuntar al endpoint
+
             jQuery.ajax({
-                url: url, // post
-                type: "post",
+                url: url, 
+                type: "POST",
                 dataType: 'json',
                 cache: false,
                 contentType: 'application/json',
-                data: JSON.stringify(jsonData),
+                data: (typeof data === 'string') ? data : JSON.stringify(data),
                 success: function(res) {
                     clearAjaxNotification();
 
@@ -221,8 +245,8 @@ function runa_cotizador()
             });
         }
 
-        jQuery('#hola_form').on("submit", function(event) {
-            do_it(event);
+        jQuery('#quote-cart-form').on("submit", function(event) {
+            do_ajax_call(event);
         });
     </script>
 
