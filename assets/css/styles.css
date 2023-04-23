@@ -10,11 +10,6 @@
 	margin-top:-30px;
 }
 
-#response-output {
-	display: none;
-	margin-top: -60px;
-	border: 1px dotted blue;
-	width: 100%;
-	max-width: 500px !important;
-	padding: 2px;
+.danger-color {
+	color: #FF4500;
 }

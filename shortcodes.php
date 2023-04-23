@@ -11,9 +11,6 @@ use boctulus\SW\core\libs\Template;
 function runa_cotizador()
 {
     $items = Cart::getItems();
-
-    // dd(Cart::count(), 'ITEMs');
-    // Cart::setQuantity(9172, 0);
 ?>
     <style>
         .buttons_added {
@@ -40,7 +37,7 @@ function runa_cotizador()
 
                 jQuery.get(`/cart/delete/${pid}`, function(data, status){
                     console.log("Data: " + data + "\nStatus: " + status);
-                    tr.hide()
+                    tr.remove()
                 })
                 .fail(function(data) {
                     console.log("error", data);
@@ -125,8 +122,20 @@ function runa_cotizador()
  
                                 <input type="email" id="notification_email" class="regular-text" required placeholder="Su correo @ lo-que-sea"/>
 
+                                <!-- validation container -->
+                                <div class="woocommerce-message message-wrapper" role="alert">
+                                    <div class="message-container container danger-color medium-text-center"> 
+                                        	
+                                    </div>
+                                    <br>
+                                </div>
+
                                 <div class="continue-shopping pull-left text-left">
-                                    <a class="button-quote button primary is-outline" href="#" id="ajax_call_btn">Obtener cotización </a>
+                                    <a class="button-quote button primary is-outline" href="#" id="ajax_call_btn">Obtener cotización</a>
+                                </div>
+
+                                <div class="continue-shopping pull-left text-left">
+                                    <a class="button-quote button primary is-outline" href="<?= get_permalink(wc_get_page_id('shop')) ?>" id="ajax_call_btn">Volve a la tienda</a>
                                 </div>
 
                                 <!-- id es usado por JS, favor de conservar -->
@@ -173,8 +182,11 @@ function runa_cotizador()
             const email    = jQuery('#notification_email').val()
 
             if (email == ''){
+                jQuery('.message-container').text('E-mail es requerido')
                 throw "email esta vacio"
             }
+
+            jQuery('.message-container').text('')
   
             let cart_items = []
 
@@ -251,7 +263,11 @@ function runa_cotizador()
             });
         }
 
-        jQuery('#quote-cart-form').on("submit", function(event) {
+        // jQuery('#quote-cart-form').on("submit", function(event) {
+        //     do_ajax_call(event);
+        // });
+
+        jQuery('#ajax_call_btn').on("click", function(event) {
             do_ajax_call(event);
         });
     </script>

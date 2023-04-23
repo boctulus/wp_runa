@@ -43,21 +43,23 @@ class XML
 
         composer require spatie/array-to-xml
     */
-    static function fromArray(array $arr, string $root_elem = 'root', $header = true)
-    {       
+    static function fromArray(array $arr, string $root_elem = 'root', $header = true){
+        if (!\Composer\InstalledVersions::isInstalled('spatie/array-to-xml')){
+            throw new \Exception("Composer package spatie/array-to-xml is requiered");
+        }
+
         if (!class_exists(\Spatie\ArrayToXml\ArrayToXml::class)){
-            exec("composer require spatie/array-to-xml --no-interaction");
-            sleep(10);
+            throw new \Exception("Class not found");
         } else {
             $class = "\Spatie\ArrayToXml\ArrayToXml";
             $converter = new $class($arr, $root_elem);
         }
 
-        if (!$header){
-            $converter->dropXmlDeclaration();
-        }
-
         $result = $converter::convert($arr, $root_elem, $header);
+
+        if (!$header){
+            $result = trim(substr($result, 21));
+        }
 
         return $result;
     }

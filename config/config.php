@@ -6,7 +6,6 @@ return [
     
     'cotizador_slug' => '/2023/04/16/cotizador', // ***********
 
-
     /*
         API
     */

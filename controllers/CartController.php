@@ -2,8 +2,11 @@
 
 namespace boctulus\SW\controllers;
 
+use boctulus\SW\core\libs\Url;
+use boctulus\SW\core\libs\XML;
 use boctulus\SW\core\libs\Cart;
 use boctulus\SW\core\libs\Logger;
+use boctulus\SW\core\libs\ApiClient;
 use boctulus\SW\core\libs\Validator;
 
 /*
@@ -129,45 +132,55 @@ class CartController
            return error("Validation error", 400, $v->getErrors());
         } 
 
-        return response(['data' => $data]);
-        // //////////////////////////////
+        $cfg = config();
+
+        $url      = $cfg['api_base_url'] . $cfg['endpoints']['pedidos'];
+	    $password = $cfg['api_token'];
     
-        // $cfg = config();
+        try {
 
-        // Logger::dump($data); //
-    
-        // try {
+            $data = XML::fromArray($data, 'ped', false);
 
-        //     $client = ApiClient::instance()
-        //     ->setHeaders([
-        //         'Authorization: ' . $cfg['api_token'],
-        //         'Content-Type: application/json'
-        //     ]);
+            $params = [
+                'pass' => $password, 
+                'data' => $data
+            ];
+        
+            $url = Url::buildUrl($url, $params);
+        
+            $client = new ApiClient;
+        
+            $client
+            ->disableSSL()
+            ->setUrl($url)
+            // ->addOptions([
+            //     CURLOPT_FRESH_CONNECT => true,
+            //     CURLOPT_HTTPHEADER    => [ "Cache-Control: no-cache" ]
+            // ])
+            ->setHeaders([
+                'Content-type' => 'application/xml',
+                'Accept'       => '*/*',
+            ])
+            ->get();
+        
+            $status = $client->getStatus();
+        
+            if ($status != 200){
+                throw new \Exception("Error: " . $client->error());
+            }
 
-        //     $client
-        //     ->disableSSL()
-        //     //->cache()
-        //     //->redirect()
-        //     ->setBody($data)
-        //     ->setUrl($cfg['api_url'])
-        //     ->post()
-        //     ->getResponse();
-
-        //     $status = $client->getStatus();
-
-        //     if ($status != 201 && $status != 200){
-        //         throw new \Exception($client->error());
-        //     }
+            Logger::varExport($client->dd(), 'request.php');
+            Logger::dd($client->data(), 'RES DATA');
            
-        //     return response([
-        //         'data' => $client->data()
-        //     ]);
+            return response([
+                'data'    => $client->data()
+            ]);
 
-        // } catch (\Exception $e){
-        //     $err = "Error con el request " . $e->getMessage();
-        //     Logger::log($err);
+        } catch (\Exception $e){
+            $err = "Error con el request " . $e->getMessage();
+            Logger::log($err);
     
-        //     return error($err);
-        // }   
+            return error($err);
+        }   
     }
 }

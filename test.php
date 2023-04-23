@@ -1,10 +1,11 @@
 <?php
 
-use boctulus\SW\core\libs\XML;
 use boctulus\SW\core\libs\Url;
+use boctulus\SW\core\libs\XML;
 use boctulus\SW\core\libs\Cart;
 use boctulus\SW\core\libs\Date;
 use boctulus\SW\core\libs\Files;
+use boctulus\SW\core\libs\Logger;
 use boctulus\SW\core\libs\Products;
 use boctulus\SW\core\libs\ApiClient;
 use boctulus\SW\core\libs\Validator;
@@ -30,9 +31,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 /////////////////////////////////////////////////
 
 
+
 function test_runa(){
-	$base_url = "http://201.148.107.125/~runa/js/zoh/pedidos.php";
-	$password = "f32fq3fq32412";
+	$cfg = config();
+
+	$url      = $cfg['api_base_url'] . $cfg['endpoints']['pedidos'];
+	$password = $cfg['api_token'];
 	
 	$arr = array (
 		'num' => '123434421',
@@ -70,11 +74,11 @@ function test_runa(){
 	$data = XML::fromArray($arr, 'ped', false);
 
 	$params = [
-		'pass' => 'f32fq3fq32412', 
+		'pass' => $password, 
 		'data' => $data
 	];
 
-	$url = Url::buildUrl('http://201.148.107.125/~runa/js/zoh/pedidos.php', $params);
+	$url = Url::buildUrl($url, $params);
 
 	$client = new ApiClient;
 
@@ -90,6 +94,8 @@ function test_runa(){
 	if ($status != 200){
 		throw new \Exception("Error: " . $client->error());
 	}
+
+	Logger::dd($client->data(), 'RES DATA');
 
 	dd(
 		$client->data()         

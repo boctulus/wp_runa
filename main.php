@@ -35,10 +35,13 @@ function assets(){
 	//js_file('/js/bootstrap/bootstrap.bundle.min.js');
 
     css_file('/css/styles.css');
+    
     js_file('/js/sweetalert.js');
-    //js_file('/js/utilities.js');
+    js_file('/js/notices.js');
 
-    js_file('/js/wp_runa.js');
+    if (!Users::isLogged()){
+        js_file('/js/wp_runa.js');
+    }
 }
 
 enqueue('assets');
