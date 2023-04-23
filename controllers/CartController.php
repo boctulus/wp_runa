@@ -129,9 +129,7 @@ class CartController
            return error("Validation error", 400, $v->getErrors());
         } 
 
-        return response([
-            'data' => $data
-        ]);
+        return response(['data' => $data]);
         // //////////////////////////////
     
         // $cfg = config();

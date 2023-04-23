@@ -133,6 +133,13 @@ class Response
                     $arr['paginator'] = static::$paginator;
             }
 
+            /*
+                Evita tener data.data pero es un cambio disruptivo
+            */
+            if (isset($data['data'])){
+                $data = $data['data'];
+            }
+
             $data = array_merge($arr,[
                     'data' => $data, 
                     'status_code' => $http_code,
