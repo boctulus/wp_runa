@@ -17,7 +17,21 @@ require_once __DIR__ . '/config/constants.php';
 
 $cfg = require __DIR__ . '/config/config.php';
 
-if ($cfg["composer_autoload"]){
+if ($cfg["use_composer"] ?? true){
+    /*
+        En vez de sleep() deberia usar algun paquete async
+    */
+    if (!file_exists(ROOT_PATH . 'vendor/autoload.php')){
+        exec("composer init --name=boctulus/wp_runa --no-interaction");
+        sleep(5);
+    }        
+        
+    if (!class_exists(\Composer\InstalledVersions::class)){
+        chdir(ROOT_PATH);
+        exec("composer install --no-interaction");
+        sleep(10);
+    }
+
     require_once APP_PATH . 'vendor/autoload.php';
 }
 

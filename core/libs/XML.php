@@ -1,9 +1,5 @@
 <?php
 
-/*
-    @author  Pablo Bozzolo boctulus@gmail.com
-*/
-
 namespace boctulus\SW\core\libs;
 
 class XML
@@ -41,6 +37,33 @@ class XML
 
         return $arrOutput;
     }  
+
+    /*
+        Requiere del paquete de Composer spatie/array-to-xml
+
+        composer require spatie/array-to-xml
+    */
+    static function fromArray(array $arr, string $root_elem = 'root', $header = true){       
+        if (!\Composer\InstalledVersions::isInstalled('spatie/array-to-xml')){
+            exec("composer require spatie/array-to-xml --no-interaction");
+            sleep(10);
+        }
+
+        if (!class_exists(\Spatie\ArrayToXml\ArrayToXml::class)){
+            throw new \Exception("Class not found");
+        } else {
+            $class = "\Spatie\ArrayToXml\ArrayToXml";
+            $converter = new $class($arr, $root_elem);
+        }
+
+        if (!$header){
+            $converter->dropXmlDeclaration();
+        }
+
+        $result = $converter::convert($arr, $root_elem, $header);
+
+        return $result;
+    }
     
     static function getDomDocument(string $html){
         $doc = new \DOMDocument();
@@ -57,8 +80,38 @@ class XML
             static::getDomDocument($html)
         );
     }   
+
+     /*
+        https://stackoverflow.com/a/7131156/980631
+    */
+    static function stripTagScript(string $html) {
+        $dom = new \DOMDocument;
+        libxml_use_internal_errors(true);
+        $dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        libxml_clear_errors();
+
+        $script = $dom->getElementsByTagName('script');
+
+        $remove = [];
+        foreach($script as $item){
+            $remove[] = $item;
+        }
+
+        foreach ($remove as $item){
+            $item->parentNode->removeChild($item); 
+        }
+
+        $html = $dom->saveHTML();
+        
+        return $html;
+    }
+
+    /*
+        https://davidwalsh.name/remove-html-comments-php
+    */
+    static function removeComments(string $html = '') {
+        return preg_replace('/<!--(.|\s)*?-->/', '', $html);
+    }
    
 }
-
-
 

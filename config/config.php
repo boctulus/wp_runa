@@ -28,8 +28,8 @@ return [
 
     'router'            => true,
 
-    'namespace' => "boctulus\SW",
+    'namespace'         => "boctulus\SW",
 
-	'composer_autoload' => false,
+	'use_composer'      => true,
 ];
 

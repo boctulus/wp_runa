@@ -120,7 +120,7 @@ class CartController
     
         $rules = [
             'email' 			=> ['type'=>'email','required'=>true], 
-            'cart_items' 	    => ['type'=>'array','required'=>true, 'min'=>1],
+            'cart_items' 	    => ['type'=>'array','required'=>true, 'min_len'=>1],
         ];
     
         $v = new Validator;
