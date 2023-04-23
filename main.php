@@ -1,15 +1,15 @@
 <?php
 
-use boctulus\SW\core\libs\Cart;
 use boctulus\SW\core\libs\Page;
 use boctulus\SW\core\libs\Users;
 use boctulus\SW\core\libs\Logger;
-use boctulus\SW\core\libs\Products;
 use boctulus\SW\core\libs\Template;
 
-//Template::set('kadence');
+/*
+    By boctulus
+*/
 
-Products::setStock(9852, 1003);
+//Template::set('kadence');
 
 
 add_action('wp_loaded', function(){
@@ -31,12 +31,12 @@ function sw_init_session() {
 require_once __DIR__ . '/shortcodes.php';
 
 function assets(){
-	#css_file('/css/bootstrap/bootstrap.min.css');
-	#js_file('/js/bootstrap/bootstrap.bundle.min.js');
+	//css_file('/css/bootstrap/bootstrap.min.css');
+	//js_file('/js/bootstrap/bootstrap.bundle.min.js');
 
     css_file('/css/styles.css');
+    js_file('/js/sweetalert.js');
     //js_file('/js/utilities.js');
-    //js_file('/js/sweetalert.js');
 
     js_file('/js/wp_runa.js');
 }
@@ -160,21 +160,6 @@ add_action('wp_loaded', function(){
 
 
 
-/*
-    More
-*/
-
-// Template::set('astra');
-// Template::printName();
-
-
-function my_custom_checkout_button_text() {
-	return 'Colocar la órden';
-}
-
-// Change checkout page button to place the order (Realizar el pedido)
-// add_filter( 'woocommerce_order_button_text', 'my_custom_checkout_button_text' );
-
 
 ////////////////////////////////////////////
 
@@ -183,6 +168,5 @@ Page::replaceContent(function(&$content){
     // $content = preg_replace('/Mi cuenta/', "CuentaaaaaaaX", $content);
 });
 
-//Cart::setQuantity(9141, 88);
 
 

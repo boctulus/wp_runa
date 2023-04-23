@@ -222,15 +222,15 @@ function runa_cotizador()
                 success: function(res) {
                     clearAjaxNotification();
 
-                    // if (typeof res['error'] != 'undefined'){
-                    //     if (typeof res['error']['message'] != 'undefined'){
-                    //         setNotification(res['error']['message']);
-                    //     }
-                    // }
-
                     console.log('RES', res);
-                    setNotification("Gracias por tu mensaje. Ha sido enviado.");
+                    
+                    //setNotification("Gracias por tu mensaje. Ha sido enviado.");
 
+                    swal({
+                        title: "Enviado!",
+                        text: "Recibirá la cotización en su correo",
+                        icon: "success",
+                    });
                 },
                 error: function(res) {
                     clearAjaxNotification();
@@ -240,7 +240,13 @@ function runa_cotizador()
                     // }
 
                     console.log('RES', res);
-                    setNotification("Hubo un error. Inténtelo más tarde.");
+                    //setNotification("Hubo un error. Inténtelo más tarde.");
+
+                    swal({
+                        title: "Error",
+                        text: "Hubo un error. Intente más tarde.",
+                        icon: "warning", // "warning", "error", "success" and "info"
+                    });
                 }
             });
         }
