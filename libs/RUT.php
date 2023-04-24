@@ -4,6 +4,12 @@ namespace boctulus\SW\libs;
 
 class RUT 
 {
+    static $rut_err_class = 'rut-error-message';
+
+    static function setRUTerrorClass(string $rut_err_class){
+        static::$rut_err_class = $rut_err_class;
+    }
+
     /*
         @author: Christian Vergara Reyes
 
@@ -19,6 +25,8 @@ class RUT
         14559208-9
         12618454-9
         8841615-5
+
+        Requiere de un campo de validacion para RUT como el
     */
     static function formatear(){
         wp_enqueue_script('jquery');
@@ -95,7 +103,7 @@ class RUT
                 //var error_message = jQuery('<span class="rut-error-message" style="color:red;display:none;"></span>');
                 //rut.after(error_message);
 
-                let error_message = $('.rut-error-message')
+                let error_message = $('.<?= static::$rut_err_class ?>')
 
                 var rut_el = jQuery('#rut');
 
