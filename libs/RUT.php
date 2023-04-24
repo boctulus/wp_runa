@@ -26,9 +26,13 @@ class RUT
         12618454-9
         8841615-5
 
-        Requiere de un campo de validacion para RUT como el
+        Requiere de un campo de validacion para RUT y otro para la validacion de clase static::$rut_err_class
+
+        Ej:
+
+        <span class="validation-error rut-error-message" style="color:red;display:none;"></span>
     */
-    static function formatear(){
+    static function formateador(){
         wp_enqueue_script('jquery');
 
         ?>

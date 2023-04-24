@@ -4,6 +4,7 @@ use boctulus\SW\core\libs\Page;
 use boctulus\SW\core\libs\Taxes;
 use boctulus\SW\core\libs\Users;
 use boctulus\SW\core\libs\Logger;
+use boctulus\SW\core\libs\Plugins;
 use boctulus\SW\core\libs\Template;
 
 /*
@@ -20,6 +21,12 @@ if (!Taxes::VATapplied()){
     admin_notice("Por favor habilite impuestos incluidos: WooCommerce > Impuesto > Opciones de impuestos", "error");
 }
 
+/*
+    WooCommerce es una dependencia en este proyecto.
+*/
+if (!Plugins::isActive('woocommerce')){
+    admin_notice("WooCommerce es requerido. Por favor instale y/o habilite el plugin", "error");
+}
 
 add_action('wp_loaded', function(){
     if (defined('WC_ABSPATH') && !is_admin())

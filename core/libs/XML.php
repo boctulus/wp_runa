@@ -44,12 +44,9 @@ class XML
         composer require spatie/array-to-xml
     */
     static function fromArray(array $arr, string $root_elem = 'root', $header = true){
-        if (!\Composer\InstalledVersions::isInstalled('spatie/array-to-xml')){
-            throw new \Exception("Composer package spatie/array-to-xml is requiered");
-        }
-
         if (!class_exists(\Spatie\ArrayToXml\ArrayToXml::class)){
-            throw new \Exception("Class not found");
+            admin_notice("El paquete de Composer spatie/array-to-xml es requierido", "error");
+            throw new \Exception("Class ArrayToXml not found");
         } else {
             $class = "\Spatie\ArrayToXml\ArrayToXml";
             $converter = new $class($arr, $root_elem);

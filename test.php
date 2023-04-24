@@ -10,6 +10,7 @@ use boctulus\SW\core\libs\Logger;
 use boctulus\SW\core\libs\Products;
 use boctulus\SW\core\libs\ApiClient;
 use boctulus\SW\core\libs\Validator;
+use boctulus\SW\core\libs\Plugins;
 use boctulus\SW\core\libs\ValidationRules;
 
 ini_set('display_errors', 1);
@@ -30,10 +31,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /////////////////////////////////////////////////
-
-
-dd(Taxes::VATapplied(), 'IVA?');
-exit;
 
 
 function test_runa(){

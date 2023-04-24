@@ -56,15 +56,19 @@ class Files
 		fclose($f);
 	}
 
-	static function getCSV(string $path, $separator = ",", $assoc = true){	
+	static function getCSV(string $path, string $separator = ",", bool $header = true, bool $assoc = true){	
 		$rows = [];
 
 		ini_set('auto_detect_line_endings', 'true');
 
 		$handle = fopen($path,'r');
 
-		$cabecera = fgetcsv($handle, null, $separator);
-		$ch       = count($cabecera);
+		if ($header){
+			$cabecera = fgetcsv($handle, null, $separator);
+			$ch       = count($cabecera);
+		}  else {
+			$assoc    = false;
+		}
 		
 		$i = 0;
 		while ( ($data = fgetcsv($handle, null, $separator) ) !== FALSE ) {
@@ -84,10 +88,14 @@ class Files
 		
 		ini_set('auto_detect_line_endings', 'false');
 
-		return [
-			'rows' => $rows,
-			'head' => $cabecera
-		];
+		if ($header){
+			return [
+				'rows'   => $rows,
+				'header' => $cabecera ?? []
+			];
+		} 
+
+		return $rows;		
 	}
 
 	/*

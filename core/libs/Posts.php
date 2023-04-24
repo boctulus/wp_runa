@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace boctulus\WooEzequiel\libs;
+namespace boctulus\SW\core\libs;
 
 /*
 	@author boctulus

@@ -1,0 +1,39 @@
+DOC de RUNA
+-----------
+
+El plugin provee un shortcode el cual renderiza el cotizador. Este es [runa-cotizador] y es utilizado en /cotizador
+
+Los datos del cliente se cargan en la url /client
+
+Dado que es necesario lidiar con productos y órdenes se hace uso del plugin de WooCommerce. Es requisito tener WooCommerce instalado.
+
+Para estilos, en particular de formularios, durante el desarrollo se utilizó el tema "Flatsome".
+
+Las vistas del cotizador y el formulario de contacto para el mismo se encuentran en la carpeta /views y se debe tener en cuenta que si bien son editables, puede ser necesario modificar algún Javascript basado en los IDs, clases css o la estructura del HTML.
+
+Los assets se encuentran en la carpeta assets:
+
+-- assets
+    +----- js
+    |
+    +------ css
+
+
+El plugin se encuentra desarrollado bajo un framework propietario de Pablo Bozzolo. Se licencia su uso para este proyecto únicamente.
+
+
+# Requisitos
+
+Resumiendo, el plugin requiere:
+
+- Un servidor web con al menos PHP 7.4 + extensiones curl, simplexml y puede que alguna más
+- El paquete spatie/array-to-xml (1)
+- WordPress
+- WooCommerce 
+- El tema Flatsome se recomienda al menos para testear el plugin.
+- Que el IVA este aplicado (2) 
+
+Notas:
+
+1. Instalar Composer y luego spatie/array-to-xml mediante "composer require spatie/array-to-xml" 
+2. Esto se hace desde ajustes de impuestos en WooCommerce.

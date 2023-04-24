@@ -2,11 +2,15 @@
 
 namespace boctulus\SW\controllers;
 
+use boctulus\SW\core\libs\Files;
+
 class ContactController
 {
     function index(){
+        $comunas = Files::getCSV(ETC_PATH . '/comunas.csv', ",", true);
+
         get_header();
-        view('contact_form');
+        view('contact_form', ['comunas' => $comunas]);
         get_footer();
     }
 

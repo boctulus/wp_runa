@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace boctulus\WooEzequiel\libs;
+namespace boctulus\SW\core\libs;
 
 /*
 	@author boctulus
@@ -32,6 +32,12 @@ class Plugins
 
             return $activated_plugins;
         }
+    }
+
+    static function isActive(string $name){
+        $name = strtolower($name);
+
+        return is_plugin_active("$name/$name.php");
     }
 
     /*
