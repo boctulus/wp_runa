@@ -4,6 +4,7 @@ namespace boctulus\SW\libs;
 
 use boctulus\SW\core\libs\XML;
 use boctulus\SW\core\libs\Files;
+use boctulus\SW\core\libs\Logger;
 use boctulus\SW\core\libs\Products;
 use boctulus\SW\core\libs\ApiClient;
 
