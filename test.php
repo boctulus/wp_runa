@@ -5,6 +5,7 @@ use boctulus\SW\core\libs\XML;
 use boctulus\SW\core\libs\Cart;
 use boctulus\SW\core\libs\Date;
 use boctulus\SW\core\libs\Files;
+use boctulus\SW\core\libs\Taxes;
 use boctulus\SW\core\libs\Logger;
 use boctulus\SW\core\libs\Products;
 use boctulus\SW\core\libs\ApiClient;
@@ -30,6 +31,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /////////////////////////////////////////////////
 
+
+dd(Taxes::VATapplied(), 'IVA?');
+exit;
 
 
 function test_runa(){

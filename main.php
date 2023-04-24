@@ -1,6 +1,7 @@
 <?php
 
 use boctulus\SW\core\libs\Page;
+use boctulus\SW\core\libs\Taxes;
 use boctulus\SW\core\libs\Users;
 use boctulus\SW\core\libs\Logger;
 use boctulus\SW\core\libs\Template;
@@ -10,6 +11,14 @@ use boctulus\SW\core\libs\Template;
 */
 
 //Template::set('kadence');
+
+
+/*
+    Es requisito de RUNA que el IVA este aplicado
+*/
+if (!Taxes::VATapplied()){
+    admin_notice("Por favor habilite impuestos incluidos: WooCommerce > Impuesto > Opciones de impuestos", "error");
+}
 
 
 add_action('wp_loaded', function(){
