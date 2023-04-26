@@ -52,12 +52,13 @@ function assets(){
 
     css_file('/css/styles.css');
     
+    js_file('/js/utilities.js');
     js_file('/js/sweetalert.js');
     js_file('/js/notices.js');
 
-    if (!Users::isLogged()){
+    //if (!Users::isLogged()){
         js_file('/js/not_logged.js');
-    }
+    //}
 }
 
 enqueue('assets');

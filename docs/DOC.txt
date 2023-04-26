@@ -18,10 +18,6 @@ Los assets se encuentran en la carpeta assets:
     |
     +------ css
 
-
-El plugin se encuentra desarrollado bajo un framework propietario de Pablo Bozzolo. Se licencia su uso para este proyecto únicamente.
-
-
 # Requisitos
 
 Resumiendo, el plugin requiere:
@@ -37,3 +33,8 @@ Notas:
 
 1. Instalar Composer y luego spatie/array-to-xml mediante "composer require spatie/array-to-xml" 
 2. Esto se hace desde ajustes de impuestos en WooCommerce.
+
+
+Licencia:
+
+El plugin se encuentra desarrollado bajo un framework propietario de Pablo Bozzolo. Se licencia su uso para este proyecto únicamente.

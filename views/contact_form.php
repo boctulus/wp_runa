@@ -7,8 +7,6 @@ js_file('contact_form.js');
 
 RUT::formateador();
 
-dd($comunas);
-
 ?>
 
 <div class="container">
@@ -71,11 +69,10 @@ dd($comunas);
                 <td>
                     <select name="display_comuna" id="display_comuna" required>
                         <option selected="selected"></option>
-                        <option id="1240000">Antofagasta</option>
-                        <option id="4490000">Antuco</option>
-                        <option id="4360000">Arauco</option>
-                        <option id="8320000">Santiago</option>
-                        <!-- mas opciones -->
+                        
+                        <?php foreach($comunas as $com): ?>
+                            <option id="<?= $com['codigo'] ?>"><?= $com['comuna'] ?></option>
+                        <?php endforeach; ?>
                     </select>
                 </td>
             </tr>
@@ -95,3 +92,4 @@ dd($comunas);
     <div id="loading-text"></div>
     
 </div>
+

@@ -108,6 +108,11 @@ function view(string $view_path, array $vars  = null){
     include get_view_src($view_path);
 }
 
-function encodeProp($value){
-    return base64_encode(is_array($value) ? '--array--' . json_encode($value) : $value);
+/*
+    Antes llamada encodeProp()
+*/
+function var_encode($name, $value){
+    $encoded = base64_encode(is_array($value) ? '--array--' . json_encode($value) : $value);
+
+    return "<input type=\"hidden\" name=\"$name-encoded\" id=\"comunas-encoded\" value=\"$encoded\">";
 }

@@ -10,7 +10,7 @@ class ContactController
         $comunas = Files::getCSV(ETC_PATH . '/comunas.csv', ",", true);
 
         get_header();
-        view('contact_form', ['comunas' => $comunas]);
+        view('contact_form', ['comunas' => $comunas['rows']]);
         get_footer();
     }
 

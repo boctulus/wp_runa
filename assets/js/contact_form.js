@@ -1,5 +1,4 @@
 
-
 /*
     Reemplaza boton de ver carrito en el navbar por boton "ir a cotizacion"
 */
@@ -10,3 +9,5 @@ const new_button  = `<li class="account-item has-icon has-dropdown"><a href="${q
 if (!is_admin_page()){
     jQuery('.header-cart-link').parent().replaceWith(new_button)
 }
+
+

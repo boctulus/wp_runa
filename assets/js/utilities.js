@@ -16,11 +16,34 @@ const isPromise = p => {
     return p && Object.prototype.toString.call(p) === "[object Promise]";
 }
 
+// General
+function setDropdownOptions(select_elem, options, default_option){
+    select_elem.innerHTML = '';
+
+    let opt = new Option(default_option['text'], default_option['value']);
+    opt.setAttribute('selected', true);
+    select_elem.appendChild(opt);
+
+    if (typeof options == 'undefined' || options == null || options.length == 0){
+        select_elem.disabled = true;
+        return;
+    } else {
+        select_elem.disabled = false;
+    }
+
+    for (let i=0; i<options.length; i++){
+        let opt = new Option(options[i]['text'], options[i]['value']);
+        select_elem.appendChild(opt);
+    }
+}
+
 /*
-    Trabaja con encodeProp() de PHP
+    Antes llamada decodeProp
+
+    Trabaja con var_encode() de PHP
 */
-const decodeProp = (prop_id) => {
-    const el = document.getElementById(prop_id);
+const var_decode = (prop_id) => {
+    const el = document.getElementById(prop_id + '-encoded');
 
     if (el == null){
         throw `Propery ${prop_id} not found`
@@ -164,3 +187,4 @@ const clearForm = (formId) => {
     $(`#${formId}`).trigger('reset')
     clearFormValidations()
 }
+
