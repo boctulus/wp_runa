@@ -110,20 +110,10 @@ use boctulus\SW\core\libs\Url;
                     <tr>
                         <td colspan="6" class="actions clear">
 
-                            <input type="email" id="notification_email" class="regular-text" required placeholder="Su correo @ lo-que-sea"/>
-
-                            <!-- validation container -->
-                            <div class="woocommerce-message message-wrapper" role="alert">
-                                <div class="message-container container danger-color medium-text-center"> 
-                                        
-                                </div>
-                                <br>
-                            </div>
-
+                            <br>
                             <div class="continue-shopping pull-left text-left">
-                                <a class="button-quote button primary is-outline" href="/contact">Complete sus datos</a>
+                                <a class="button-quote button primary is-outline" href="#" id="to_contact">Complete sus datos</a>
                             </div>
-
 
                         </td>
                     </tr>
@@ -134,43 +124,15 @@ use boctulus\SW\core\libs\Url;
     </form>
 </div>
 
+
 <script>
-    const base_url = '<?= Url::getBaseUrl() ?>'
-    
-    function setNotification(msg) {
-        $('#response-output').show()
-        $('#response-output').html(msg);
-    }
 
-    /*
-        Agregado para el "loading,.." con Ajax
-    */
+    jQuery('#to_contact').on("click", function(event) {
+       console.log(get_form_data())
+    });
 
-    function loadingAjaxNotification() {
-        <?php $path = asset('images/loading.gif') ?>
-        document.getElementById("loading-text").innerHTML = "<img src=\"<?= $path ?>\" style=\"transform: scale(0.5);\" />";
-    }
-
-    function clearAjaxNotification() {
-        document.getElementById("loading-text").innerHTML = "";
-    }
-
-    /*
-        Debe incluir el correo.....y hacer un Ajax call ...... al cotizador
-
-        ... el cual debe enviar un correo.... y notificar luego si hubo exito o no en la operacion
-    */
     const get_form_data = function()
     {
-        const email = jQuery('#notification_email').val()
-
-        if (email == ''){
-            jQuery('.message-container').text('E-mail es requerido')
-            throw "email esta vacio"
-        }
-
-        jQuery('.message-container').text('')
-
         let cart_items = []
 
         jQuery('td.product-name').each((index, td) => { 
@@ -187,70 +149,10 @@ use boctulus\SW\core\libs\Url;
         });
 
         const obj      = {
-            cart_items,
-            email
+            cart_items
         }
 
-        const data    = JSON.stringify(obj)
-
-        return data
+        return obj
     }
 
-    function do_ajax_call(e) {
-        e.preventDefault();
-
-        let data = get_form_data() //getFormData(e.currentTarget, false)
-
-        console.log(data)
-
-        loadingAjaxNotification()
-
-        const url = base_url + '/cart/quote'; /// apuntar al endpoint
-
-        jQuery.ajax({
-            url: url, 
-            type: "POST",
-            dataType: 'json',
-            cache: false,
-            contentType: 'application/json',
-            data: (typeof data === 'string') ? data : JSON.stringify(data),
-            success: function(res) {
-                clearAjaxNotification();
-
-                console.log('RES', res);
-                
-                //setNotification("Gracias por tu mensaje. Ha sido enviado.");
-
-                swal({
-                    title: "Enviado!",
-                    text: "Recibirá la cotización en su correo",
-                    icon: "success",
-                });
-            },
-            error: function(res) {
-                clearAjaxNotification();
-
-                // if (typeof res['message'] != 'undefined'){
-                //     setNotification(res['message']);
-                // }
-
-                console.log('RES', res);
-                //setNotification("Hubo un error. Inténtelo más tarde.");
-
-                swal({
-                    title: "Error",
-                    text: "Hubo un error. Intente más tarde.",
-                    icon: "warning", // "warning", "error", "success" and "info"
-                });
-            }
-        });
-    }
-
-    // jQuery('#quote-cart-form').on("submit", function(event) {
-    //     do_ajax_call(event);
-    // });
-
-    jQuery('#ajax_call_btn').on("click", function(event) {
-        do_ajax_call(event);
-    });
 </script>
