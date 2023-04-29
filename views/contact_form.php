@@ -96,7 +96,7 @@ RUT::formateador();
                     </div>
 
                     <div class="continue-shopping pull-left text-left">
-                        <a class="button-quote button primary is-outline" href="<?= get_permalink(wc_get_page_id('shop')) ?>" id="ajax_call_btn">Volve a la tienda</a>
+                        <a class="button-quote button primary is-outline" href="<?= get_permalink(wc_get_page_id('shop')) ?>">Volve a la tienda</a>
                     </div>
 
                 </td>

@@ -105,14 +105,37 @@ use boctulus\SW\core\libs\Url;
 
                     <?php endforeach; ?>
 
+
                     <!-- Extras -->
+                    <tr>
+                        <td colspan="6" class="actions clear">
+
+                            <?php if (empty($items)){
+                                echo "No hay productos para cotizar en su cesta";
+                            }
+                            ?>
+
+                        </td>
+                    </tr>
 
                     <tr>
                         <td colspan="6" class="actions clear">
 
                             <br>
-                            <div class="continue-shopping pull-left text-left">
+                            <div class="pull-left text-left">
+                                <?php
+                                    if (empty($items)):
+                                ?>        
+                                    <a class="button-quote button primary is-outline" href="<?= get_permalink(wc_get_page_id('shop')) ?>">Volve a la tienda</a>
+                                <?php
+                                    else:
+                                ?>
+
                                 <a class="button-quote button primary is-outline" href="#" id="to_contact">Complete sus datos</a>
+
+                                <?php
+                                    endif;
+                                ?>
                             </div>
 
                         </td>
