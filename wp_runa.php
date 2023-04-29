@@ -27,7 +27,6 @@ register_activation_hook( __FILE__, function(){
 		Files::mkdir($log_dir);
 	}
 
-	include_once __DIR__ . '/scripts/create_access.php';
 	include_once __DIR__ . '/on_activation.php';
 });
 
