@@ -123,3 +123,9 @@ if (!defined('CSS_PATH'))
 
 if (!defined('JS_PATH'))
     define('JS_PATH', PUBLIC_PATH . 'js' . DIRECTORY_SEPARATOR);       
+
+if (!defined('SCRIPTS_PATH'))
+	define('SCRIPTS_PATH', ROOT_PATH  . 'scripts' . DIRECTORY_SEPARATOR);
+
+if (!defined('CORE_SCRIPTS_PATH'))
+	define('CORE_SCRIPTS_PATH', CORE_PATH  . 'scripts' . DIRECTORY_SEPARATOR);

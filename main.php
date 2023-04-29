@@ -47,14 +47,15 @@ function sw_init_session() {
 require_once __DIR__ . '/shortcodes.php';
 
 function assets(){
-	//css_file('/css/bootstrap/bootstrap.min.css');
-	//js_file('/js/bootstrap/bootstrap.bundle.min.js');
+	//css_file('/third_party/bootstrap/bootstrap.min.css');
+	// js_file('/third_party/bootstrap/bootstrap.bundle.min.js');
+    // js_file('/third_party/sweetalert.js');
 
     css_file('/css/styles.css');
     
     js_file('/js/utilities.js');
-    js_file('/js/sweetalert.js');
     js_file('/js/notices.js');
+    js_file('/js/storage.js');
 
     //if (!Users::isLogged()){
         js_file('/js/not_logged.js');

@@ -1,150 +1,131 @@
-<?php declare(strict_types=1);
+<?php 
 
 namespace boctulus\SW\core\libs;
 
-use boctulus\SW\core\libs\Url;
+use boctulus\SW\core\libs\Files;
 
-class VarDump
+class Logger
 {
-	public static $render       = true;
-	public static $render_trace = false;
+    static $logFile = 'log.txt';
 
-	static function p(){
-		return (php_sapi_name() == 'cli' || Url::isPostmanOrInsomnia()) ? PHP_EOL . PHP_EOL : '<p/>';
-	}
+    static function getLogFilename(bool $full_path = false)
+    {
+        if (static::$logFile == null){
+            static::$logFile = config()['log_file'];
+        }
 
-	static function br(){
-		return (php_sapi_name() == 'cli' || Url::isPostmanOrInsomnia())  ? PHP_EOL : '<br/>';;
-	}
+        return ($full_path ? LOGS_PATH : '') . static::$logFile;
+    }
+    
+    static function truncate(){
+        file_put_contents(LOGS_PATH . static::getLogFilename(), '');
+    }
+    
+    static function getContent(?string $file = null){
+        if ($file == null){
+	        $file = static::getLogFilename();
+        }
 
-	protected static function pre(callable $fn, ...$args){
-		echo '<pre>';
-		$fn($args);
-		echo '</pre>';
-	}
+        $path = LOGS_PATH . $file;
 
-	protected static function export($v = null, $msg = null, bool $additional_carriage_return = false) 
-	{	
-		$type = gettype($v);
+        return file_get_contents($path);
+    }
 
-		$postman = Url::isPostmanOrInsomnia();
-		
-		$cli     = (php_sapi_name() == 'cli');
-		$br      = static::br();
-		$p       = static::p();
 
-		$pre = !$cli;	
+	/*
+		Resultado:
 
-		if ($postman || ($type != 'array' && !Strings::startsWith('array (', $v) )){
-			$pre = false;
+		<?php 
+
+		$arr = array (
+		'x' => 'Z',
+		);
+	*/
+	static function varExport($data, $path = null, $variable = null){
+		if ($path === null){
+			$path = LOGS_PATH . 'exported.php';
+		} else {
+			if (!Strings::contains('/', $path) && !Strings::contains(DIRECTORY_SEPARATOR, $path)){
+				$path = LOGS_PATH . $path;
+			}
 		}
 
-		$fn = function($x) use ($type, $postman, $pre){
-			$pp = function ($fn, $dato) use ($pre){
-				if ($pre){
-					self::pre(function() use ($fn, $dato){ 
-						$fn($dato);
-					});
-				} else {
-					$fn($dato);
-				}
-			};
-
-			switch ($type){
-				case 'boolean':
-				case 'string':
-				case 'double':
-				case 'float':
-					$pp('print_r', $x);
-					break;
-				case 'array':
-					if ($postman){
-						$pp('var_export', $x);
-					} else {
-						$pp('print_r', $x);
-					}
-					break;	
-				case 'integer':
-					$pp('var_export', $x);
-					break;
-				default:
-				$pp('var_dump', $x);
-			}	
-		};
-		
-		if ($type == 'boolean'){
-			$v = $v ? 'true' : 'false';
-		}	
-
-		if (!empty($msg)){
-			$cfg = config();
-			$ini = $cfg['var_dump_separators']['start'] ?? '--| ';
-			$end = $cfg['var_dump_separators']['end']   ?? '';
-
-			echo "{$ini}$msg{$end}". (!$pre ? $br : '');
-		}
+		if ($variable === null){
+			$bytes = file_put_contents($path, '<?php '. "\r\n\r\n" . 'return ' . var_export($data, true). ';');
+		} else {
+			if (!Strings::startsWith('$', $variable)){
+				$variable = '$'. $variable;
+			}
 			
-		$fn($v);			
-	
-		switch ($type){
-			case 'boolean':
-			case 'string':
-			case 'double':
-			case 'float':	
-			case 'integer':
-				$include_break = true;
-				break;
-			case 'array':
-				$include_break = $postman;
-				break;	
-			default:
-				$include_break = false;
-		}	
-
-		if (!$cli && !$postman && $type != 'array'){
-			echo $br;
+			$bytes = file_put_contents($path, '<?php '. "\r\n\r\n" . $variable . ' = ' . var_export($data, true). ';');
 		}
 
-		if ($include_break && ($cli ||$postman)){
-			echo $br;
-		}
-
-		if ($additional_carriage_return){
-			echo $br;
-		}
-	}	
-
-	static public function dd($val = null, $msg = null, bool $additional_carriage_return = false)
-	{
-		if (!static::$render){
-			return;
-		}
-
-		//var_dump(static::$render_trace);
-
-		if (static::$render_trace){
-			$file = debug_backtrace()[1]['file'];
-			$line = debug_backtrace()[1]['line'];
-		
-			static::export("{$file}:{$line}", "LOCATION", true);
-		}
-
-		self::export($val, $msg, $additional_carriage_return);
+		return ($bytes > 0);
 	}
 
-	static function hideResponse(){
-        self::$render = false;
-    }
+	static function JSONExport($data, ?string $path = null){
+		if ($path === null){
+			$path = LOGS_PATH . 'exported.json';
+		} else {
+			if (!Strings::contains('/', $path) && !Strings::contains(DIRECTORY_SEPARATOR, $path)){
+				$path = LOGS_PATH . $path;
+			}
+		}
 
-    static function showResponse(bool $status = true){
-        self::$render = $status;
-    }
+		$bytes = file_put_contents($path, json_encode($data));
+		return ($bytes > 0);
+	}
 
-	static function hideTrace(){
-        self::$render_trace = false;
-    }
+	static function log($data, ?string $path = null, $append = true){	
+		if ($path === null){
+			$path = LOGS_PATH . static::getLogFilename();
+		} else {
+			if (!Strings::contains('/', $path) && !Strings::contains(DIRECTORY_SEPARATOR, $path)){
+				$path = LOGS_PATH . $path;
+			}
+		}
 
-    static function showTrace(bool $status = true){
-        self::$render_trace = $status;
-    }
+		if (is_array($data) || is_object($data))
+			$data = json_encode($data);
+		
+		$data = date("Y-m-d H:i:s"). "\t" .$data;
+
+		return Files::writeOrFail($path, $data. "\n",  $append ? FILE_APPEND : 0);
+	}
+
+	static function dump($object, ?string $path = null, $append = false){
+		if ($path === null){
+			$path = LOGS_PATH . static::getLogFilename();
+		} else {
+			if (!Strings::contains('/', $path) && !Strings::contains(DIRECTORY_SEPARATOR, $path)){
+				$path = LOGS_PATH . $path;
+			}
+		}
+
+		if ($append){
+			Files::writeOrFail($path, var_export($object,  true) . "\n", FILE_APPEND);
+		} else {
+			Files::writeOrFail($path, var_export($object,  true) . "\n");
+		}		
+	}
+
+	static function dd($data, $msg = null, bool $append = true){
+		static::log(!empty($msg) ? [ $msg => $data ] : $data, null, $append);
+	}
+
+	static function logError($error){
+		if ($error instanceof \Exception){
+			$error = $error->getMessage();
+		}
+
+		static::log($error, 'errors.txt');
+	}
+
+	static function logSQL(string $sql_str){
+		$config = config();
+
+		static::log($sql_str, 'sql_log.txt');
+	}
+
 }
+

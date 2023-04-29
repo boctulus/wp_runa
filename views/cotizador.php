@@ -151,7 +151,21 @@ use boctulus\SW\core\libs\Url;
 <script>
 
     jQuery('#to_contact').on("click", function(event) {
-       console.log(get_form_data())
+       $form_data = get_form_data();
+       
+        console.log($form_data)
+
+       /*
+            Almaceno dentro de SessionStorage
+       */
+
+        toStorage({
+            'form': $form_data
+        })
+
+        // y redirecciono a /contact
+
+        window.location.replace('/contact')
     });
 
     const get_form_data = function()

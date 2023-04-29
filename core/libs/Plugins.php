@@ -12,6 +12,14 @@ if ( ! function_exists( 'get_plugins' ) ) {
 
 class Plugins
 {
+    static function currentName(){
+       $path = realpath(__DIR__ . '/../..');
+       $_pth = explode(DIRECTORY_SEPARATOR, $path);
+       $name = $_pth[count($_pth)-1];
+
+       return $name;
+    }
+
     /*
         https://wordpress.stackexchange.com/a/286761/99153
     */
