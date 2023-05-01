@@ -197,7 +197,7 @@ RUT::formateador();
         se recupera y se rellena automaticamente el form
     */
     window.addEventListener("DOMContentLoaded", (event) => {
-        let contact_data = fromStorage()?.form?.contact
+        let contact_data = fromStorage()?.contact
     
         if (contact_data != '' || contact_data != null){
             // re-populate form
@@ -209,7 +209,7 @@ RUT::formateador();
         // obj
         let prev_data  = fromStorage()
 
-        let cart_items = prev_data?.form?.cart_items
+        let cart_items = prev_data?.cart_items
 
         if (cart_items == null || Object.keys(cart_items).length === 0){
             jQuery('.message-container').text('No hay nada que cotizar')
@@ -226,25 +226,20 @@ RUT::formateador();
         }
 
         // obj
-        let new_data = {            
+        let contact = {            
             "contact" : getFormData($("#quoter_contact_form"), false)
         }
-
-        // obj -merge-
-        let data = { ...prev_data.form, ...new_data }
 
         ///////////////////////////////////// 
         // Ahora almaceno de nuevo en Storage
 
-        toStorage({ "form": data })
+        toStorage(contact)
 
         /*
             Si todo sale bien, limpio errores
         */
 
         jQuery('.message-container').text('')
-
-        console.log(data)
 
         //do_ajax_call(event);
     });

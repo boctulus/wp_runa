@@ -151,17 +151,15 @@ use boctulus\SW\core\libs\Url;
 <script>
 
     jQuery('#to_contact').on("click", function(event) {
-       $form_data = get_form_data();
+        form_data = get_form_data();
        
-        console.log($form_data)
+        console.log(form_data)
 
        /*
             Almaceno dentro de SessionStorage
        */
 
-        toStorage({
-            'form': $form_data
-        })
+        toStorage({ "cart_items": form_data })
 
         // y redirecciono a /contact
 
@@ -185,11 +183,7 @@ use boctulus\SW\core\libs\Url;
             })
         });
 
-        const obj      = {
-            cart_items
-        }
-
-        return obj
+        return cart_items
     }
 
 </script>
