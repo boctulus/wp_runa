@@ -142,9 +142,8 @@ RUT::formateador();
 
         ... el cual debe enviar un correo.... y notificar luego si hubo exito o no en la operacion
     */
-    function do_ajax_call(e, data) {
-        e.preventDefault();
-
+    function do_ajax_call(data) 
+    {
         loadingAjaxNotification()
 
         const url = base_url + '/cart/quote'; /// apuntar al endpoint
@@ -205,7 +204,8 @@ RUT::formateador();
         }  
     });
 
-    jQuery('#ajax_call_btn').on("click", function(event) {       
+    jQuery('#ajax_call_btn').on("click", function(event) {  
+
         // obj
         let prev_data  = fromStorage()
 
@@ -233,13 +233,15 @@ RUT::formateador();
         ///////////////////////////////////// 
         // Ahora almaceno de nuevo en Storage
 
-        toStorage(contact)
+        let data = toStorage(contact)
 
         /*
             Si todo sale bien, limpio errores
         */
 
         jQuery('.message-container').text('')
+
+        console.log(data)
 
         //do_ajax_call(event);
     });

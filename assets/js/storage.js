@@ -2,6 +2,9 @@
     @author Pablo Bozzolo
 */
 
+/*
+    Si merge es true, se hace un "shallow merge" de propiedades
+*/
 const toStorage = (data, storage = 'local', merge = true) => {
     switch (storage){
         case 'session':
@@ -19,7 +22,11 @@ const toStorage = (data, storage = 'local', merge = true) => {
             data      = { ...prev_data, ...data }
     }
 
-    st_obj.setItem('wp_sw', JSON.stringify(data))    
+    st_obj.setItem('wp_sw', JSON.stringify(data)) 
+    
+    // dado es util en algunos casos,
+    // recuperar el objeto cuando fue mergeado
+    return data;
 }
 
 const fromStorage = (storage = 'local') => {    
