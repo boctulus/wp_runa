@@ -73,7 +73,11 @@ const var_decode = (prop_id) => {
 
     Ej:
 
-    getFormData(this, false, 'col-')
+        getFormData($("#quoter_contact_form"), false)
+
+    o con prefijo:
+
+        getFormData($("#quoter_contact_form"), false, 'col-')
 */
 const getFormData = (formElem, use_id = true, prefix = null) => {
     const serialized = jQuery(formElem).serializeArray();

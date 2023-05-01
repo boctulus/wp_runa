@@ -17,7 +17,7 @@ const toStorage = (data, storage = 'local') => {
     st_obj.setItem('wp_sw', JSON.stringify(data))    
 }
 
-const fromStorage = (data, storage = 'local') => {
+const fromStorage = (storage = 'local') => {    
     switch (storage){
         case 'session':
             st_obj = sessionStorage

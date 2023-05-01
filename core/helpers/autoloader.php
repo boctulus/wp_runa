@@ -20,7 +20,6 @@ function wp_namespace_autoload( $class ) {
 	$directory = realpath(ROOT_PATH);
 	$path      = $directory . $class;
 
-    // If the file exists in the specified path, then include it.
     if ( file_exists( $path ) ) {
         include_once( $path );
     } else {

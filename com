@@ -15,7 +15,7 @@ if (php_sapi_name() != "cli"){
 define( 'ABSPATH', realpath(__DIR__ . '/../../..') . DIRECTORY_SEPARATOR);
 
 require_once ABSPATH . '/wp-config.php';
-require_once ABSPATH .'/wp-load.php';
+require_once ABSPATH . '/wp-load.php';
 
 
 /* Helpers */
