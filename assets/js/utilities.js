@@ -103,13 +103,13 @@ const getFormData = (formElem, use_id = true, prefix = null) => {
 
     Ej:
 
-    getObjFromElems('col2save')
+        getObjFromElems('col2save')
 
     De especificarse un prefijo, puede eliminarlo de cada nombre de campo
 
     Ej:
 
-    getObjFromElems('col2save', 'col-')
+        getObjFromElems('col2save', 'col-')
 
     Si use_name es true, buscara los elementos por name y no por id
 */
@@ -135,28 +135,21 @@ const getFormDataByClassName = (elem_class, use_id = true, prefix = null) => {
 
     Ej:
 
-    fillForm(obj, 'col-')
+        fillForm(obj, 'col-')
+
+    Funciona tambien usando como datasource un storage
+
+    Ej:
+
+        fillForm(fromStorage().form.contact)
 */
 const fillForm = (data_obj, prefix = null) => {
+    if (typeof data_obj !== 'object'){
+        return;
+    }
+
     for (const [key, value] of Object.entries(data_obj)) {
-        $('#' + (prefix == null ? '' : prefix) + key).val(value)
+        jQuery('#' + (prefix == null ? '' : prefix) + key).val(value)
     }
 }
 
-// const setNotification = (msg, target = '#modal_notifications') => {
-//     if (Array.isArray(msg)){    
-//         let block_elems = [];
-
-//         msg.forEach((el) => {
-//             block_elems.push(`<li>${el}</li>`)
-//         })
-
-//         msg = '<ul style="list-style: none; margin: 0; padding: 0;">' + block_elems.join("\r\n") + '</ul>'
-//     }
-
-//     $('#modal_notifications').html(msg)
-// }
-
-// const clearNotifications = (target = '#modal_notifications') => {
-//     $('#modal_notifications').html('')
-// }

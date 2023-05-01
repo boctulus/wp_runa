@@ -11,7 +11,6 @@ function addNotice(message, type = 'info', id_container = 'alert_container', rep
 
     if (message === ""){
         throw "Mensaje de notificación no puede quedar vacio";
-        return;
     }
 
     let alert_container  = document.getElementById(id_container);
@@ -63,3 +62,20 @@ function clearNotices(id_container = 'alert_container'){
 }
 
 
+// const setNotification = (msg, target = '#modal_notifications') => {
+//     if (Array.isArray(msg)){    
+//         let block_elems = [];
+
+//         msg.forEach((el) => {
+//             block_elems.push(`<li>${el}</li>`)
+//         })
+
+//         msg = '<ul style="list-style: none; margin: 0; padding: 0;">' + block_elems.join("\r\n") + '</ul>'
+//     }
+
+//     $('#modal_notifications').html(msg)
+// }
+
+// const clearNotifications = (target = '#modal_notifications') => {
+//     $('#modal_notifications').html('')
+// }

@@ -192,11 +192,26 @@ RUT::formateador();
     //     do_ajax_call(event);
     // });
 
+    /*
+        Al cargar la pagina, si el form estaba salvado en storage,
+        se recupera y se rellena automaticamente el form
+    */
+    window.addEventListener("DOMContentLoaded", (event) => {
+        let contact_data = fromStorage()?.form?.contact
+    
+        if (contact_data != '' || contact_data != null){
+            // re-populate form
+            fillForm(contact_data)
+        }  
+    });
+
     jQuery('#ajax_call_btn').on("click", function(event) {       
         // obj
-        let prev = fromStorage()
+        let prev_data  = fromStorage()
 
-        if (Object.keys(prev).length === 0 || Object.keys(prev.form).length === 0){
+        let cart_items = prev_data?.form?.cart_items
+
+        if (cart_items == null || Object.keys(cart_items).length === 0){
             jQuery('.message-container').text('No hay nada que cotizar')
             return
         }
@@ -205,7 +220,7 @@ RUT::formateador();
             for each campo => validar => agregar / remover clases css
         */
         
-        if (prev['notification_email'] == ''){
+        if (prev_data['notification_email'] == ''){
             jQuery('.message-container').text('E-mail es requerido')
             return
         }
@@ -216,8 +231,12 @@ RUT::formateador();
         }
 
         // obj -merge-
-        let data = { ...prev.form, ...new_data }
+        let data = { ...prev_data.form, ...new_data }
 
+        ///////////////////////////////////// 
+        // Ahora almaceno de nuevo en Storage
+
+        toStorage({ "form": data })
 
         /*
             Si todo sale bien, limpio errores
