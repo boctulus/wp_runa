@@ -205,14 +205,14 @@ RUT::formateador();
             for each campo => validar => agregar / remover clases css
         */
         
-        if (data['notification_email'] == ''){
+        if (prev['notification_email'] == ''){
             jQuery('.message-container').text('E-mail es requerido')
             return
         }
 
         // obj
         let new_data = {            
-            "contact" : { 'nombre': 'Juan', 'edad': 99 }
+            "contact" : getFormData($("#quoter_contact_form"), false)
         }
 
         // obj -merge-
