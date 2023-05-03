@@ -114,15 +114,15 @@ class Validator /* implements IValidator */
 			Alias
 		*/
 
-		static::$rule_types['int']           = static::$rule_types['integer'];
-		static::$rule_types['num']           = static::$rule_types['number'];
-		static::$rule_types['numeric']       = static::$rule_types['number'];
-		static::$rule_types['not-number']    = !static::$rule_types['number'];
-		static::$rule_types['not-num']       = !static::$rule_types['number'];
-		static::$rule_types['not-numeric']   = !static::$rule_types['number'];
-		static::$rule_types['bool']          = static::$rule_types['boolean'];
-		static::$rule_types['str']           = static::$rule_types['string'];
-		static::$rule_types['timestamp']     = static::$rule_types['datetime'];
+		static::$rules['int']           = static::$rules['integer'];
+		static::$rules['num']           = static::$rules['number'];
+		static::$rules['numeric']       = static::$rules['number'];
+		static::$rules['not-number']    = !static::$rules['number'];
+		static::$rules['not-num']       = !static::$rules['number'];
+		static::$rules['not-numeric']   = !static::$rules['number'];
+		static::$rules['bool']          = static::$rules['boolean'];
+		static::$rules['str']           = static::$rules['string'];
+		static::$rules['timestamp']     = static::$rules['datetime'];
 		
 		static::$rule_types = array_keys(static::$rules);
 	}

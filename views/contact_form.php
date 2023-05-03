@@ -19,9 +19,9 @@ RUT::formateador();
             <tbody>
 
                 <!-- Name -->
-                <tr class="billing_company-wrap">
-                    <th><label for="billing_company">Nombre <span class="description">(obligatorio)</span></label></th>
-                    <td><input type="text" name="billing_company" id="billing_company" class="regular-text" pattern="[a-zA-Z0-9 ñÑáéíóú]+" required > 
+                <tr class="nom-wrap">
+                    <th><label for="nom">Nombre <span class="description">(obligatorio)</span></label></th>
+                    <td><input type="text" name="nom" id="nom" class="regular-text" pattern="[a-zA-Z0-9 ñÑáéíóú]+" required > 
                     <!-- <span class="description">Nombre completo o razón social</span> -->
                 </td>
                 </tr>
@@ -34,15 +34,15 @@ RUT::formateador();
                     </td>                
                 </tr>
 
-                <tr class="giro-wrap">
-                    <!-- <th><label for="giro">Giro</label></th>
-                    <td><input type="text" name="giro" id="giro" class="regular-text"></td> -->
+                <tr class="gir-wrap">
+                    <!-- <th><label for="gir">gir</label></th>
+                    <td><input type="text" name="gir" id="gir" class="regular-text"></td> -->
 
                     <th>
-                        <label for="display_name">Giro<span class="description">(obligatorio)</span></label>
+                        <label for="gir">Giro<span class="description">(obligatorio)</span></label>
                     </th>
                     <td>
-                        <select name="display_giro" id="display_giro" required>
+                        <select name="gir" id="gir" required>
                             <option selected="selected"></option>
                             <option id="sin giro">Sin giro</option>
                             <option id="con giro">Con giro</option>
@@ -50,27 +50,27 @@ RUT::formateador();
                     </td>
                 </tr>
 
-                <tr class="phone-wrap">
-                    <th><label for="phone">Teléfono <span class="description">(obligatorio)</span></label></th>
-                    <td><input type="tel" name="phone" id="phone" class="regular-text" required></td>
+                <tr class="fon-wrap">
+                    <th><label for="fon">Teléfono <span class="description">(obligatorio)</span></label></th>
+                    <td><input type="tel" name="fon" id="fon" class="regular-text" required></td>
                 </tr>
 
                 <tr class="email-wrap">
-                    <th><label for="notification_email">E-mail <span class="description">(obligatorio)</span></label></th>
-                    <td><input type="email" name="notification_email" id="notification_email" class="regular-text" placeholder="Su correo @ lo-que-sea" required ></td>
+                    <th><label for="ema">E-mail <span class="description">(obligatorio)</span></label></th>
+                    <td><input type="email" name="ema" id="ema" class="regular-text" placeholder="Su correo @ lo-que-sea" required ></td>
                 </tr>
 
-                <tr class="address-wrap">
-                    <th><label for="address">Dirección <span class="description">(obligatorio)</span></label></th>
-                    <td><input type="text" name="address" id="address" class="regular-text" required></td>
+                <tr class="dir-wrap">
+                    <th><label for="dir">Dirección <span class="description">(obligatorio)</span></label></th>
+                    <td><input type="text" name="dir" id="dir" class="regular-text" required></td>
                 </tr>
 
-                <tr class="user-display-name-wrap">
+                <tr class="user-display-com-wrap">
                     <th>
-                        <label for="display_name">Comuna <span class="description">(obligatorio)</span></label>
+                        <label for="com">Comuna <span class="description">(obligatorio)</span></label>
                     </th>
                     <td>
-                        <select name="display_comuna" id="display_comuna" required>
+                        <select name="com" id="com" required>
                             <option selected="selected"></option>
                             
                             <?php foreach($comunas as $com): ?>
@@ -148,6 +148,8 @@ RUT::formateador();
 
         const url = base_url + '/cart/quote'; /// apuntar al endpoint
 
+        //console.log(data);
+
         jQuery.ajax({
             url: url, 
             type: "POST",
@@ -175,7 +177,7 @@ RUT::formateador();
                 //     setNotification(res['message']);
                 // }
 
-                console.log('RES', res);
+                console.log('RES ERROR', res);
                 //setNotification("Hubo un error. Inténtelo más tarde.");
 
                 swal({
@@ -220,7 +222,7 @@ RUT::formateador();
             for each campo => validar => agregar / remover clases css
         */
         
-        if (prev_data['notification_email'] == ''){
+        if (prev_data['ema'] == ''){
             jQuery('.message-container').text('E-mail es requerido')
             return
         }
@@ -241,8 +243,8 @@ RUT::formateador();
 
         jQuery('.message-container').text('')
 
-        console.log(data)
+        //console.log(data)
 
-        //do_ajax_call(event);
+        do_ajax_call(data);
     });
 </script>

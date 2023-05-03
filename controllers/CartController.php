@@ -6,6 +6,7 @@ use boctulus\SW\core\libs\Url;
 use boctulus\SW\core\libs\XML;
 use boctulus\SW\core\libs\Cart;
 use boctulus\SW\core\libs\Logger;
+use boctulus\SW\core\libs\Products;
 use boctulus\SW\core\libs\ApiClient;
 use boctulus\SW\core\libs\Validator;
 
@@ -114,6 +115,9 @@ class CartController
     */
     function save_form()
     {
+        $quote_num = 100; // hardcoded
+
+
         $req  = request();
         $data = $req->as_array()->getBody();
 
@@ -122,8 +126,8 @@ class CartController
         }
     
         $rules = [
-            'email' 			=> ['type'=>'email','required'=>true], 
             'cart_items' 	    => ['type'=>'array','required'=>true, 'min_len'=>1],
+            'contact' 			=> ['type'=>'array','required'=>true], 
         ];
     
         $v = new Validator;
@@ -132,6 +136,65 @@ class CartController
            return error("Validation error", 400, $v->getErrors());
         } 
 
+        // Client
+
+        $cli = $data['contact'];
+
+        $contact_rules = [
+            'nom'  => ['type'=> 'str', 'required'=>true],
+            'dir'  => ['type'=> 'str', 'required'=>true],
+            'com'  => ['type'=> 'str', 'required'=>true],
+            'gir'  => ['type'=> 'str', 'required'=>true],
+            'ema'  => ['type'=> 'email', 'required'=>true],
+            'fon'  => ['type'=> 'str', 'required'=>true],
+            'rut'  => ['required'=>true],
+        ];
+
+        if (!$v->validate($cli, $contact_rules)){
+            return error("Validation error", 400, $v->getErrors());
+        } 
+
+        // Cart items
+
+        $items = $data['cart_items'];
+
+        // $item_rules = [
+        //     'id'   => ['type'=> 'integer', 'required'=>true],
+        //     'qty'  => ['required'=>true],
+        // ];
+
+        // dd($items);
+
+        // if (!$v->validate($items, $item_rules)){
+        //     return error("Validation error", 400, $v->getErrors());
+        // } 
+
+        foreach ($items as $ix => $item){
+            $p = Products::getProduct($item['id']);
+
+            // https://stackoverflow.com/a/54375782/980631
+            $regular_price = (float) $p->get_regular_price(); // Regular price
+            $sale_price    = (float) $p->get_price(); // Active price (the "Sale price" when on-sale)
+            
+            $item = [
+                'cod' => $p->get_sku(),
+                'can' => $item['qty'],
+                'pre' => $regular_price,
+                'des' => $regular_price - $sale_price,      
+                'tot' => $sale_price
+            ];
+
+            $items[$ix] = $item;
+        }
+
+        $arr = [
+            'num' => $quote_num,
+
+            'cli' => $cli,
+            
+            'art' => $items
+        ];
+
         $cfg = config();
 
         $url      = $cfg['api_base_url'] . $cfg['endpoints']['pedidos'];
@@ -139,9 +202,9 @@ class CartController
     
         try {
 
-            $data = XML::fromArray($data, 'ped', false);
+            $data = XML::fromArray($arr, 'ped', false);
 
-            $params = [
+            $params = [ 
                 'pass' => $password, 
                 'data' => $data
             ];

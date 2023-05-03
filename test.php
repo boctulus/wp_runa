@@ -33,6 +33,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 /////////////////////////////////////////////////
 
 
+$pid = 9229;
+
+$p = Products::getProduct($pid);
+
+dd($p);
+
+// https://stackoverflow.com/a/54375782/980631
+$regular_price = (float) $p->get_regular_price(); // Regular price
+$sale_price    = (float) $p->get_price(); // Active price (the "Sale price" when on-sale)
+
+dd($regular_price, 'REG PRICE');
+dd($sale_price,    'SALE PRICE');
+
+
+exit;
+
+
+
 function test_runa(){
 	$cfg = config();
 
@@ -104,6 +122,6 @@ function test_runa(){
 }      
 
 
-test_runa();
+//test_runa();
 
 
