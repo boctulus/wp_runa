@@ -33,19 +33,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 /////////////////////////////////////////////////
 
 
-$pid = 9229;
+$xml_encoded = '%3Cped%3E%3Cnum%3E101%3C%2Fnum%3E%3Ccli%3E%3Cnom%3EPablo+Bozzolo%3C%2Fnom%3E%3Crut%3E4.534.543-6%3C%2Frut%3E%3Cgir%3ECon+giro%3C%2Fgir%3E%3Cfon%3E644149161%3C%2Ffon%3E%3Cema%3Eboctulus%40gmail.com%3C%2Fema%3E%3Cdir%3EDiego+de+Torres+5%3C%2Fdir%3E%3Ccom%3ECalama%3C%2Fcom%3E%3C%2Fcli%3E%3Cart%3E%3Ccod%3EYR0-446%3C%2Fcod%3E%3Ccan%3E7%3C%2Fcan%3E%3Cpre%3E54851%3C%2Fpre%3E%3Cdes%3E0%3C%2Fdes%3E%3Ctot%3E54851%3C%2Ftot%3E%3C%2Fart%3E%3Cart%3E%3Ccod%3EYR0-465%3C%2Fcod%3E%3Ccan%3E4%3C%2Fcan%3E%3Cpre%3E51900%3C%2Fpre%3E%3Cdes%3E0%3C%2Fdes%3E%3Ctot%3E51900%3C%2Ftot%3E%3C%2Fart%3E%3C%2Fped%3E';
 
-$p = Products::getProduct($pid);
-
-dd($p);
-
-// https://stackoverflow.com/a/54375782/980631
-$regular_price = (float) $p->get_regular_price(); // Regular price
-$sale_price    = (float) $p->get_price(); // Active price (the "Sale price" when on-sale)
-
-dd($regular_price, 'REG PRICE');
-dd($sale_price,    'SALE PRICE');
-
+dd(
+	urldecode($xml_encoded)
+);
 
 exit;
 

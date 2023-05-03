@@ -6,6 +6,7 @@ use boctulus\SW\core\libs\Url;
 use boctulus\SW\core\libs\XML;
 use boctulus\SW\core\libs\Cart;
 use boctulus\SW\core\libs\Logger;
+use boctulus\SW\core\libs\Orders;
 use boctulus\SW\core\libs\Products;
 use boctulus\SW\core\libs\ApiClient;
 use boctulus\SW\core\libs\Validator;
@@ -115,9 +116,6 @@ class CartController
     */
     function save_form()
     {
-        $quote_num = 100; // hardcoded
-
-
         $req  = request();
         $data = $req->as_array()->getBody();
 
@@ -169,6 +167,7 @@ class CartController
         //     return error("Validation error", 400, $v->getErrors());
         // } 
 
+        $products = [];
         foreach ($items as $ix => $item){
             $p = Products::getProduct($item['id']);
 
@@ -176,6 +175,11 @@ class CartController
             $regular_price = (float) $p->get_regular_price(); // Regular price
             $sale_price    = (float) $p->get_price(); // Active price (the "Sale price" when on-sale)
             
+            $products[] = [
+                'pid' => $item['id'],
+                'qty' => $item['qty']
+            ];
+
             $item = [
                 'cod' => $p->get_sku(),
                 'can' => $item['qty'],
@@ -187,13 +191,57 @@ class CartController
             $items[$ix] = $item;
         }
 
+        /*
+            Create order => get Order ID
+        */
+
+        $billing_address = array(
+            'first_name' => '',
+            'last_name'  => '',
+            'company'    => $cli['nom'],
+            'email'      => $cli['ema'],
+            'phone'      => $cli['fon'],
+            'address_1'  => '',
+            'address_2'  => '',
+            'city'       => '',
+            'state'      => '',
+            'postcode'   => '',
+            'country'    => 'Chile'
+        );
+
+        $shipping_address = array(
+            'first_name' => '',
+            'last_name'  => '',
+            'company'    => $cli['nom'],
+            'email'      => $cli['ema'],
+            'phone'      => $cli['fon'],
+            'address_1'  => $cli['dir'],
+            'address_2'  => '',
+            'city'       => $cli['com'],
+            'state'      => '',
+            'postcode'   => '',
+            'country'    => 'Chile'
+        );
+        
+
+        $quoted_order = Orders::create($products, $billing_address, $shipping_address);
+        $order_id      = trim(str_replace('#', '', $quoted_order->get_order_number()));
+
+
+        /*
+            Request preparation
+        */
+
+
         $arr = [
-            'num' => $quote_num,
+            'num' => $order_id,
 
             'cli' => $cli,
             
             'art' => $items
         ];
+
+        Logger::dd($arr, 'req'); //
 
         $cfg = config();
 

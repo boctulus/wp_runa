@@ -61,7 +61,7 @@ class Orders
         
         https://stackoverflow.com/a/31987151/980631
     */
-    static function createOrder(Array $products, Array $billing_address = null, Array $shipping_address = null, $attributes = [])
+    static function create(Array $products, Array $billing_address = null, Array $shipping_address = null, $attributes = [])
     {   
         // Now we create the order
         $order = wc_create_order();
@@ -120,7 +120,7 @@ class Orders
 
             $user_id = $user_ids[array_rand($user_ids,1)];
 
-            $order = Orders::createOrder($products, null, null, [
+            $order = Orders::create($products, null, null, [
                 '_customer_user' => $user_id,
             ]);
         
@@ -148,7 +148,7 @@ class Orders
 
             $user_id = $user_ids[array_rand($user_ids,1)];
         
-            $order = Orders::createOrder($products, null, null, [
+            $order = Orders::create($products, null, null, [
                 '_customer_user' => $user_id,
             ]);
         
