@@ -177,9 +177,13 @@ class Orders
         $order->set_customer_id($user_id);
     }
 
-    static function getOrderById($order_id){
+    static function getOrderId(\WC_Order $order){
+        return trim(str_replace('#', '', $order->get_order_number()));
+    }
+
+    static function getOrderById($order_id) : \WC_Order {
         // Get an instance of the WC_Order object (same as before)
-        return wc_get_order($order_id);
+         return wc_get_order($order_id);
     }
 
     static function orderExists($order_id) : bool {
@@ -348,7 +352,6 @@ class Orders
 
         // Get the WP_User Object instance object
         $user = $order->get_user();
-
 
         /*
             Billing
