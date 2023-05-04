@@ -1,6 +1,9 @@
 <?php
 
+use boctulus\SW\core\libs\Url;
+use boctulus\SW\core\libs\Cart;
 use boctulus\SW\core\libs\Page;
+use boctulus\SW\core\libs\Files;
 use boctulus\SW\core\libs\Taxes;
 use boctulus\SW\core\libs\Users;
 use boctulus\SW\core\libs\Logger;
@@ -28,10 +31,19 @@ if (!Plugins::isActive('woocommerce')){
     admin_notice("WooCommerce es requerido. Por favor instale y/o habilite el plugin", "error");
 }
 
+/*
+    Deshabilitar carrito y checkout de forma condicional
+*/
 add_action('wp_loaded', function(){
     if (defined('WC_ABSPATH') && !is_admin())
 	{
-        //Cart::addRandomly(2);
+        if (config()['disable_cart']){
+            Cart::disableCart();
+        }
+
+        if (config()['disable_checkout']){
+            Cart::disableCheckout();
+        }
     }    
 });
 

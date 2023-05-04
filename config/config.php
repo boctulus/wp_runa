@@ -15,6 +15,14 @@ return [
         'stock_xml_gen'  => '/~runa/js/zoh/stock.php',
         'stock_xml_get'  => '/~runa/js/zoh/stock.xml'
     ],
+
+    /*
+        Permite deshabilitar /cart o /carrito
+        y lo mismo para el checkout
+    */
+
+    'disable_cart'     => true,
+    'disable_checkout' => true,
     
 
     // No editar desde aqui -->

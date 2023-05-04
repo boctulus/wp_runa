@@ -13,24 +13,6 @@ class Cart
 			dd("Cart no puede funcionar sin session de usuario y por ende con modo 'cli'");	
 			exit;
 		}
-
-		// $WC_ABSPATH =  ABSPATH . "\wp-content\plugins\woocommerce";
-
-		// include_once $WC_ABSPATH . 'includes/wc-cart-functions.php';
-		// include_once $WC_ABSPATH . 'includes/class-wc-cart.php';
-    	// include_once $WC_ABSPATH . 'includes/wc-notice-functions.php';
-        // include_once $WC_ABSPATH . 'includes/wc-template-hooks.php';
-
-		// if ( null === WC()->session ) {
-		// 	$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
-		
-		// 	WC()->session = new $session_class();
-		// 	WC()->session->init();
-		// }
-		
-		// if ( null === WC()->customer ) {
-		// 	WC()->customer = new \WC_Customer( get_current_user_id(), true );
-		// }
 		
 		if ( null === WC()->cart ) {
 			WC()->cart = new \WC_Cart();
@@ -188,7 +170,23 @@ class Cart
 		foreach ($product_ids as $pid){
 			static::add($pid, rand(1,10));
 		}
+	}
 
+	/*
+		Deshabilita /cart
+
+		Podria cargar vistas de header y footer y mostrar mensaje diciendo que esta des-habilitado
+	*/
+	static function disableCart(){		
+		if (rtrim(Url::currentUrl(), '/') == rtrim(wc_get_cart_url(), '/')){
+			exit;
+		}
+	}
+
+	static function disableCheckout(){
+		if (rtrim(Url::currentUrl(), '/') == rtrim(wc_get_checkout_url(), '/')){
+			exit;
+		}
 	}
 
 }
