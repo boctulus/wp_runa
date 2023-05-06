@@ -13,7 +13,8 @@ return [
     'endpoints'    => [
         'pedidos'        => '/~runa/js/zoh/pedidos.php',
         'stock_xml_gen'  => '/~runa/js/zoh/stock.php',
-        'stock_xml_get'  => '/~runa/js/zoh/stock.xml'
+        'stock_xml_get'  => '/~runa/js/zoh/stock.xml',
+        'sync_productos' => '....???'
     ],
 
     /*
