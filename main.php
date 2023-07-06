@@ -14,14 +14,16 @@ use boctulus\SW\core\libs\Template;
     By boctulus
 */
 
-//Template::set('kadence');
+// Template::set('kadence');
 
+$quoter_slug = '/cotizador';
+$quoter_stp2 = '/contact';   
 
 /*
     Es requisito de RUNA que el IVA este aplicado
 */
 if (!Taxes::VATapplied()){
-    admin_notice("Por favor habilite impuestos incluidos: WooCommerce > Impuesto > Opciones de impuestos", "error");
+    //admin_notice("Por favor habilite impuestos incluidos: WooCommerce > Impuesto > Opciones de impuestos", "error");
 }
 
 /*
@@ -35,14 +37,16 @@ if (!Plugins::isActive('woocommerce')){
     Deshabilitar carrito y checkout de forma condicional
 */
 add_action('wp_loaded', function(){
+    global $quoter_slug, $quoter_stp2;
+
     if (defined('WC_ABSPATH') && !is_admin())
 	{
         if (config()['disable_cart']){
-            Cart::disableCart();
+            Cart::cartRedirect($quoter_slug);
         }
 
         if (config()['disable_checkout']){
-            Cart::disableCheckout();
+            Cart::checkoutRedirect($quoter_stp2);
         }
     }    
 });
@@ -141,16 +145,6 @@ if (!in_array('SimpleXML', get_loaded_extensions())){
 
     remove_action( 'woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20 );
     add_action( 'woocommerce_proceed_to_checkout', 'custom_button_proceed_to_checkout', 20 );
-
-    function new_checkout_url( $url ) {
-        if (!Users::isLogged()){
-            $url = "/bla/bla/mi_nuevo_checkout";  // quizas no quiera cambiar la url
-        }
-        
-        return $url;
-    }
-    add_filter( 'woocommerce_get_checkout_url', 'new_checkout_url', 30 );
-
 
     /*
         Hide prices del cart

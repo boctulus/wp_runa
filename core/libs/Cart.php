@@ -189,4 +189,31 @@ class Cart
 		}
 	}
 
+	/*
+		Redirecciona desde /cart a otro slug
+
+		Precond: no se debe haber aplicado el filtro para cambiar el slug
+		ya que cambiaria la url y ya no habria coincidencia
+	*/
+	static function cartRedirect(string $slug){        
+		if (rtrim(Url::currentUrl(), '/') == rtrim(wc_get_cart_url(), '/')){
+			wp_redirect(home_url($slug));
+			exit;
+		}
+	}
+
+	/*
+		Redirecciona desde /checkout a otro slug
+
+		Precond: no se debe haber aplicado el filtro 'woocommerce_get_checkout_url'
+		ya que cambiaria la url del checkout y ya no habria coincidencia
+	*/
+	static function checkoutRedirect($slug){
+		if (rtrim(Url::currentUrl(), '/') == rtrim(wc_get_checkout_url(), '/')){
+			wp_redirect(home_url($slug));
+			exit;
+		}
+	}
+	
+
 }

@@ -13,29 +13,89 @@ class Users
         return !empty(get_current_user_id());
     }
 
-    /*
-        Admitir el username en el request seria para un caso extremo
-        por cuestiones de seguridad
-    */
-    static function getCurrentUserId(bool $read_username_from_req = false){
-        $uid = get_current_user_id();
-
-        if ($uid === 0 && $read_username_from_req){
-            $username = Request::getInstance()
-            ->getBodyParam('uname');
-
-            $uid = static::getUserIdByUsername($username);
+    // Login
+    static function login(string $username, string $password, bool $remember = true){
+        $user_data = array(
+            'user_login'    => $username,
+            'user_password' => $password,
+            'remember'      => $remember, // Opcional, si se quiere recordar al usuario
+        );
+        
+        $user = wp_signon($user_data, false);
+        
+        if (is_wp_error($user)) {
+            $error_message = $user->get_error_message();
+            Logger::logError($error_message);
         }
 
-        return $uid;
+        return !is_wp_error($user);
+    }
+
+    // login por username sin password
+    static function login_nopassword(string $username, bool $redirect = true){
+        $user = get_user_by('login', $username );
+        
+        // Redirect URL //
+        if ( !is_wp_error( $user ) )
+        {
+            wp_clear_auth_cookie();
+            wp_set_current_user ( $user->ID );
+            wp_set_auth_cookie  ( $user->ID );
+        
+            if ($redirect){
+                $redirect_to = user_admin_url();
+                wp_safe_redirect( $redirect_to );
+                exit();
+            }
+        } else {
+            $error_message = $user->get_error_message();
+            Logger::logError($error_message);
+        }
+
+        return !is_wp_error($user);
+    }
+
+    static function restrictAccess($capability = 'administrator', $redirect_to = '/access-denied'){
+        if (is_cli()){
+            return; // ok
+        }
+
+        if (!is_user_logged_in() || !current_user_can($capability)) {
+            // El usuario no es administrador / lo-que-sea o no ha iniciado sesión
+            // Redirigir a una página de acceso denegado (a crear) o mostrar un mensaje de error
+            wp_redirect(home_url($redirect_to));
+            exit();
+        }
+    }
+    
+    static function getCurrentUserId(){
+        if (!is_user_logged_in()){
+            return null;
+        }
+
+        $user_id = get_current_user_id();
+
+        if ($user_id == 0){
+            return null;
+        }
+
+        return $user_id;
+    }
+
+    static function getUserById($id){
+        if (!is_numeric($id)){
+            throw new \InvalidArgumentException("UID no tiene el formato esperado");
+        }
+
+        return get_user_by('id', $id);
     }
 
     static function getUserByEmail($email){
-        return get_user_by( 'email', $email);
+        return get_user_by('email', $email);
     }
 
     static function getUserIdByEmail($email){
-        $u = get_user_by( 'email', $email);
+        $u = get_user_by('email', $email);
 
         if (!empty($u)){
             return $u->ID;
@@ -43,17 +103,148 @@ class Users
     }
 
     static function getUserIdByUsername($username){
-        $u = get_user_by( 'login', $username);
+        $u = get_user_by('login', $username);
 
         if (!empty($u)){
             return $u->ID;
         }
     }
 
+    static function getAdminEmail(){
+        return get_option('admin_email');
+    } 
+
+    // set user meta
+    static function setMeta($user_id, $meta_key, $value){
+        return update_user_meta($user_id, $meta_key, $value);
+    }
+
+    /*
+        Ej:
+
+        Users::getMeta('api_key', 7)
+    */
+    static function getMeta($meta_key, $user_id = null){
+        return get_the_author_meta($meta_key, $user_id ?? Users::getCurrentUserId());
+    }
+
+    // for All Users
+    static function getMetaAll($meta_key = null, $user_id = null){
+        $select = ($meta_key === null ? ['user_id', 'meta_key', 'meta_value'] :  ['user_id', 'meta_value']);
+        
+        $metas = table('usermeta') // Expected type 'object'. Found 'string'
+        ->select($select)
+        ->when($meta_key != null, function($q) use ($meta_key){
+            $q->where([
+                'meta_key' => $meta_key
+            ]);
+        })
+        ->when($user_id != null, function($q) use ($user_id){
+            $q->where([
+                'user_id' => $user_id
+            ]);
+        })
+        ->get();
+
+        return $metas;
+    }
+
+    /*
+        Ej:
+
+        Users::getAPIKey(7)
+    */
+    static function getAPIKey($user_id = null){
+        return static::getMeta('api_key', $user_id);
+    }
+
+    /*
+        for All Users
+
+        Ej de salida:
+
+        Array
+        (
+            [0] => Array
+                (
+                    [user_id] => 8
+                    [meta_value] => v8gVyfbF334077
+                )
+
+            [1] => Array
+                (
+                    [user_id] => 7
+                    [meta_value] => 3JYiRsVv
+                )
+
+        )
+
+    */
+    static function getAPIKeyAll(){
+        return static::getMetaAll('api_key');
+    }
+
+    static function getUserIdByMetaKey($meta_value, $meta_key = null){
+        /*
+            SELECT `user_id` FROM `woo3`.`wp_usermeta`
+            WHERE meta_key = 'user_api_key' AND meta_value = 'woo3-010011010101';
+        */
+
+        $user_id = table('usermeta')
+        ->select(['user_id'])
+        ->where([
+            'meta_value' => $meta_value
+        ])
+        ->when($meta_key != null, function($q) use ($meta_key){
+            $q->where([
+                'meta_key' => $meta_key
+            ]);
+        })
+        ->value('user_id');
+
+        return $user_id;
+    }
+    
+    static function getUserIdByAPIKey($api_key){
+        return Users::getUserIdByMetaKey($api_key, 'api_key');
+    }
+
     static function userExistsByEmail($email){
         return !empty( get_user_by( 'email', $email) );
     }
+
+     /*
+        Acepta un rol o array de roles o null para todos
+    */
+    static function getCapabilities($rol = null){
+        global $wp_roles;
+
+        if ($rol == null){
+            $rol = static::getRoleSlugs();
+        } 
+
+        if (is_array($rol)){
+            $capabilities = [];
+
+            // roles
+            foreach ($rol as $r){
+                if (!static::roleExists($r)){
+                    throw new \InvalidArgumentException("Rol '$r' no existe");
+                }
+
+                $capabilities[$r] = array_keys($wp_roles->roles[$r]['capabilities'] ); // Warning: Undefined array key "Administrator"
+            }
+        } else {
+            if (!static::roleExists($rol)){
+                throw new \InvalidArgumentException("Rol '$rol' no existe");
+            }
+
+            $capabilities = array_keys($wp_roles->roles[$rol]['capabilities'] );
+        }
     
+        return $capabilities;
+    }
+
     /*
         https://wordpress.stackexchange.com/a/111788/99153
     */
@@ -145,6 +336,9 @@ class Users
         return $user->remove_role( $role );
     }
 
+    /*
+        Lista todos los roles posibles
+    */
     static function getRoleNames() {
         global $wp_roles;
         
@@ -152,6 +346,25 @@ class Users
             $wp_roles = new \WP_Roles();
         
         return $wp_roles->get_names();
+    }
+
+     /*
+        Retorna algo como:
+
+       Array
+        (
+            [0] => administrator
+            [1] => editor
+            [2] => author
+            [3] => contributor
+            [4] => subscriber
+            [5] => customer
+            [6] => shop_manager
+        )
+
+    */
+    static function getRoleSlugs() {
+        return array_keys(static::getRoleNames());
     }
 
     static function getUsersByRole(Array $roles) {
@@ -166,6 +379,21 @@ class Users
         return $query->get_results();
     }
 
+    /*
+        https://usersinsights.com/wordpress-get-current-user-role/
+    */
+
+    static function getCurrentUserRoles() {
+        if( is_user_logged_in() ) {
+            $user  = wp_get_current_user();
+            $roles = (array) $user->roles;
+        
+            return $roles; 
+        } else {   
+            return [];
+        }   
+    }
+
     static function getUserIDList() {
         $query = new \WP_User_Query(
            array(
@@ -177,6 +405,10 @@ class Users
         return $query->get_results();
     }
     
+    /*
+        Para WooCommerce
+    */
+
     static function getCustomerList() {
         $query = new \WP_User_Query(
            array(
@@ -187,5 +419,27 @@ class Users
         );
 
         return $query->get_results();
+    }
+
+    /*
+        Si el $user_id es null, se toma del usuario actual
+    */
+    static function isPayingCustomer($user_id = null){
+        return (bool) Users::getMeta('paying_customer', $user_id);
+    }
+
+    static function makePayingCustomer($customer_id = null){
+        Users::setMeta( $customer_id, 'paying_customer', 1 );
+    }
+
+    static function removeAsPayingCustomer($customer_id = null){
+        Users::setMeta( $customer_id, 'paying_customer', 0 );
+    }
+
+    static function getLang(){
+        $user        = wp_get_current_user();
+        $user_locale = get_user_meta($user->ID, 'locale', true);
+
+        return $user_locale;
     }
 }
