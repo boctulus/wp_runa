@@ -32,50 +32,73 @@ class Cart
 		return count(static::getItems());
 	}
 
-	static function getItems(){
-    	$items = static::getCart()->get_cart();
-
-		$arr = [];
-		foreach($items as $item) { 
-			$prod = wc_get_product( $item['product_id'] );
-
-			$p = [];
-
-			$p['id']            = $item['data']->get_id();
-			$p['img']           = $prod->get_image(); // accepts 2 arguments ( size, attr )
-			$p['img_url']       = Strings::match($p['img'], '/< *img[^>]*src *= *["\']?([^"\']*)/i');
-			$p['title']         = $prod->get_title();
-			$p['url']           = get_post_permalink($item['id']);
-			$p['link']          = '<a href="'. get_post_permalink($p['id']). '">'. $p['title'] .'</a>';
-			$p['qty']           = $item['quantity'];
-
-			$p['line_subtotal']      = $item['line_subtotal']; 
-			$p['line_subtotal_tax']  = $item['line_subtotal_tax'];
-
-			// gets the cart item total
-			$p['line_total']         = $item['line_total'];
-			$p['line_tax']           = $item['line_tax'];
-
-			// unit price of the product
-			$p['item_price']         = $p['line_subtotal'] / $p['qty'];
-			$p['item_tax']           = $p['line_subtotal_tax'] / $p['qty'];
-
-			/*
-				Product object data
-
-				Nota: los precios en el carrito pueden no corresponderse a los precios actuales
-			*/
-			
-			$p['price']         = get_post_meta($item['product_id'] , '_price', true);
-			$p['regular_price'] = get_post_meta($item['product_id'] , '_regular_price', true);
-			$p['sale_price']    = get_post_meta($item['product_id'] , '_sale_price', true);
-			$p['sku']			= get_post_meta($item['product_id'] , '_sku', true);
-			
-			$arr[] = $p;
-		}
-
-		return $arr;    
+	static function empty() {
+		$cart = static::getCart();
+		$cart->empty_cart();
 	}
+
+	static function getItems(){
+        $items = static::getCart()->get_cart();
+
+        $arr = [];
+        foreach($items as $item) { 
+            $prod = wc_get_product( $item['product_id'] );
+
+            $p = [];
+
+            $p['id']            = $item['data']->get_id();
+            $p['img']           = $prod->get_image(); // accepts 2 arguments ( size, attr )
+            $p['img_url']       = Strings::match($p['img'], '/< *img[^>]*src *= *["\']?([^"\']*)/i');
+            $p['title']         = $prod->get_title();
+            $p['url']           = get_post_permalink($item['id']);
+            $p['link']          = '<a href="'. get_post_permalink($p['id']). '">'. $p['title'] .'</a>';
+            $p['qty']           = $item['quantity'];
+
+            $p['line_subtotal']      = $item['line_subtotal']; 
+            $p['line_subtotal_tax']  = $item['line_subtotal_tax'];
+
+            // gets the cart item total
+            $p['line_total']         = $item['line_total'];
+            $p['line_tax']           = $item['line_tax'];
+
+            // unit price of the product
+            $p['item_price']         = $p['line_subtotal'] / $p['qty'];
+            $p['item_tax']           = $p['line_subtotal_tax'] / $p['qty'];
+
+            /*
+                Product object data
+
+                Nota: los precios en el carrito pueden no corresponderse a los precios actuales
+            */
+
+            $p['price']         = get_post_meta($item['product_id'] , '_price', true);
+            $p['regular_price'] = get_post_meta($item['product_id'] , '_regular_price', true);
+            $p['sale_price']    = get_post_meta($item['product_id'] , '_sale_price', true);
+            $p['sku']			= get_post_meta($item['product_id'] , '_sku', true);
+
+        	// Generate variation URL if product is variable
+			if ($prod->is_type('variation')) {
+				$parent_product_id = $prod->get_parent_id();
+				$parent_product = wc_get_product($parent_product_id);
+
+				$variation_url = $parent_product->get_permalink();
+
+				$attributes = $item['variation'];
+
+				foreach ($attributes as $attribute => $value) {
+					$variation_url .= '&attribute_' . $attribute . '=' . $value;
+				}
+
+				$p['url'] = $variation_url;
+			} else {
+				$p['url'] = get_post_permalink($item['product_id']);
+			}
+            
+            $arr[] = $p;
+        }
+
+        return $arr;    
+    }
 
 	static function find($product_id){
 		$cart = static::getCart();
@@ -214,6 +237,4 @@ class Cart
 			exit;
 		}
 	}
-	
-
 }

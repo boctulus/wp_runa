@@ -86,9 +86,9 @@ RUT::formateador();
                     <td colspan="6" class="actions clear">
 
                         <!-- validation container -->
-                        <div class="woocommerce-message message-wrapper" role="alert">
-                            <div class="message-container container danger-color medium-text-center"> 
-                                    
+                        <div class="" id="validation container" role="alert"><!-- woocommerce-message message-wrapper -->
+                            <div class="message-container container medium-text-center"><!-- danger-color --> 
+                                    &nbsp;
                             </div>
                             <br>
                         </div>

@@ -10,32 +10,56 @@ use boctulus\SW\core\libs\Url;
             $ = jQuery
         }
 
-        jQuery('tr > td > a.remove').click(function(e) {
-            let a = jQuery(this)
-            let td = a.parent()
-            let tr = td.parent()
+        $('#clear-cart-button').click(function (e) {
+            e.preventDefault();
 
-            let pid = a.data('product_id')
-
-            console.log(pid)
-
-            jQuery.get(`/cart/delete/${pid}`, function(data, status) {
-                    console.log("Data: " + data + "\nStatus: " + status);
-                    tr.remove()
-                })
-                .fail(function(data) {
-                    console.log("error", data);
-                });
+            $.post(`/cart/empty}`, function (data, status) {
+               console.log('Carrito borrado');
+            })
+            .fail(function (data) {
+                console.log("error", data);
+            });
         });
 
-        jQuery('input.minus').click(function(e) {
-            let pid = jQuery(this).data('product_id')
-            //console.log(pid)
+        // Actualizado 7/7/23
+        $('.remove-item').click(function (e) {
+            e.preventDefault();
+            let a = $(this);
+            let tr = a.closest('tr');
+
+            let pid = a.data('product_id');
+
+            console.log(pid);
+
+            $.get(`/cart/delete/${pid}`, function (data, status) {
+                console.log("Data: " + data + "\nStatus: " + status);
+                tr.remove();
+            })
+            .fail(function (data) {
+                console.log("error", data);
+            });
         });
 
-        jQuery('input.plus').click(function(e) {
-            let pid = jQuery(this).data('product_id')
-            //console.log(pid)
+        // Actualizado 7/7/23
+        $('.minus').click(function (e) {
+            e.preventDefault();
+            let input = $(this).parent().find('input.qty');
+            let qty = parseInt(input.val());
+
+            if (qty > 1) {
+                qty--;
+                input.val(qty);
+            }
+        });
+
+        // Actualizado 7/7/23
+        $('.plus').click(function (e) {
+            e.preventDefault();
+            let input = $(this).parent().find('input.qty');
+            let qty = parseInt(input.val());
+
+            qty++;
+            input.val(qty);
         });
     });
 </script>
@@ -65,10 +89,15 @@ use boctulus\SW\core\libs\Url;
                     <!-- foreach -->
                     <?php foreach($items as $key => $item): ?>
 
+                    <?php 
+                        // dd($item);                      
+                        // exit;
+                    ?>
+
                     <tr class="woocommerce-cart-form__cart-item cart_item st-item-meta">
                         <td class="product-name" data-title="Producto">
                             <div class="product-thumbnail">
-                                <a href="https://zoh.deltaservidor.com/producto/olivia-print-bloom/?attribute_pa_color=black">
+                                <a href="<?= $item['url'] ?>">
                                     <img width="300" height="300" src="<?= $item['img_url'] ?>" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="">
                                     
                                 </a>
@@ -76,7 +105,7 @@ use boctulus\SW\core\libs\Url;
                         </td>
                         <td class="product-details">
                             <div class="cart-item-details">
-                                <a href="https://zoh.deltaservidor.com/producto/olivia-print-bloom/?attribute_pa_color=black"><?= $item['title'] ?></a> <label class="screen-reader-text"><?= $item['sku'] . ' '. $item['title'] ?></label>
+                                <a href="<?= $item['url'] ?>"><?= $item['title'] ?></a> <label class="screen-reader-text"><?= $item['sku'] . ' '. $item['title'] ?></label>
                                 
                                 <!--dl class="variation">
                                     <dt class="variation-Color">Color</dt>
@@ -133,9 +162,23 @@ use boctulus\SW\core\libs\Url;
 
         <div class="actions clearfix">
             <div class="col-md-12 col-sm-12 mob-center">       
-                <a class="button-quote btn bordered" href="#" id="to_contact">Complete sus datos</a>
 
-                <a class="clear-cart btn bordered">
+                    <?php
+                        if (empty($items)):
+                    ?>        
+                        <a class="button-quote btn bordered" href="<?= get_permalink(wc_get_page_id('shop')) ?>">Volve a la tienda</a>
+                    <?php
+                        else:
+                    ?>
+
+                    <a class="button-quote btn bordered" href="#" id="to_contact">Complete sus datos</a>
+
+                    <?php
+                        endif;
+                    ?>
+
+                    <a class="clear-cart btn bordered" <?= (count($items) == 0 ? 'disabled' : '');  ?> id="clear-cart-button">
+
                     <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 24 24" style="enable-background:new 0 0 24 24" xml:space="preserve" width=".8em" height=".8em" fill="currentColor">
                         <g>
                             <path d="M8.8916016,6.215332C8.8803711,6.2133789,8.8735352,6.2143555,8.8666992,6.2148438

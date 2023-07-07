@@ -91,6 +91,7 @@ class CartController
         }   
     }
 
+    // bora un item del carrito
     function delete($pid){
         try {
             $ok = Cart::remove($pid);
@@ -101,6 +102,23 @@ class CartController
 
             response([
                 'message' => "Producto con pid=$pid fue exitosamente borrado del carrito"
+            ]);
+
+        } catch (\Exception $e){
+            $err = "Error con el request " . $e->getMessage();
+            Logger::log($err);
+    
+            return error($err);
+        }   
+    }
+
+    // vacia el carrito
+    function empty(){
+        try {
+            Cart::empty();
+            
+            response([
+                'message' => "Borrado del carrito exitoso"
             ]);
 
         } catch (\Exception $e){
