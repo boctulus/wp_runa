@@ -72,13 +72,24 @@ function assets(){
     js_file('/js/utilities.js');
     js_file('/js/notices.js');
     js_file('/js/storage.js');
-
-    //if (!Users::isLogged()){
-        js_file('/js/not_logged.js');
-    //}
+    js_file('/js/at_home.js');
 }
 
 enqueue('assets');
+
+function agregar_script_en_home() {
+    if ( ! is_admin() && is_home() ) {
+        wp_enqueue_script( 'mi-script', '', array(), '1.0', true );
+        wp_add_inline_script( 'mi-script', "
+            (function() {
+                // Código JavaScript aquí
+                console.log('HERE');
+                jQuery('.woocommerce-mini-cart__total').remove();
+            })();
+        ");
+    }
+}
+add_action( 'wp_enqueue_scripts', 'agregar_script_en_home' );
 
 /*
     Me aseguro que la extension SimpleXML este instalada

@@ -4,11 +4,16 @@ use boctulus\SW\core\libs\Url;
 
 ?>
 
+
 <script>
     addEventListener("DOMContentLoaded", (event) => {
         if (typeof $ === 'undefined' && typeof jQuery !== 'undefined') {
             $ = jQuery
         }
+
+        // Rueditas de carga
+        $('.elementor-element-65cdc8a').hide()
+        $('.elementor-element-54380b0').hide()
 
         $('#clear-cart-button').click(function (e) {
             e.preventDefault();

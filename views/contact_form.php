@@ -10,6 +10,18 @@ RUT::formateador();
 
 ?>
 
+<script>
+addEventListener("DOMContentLoaded", (event) => {
+        if (typeof $ === 'undefined' && typeof jQuery !== 'undefined') {
+            $ = jQuery
+        }
+
+        // Rueditas de carga
+        $('.elementor-element-65cdc8a').hide()
+        $('.elementor-element-54380b0').hide()
+})    
+</script>
+
 <div class="container">
     <h1>Datos de contacto</h1>
 
@@ -83,22 +95,22 @@ RUT::formateador();
                 <!-- Extras -->
 
                 <tr>
-                    <td colspan="6" class="actions clear">
-
-                        <!-- validation container -->
-                        <div class="" id="validation container" role="alert"><!-- woocommerce-message message-wrapper -->
-                            <div class="message-container container medium-text-center"><!-- danger-color --> 
-                                    &nbsp;
-                            </div>
-                            <br>
-                        </div>
-
-                     
+                    <td colspan="6" class="actions clear">      
+                                         
                         <div class="continue-shopping pull-left text-left">
                             <a class="button-quote btn bordered" href="<?= get_permalink(wc_get_page_id('shop')) ?>">Volve a la tienda</a>
                         </div>        
                        
                         <a class="button-quote btn bordered" href="#" id="ajax_call_btn">Obtener cotización</a>
+
+                         <!-- validation container -->
+                         <div class="" id="validation container" role="alert" ><!-- woocommerce-message message-wrapper -->
+                            <div class="message-container container medium-text-center"><!-- danger-color --> 
+                                    &nbsp;
+                            </div>
+                            <br>
+                        </div>
+                     
                         
                     </td>
                 </tr>
