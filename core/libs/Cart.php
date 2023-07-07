@@ -15,6 +15,10 @@ class Cart
 			exit;
 		}
 
+		if ( null === WC()->cart ) {
+			WC()->cart = new \WC_Cart();
+		}	
+
 		if (empty($user_id)){			
 			return WC()->cart;
 		} else {
@@ -191,6 +195,9 @@ class Cart
 		}
 	}
 
+	/*
+		No esta funcionando con Ajax
+	*/
 	static function empty($user_id = null) 
 	{
 		$cart = static::getCart($user_id); // obtiene instancia del carrito	
@@ -198,8 +205,7 @@ class Cart
 		foreach ($cart as $cart_item_key => $cart_item) {
 			$product_id = $cart_item['product_id'];			
 			static::remove($product_id);
-		}
-	
+		}	
 	}
 
 	/*

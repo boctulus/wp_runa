@@ -93,14 +93,13 @@ RUT::formateador();
                             <br>
                         </div>
 
-                        <div class="pull-left text-left">
-                            <a class="button-quote button primary is-outline" href="#" id="ajax_call_btn">Obtener cotización</a>
-                        </div>
-
+                     
                         <div class="continue-shopping pull-left text-left">
-                            <a class="button-quote button primary is-outline" href="<?= get_permalink(wc_get_page_id('shop')) ?>">Volve a la tienda</a>
-                        </div>
-
+                            <a class="button-quote btn bordered" href="<?= get_permalink(wc_get_page_id('shop')) ?>">Volve a la tienda</a>
+                        </div>        
+                       
+                        <a class="button-quote btn bordered" href="#" id="ajax_call_btn">Obtener cotización</a>
+                        
                     </td>
                 </tr>
             </tbody>
