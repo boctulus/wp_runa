@@ -2,8 +2,33 @@
 
 namespace boctulus\SW\core\libs;
 
+use \Spatie\ArrayToXml\ArrayToXml;
+
 class XML
 {
+    /*
+        Requiere del paquete de Composer spatie/array-to-xml
+
+        composer require spatie/array-to-xml
+    */
+    static function fromArray(array $arr, string $root_elem = 'root', $header = true){
+        if (!class_exists(\Spatie\ArrayToXml\ArrayToXml::class)){
+            admin_notice("El paquete de Composer spatie/array-to-xml es requierido", "error");
+            throw new \Exception("Class ArrayToXml not found");
+        } else {
+            
+            $converter = new ArrayToXml($arr, $root_elem);
+        }
+
+        $result = $converter::convert($arr, $root_elem, $header);
+
+        if (!$header){
+            $result = trim(substr($result, 21));
+        }
+
+        return $result;
+    }
+        
     static function toArray(string $xml){
         $xml = trim($xml);
 
@@ -37,29 +62,6 @@ class XML
 
         return $arrOutput;
     }  
-
-    /*
-        Requiere del paquete de Composer spatie/array-to-xml
-
-        composer require spatie/array-to-xml
-    */
-    static function fromArray(array $arr, string $root_elem = 'root', $header = true){
-        if (!class_exists(\Spatie\ArrayToXml\ArrayToXml::class)){
-            admin_notice("El paquete de Composer spatie/array-to-xml es requierido", "error");
-            throw new \Exception("Class ArrayToXml not found");
-        } else {
-            $class = "\Spatie\ArrayToXml\ArrayToXml";
-            $converter = new $class($arr, $root_elem);
-        }
-
-        $result = $converter::convert($arr, $root_elem, $header);
-
-        if (!$header){
-            $result = trim(substr($result, 21));
-        }
-
-        return $result;
-    }
     
     static function getDomDocument(string $html){
         $doc = new \DOMDocument();

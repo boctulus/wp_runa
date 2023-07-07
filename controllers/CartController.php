@@ -5,10 +5,12 @@ namespace boctulus\SW\controllers;
 use boctulus\SW\core\libs\Url;
 use boctulus\SW\core\libs\XML;
 use boctulus\SW\core\libs\Cart;
+use boctulus\SW\core\libs\Users;
 use boctulus\SW\core\libs\Logger;
 use boctulus\SW\core\libs\Orders;
 use boctulus\SW\core\libs\Products;
 use boctulus\SW\core\libs\ApiClient;
+use boctulus\SW\core\libs\Request;
 use boctulus\SW\core\libs\Validator;
 
 /*
@@ -112,10 +114,21 @@ class CartController
         }   
     }
 
-    // vacia el carrito
-    function empty(){
+    // Endppoint vacia el carrito
+    function empty(){        
         try {
-            Cart::empty();
+            $user_id = request()
+            ->getBodyParam('user_id');
+
+            if (empty($user_id)){
+                $user_id = Users::getCurrentUserId();
+            }
+    
+            if (empty($user_id)){
+                throw new \Exception("user_id no puede estar vacio");
+            }
+
+            Cart::empty($user_id);
             
             response([
                 'message' => "Borrado del carrito exitoso"
@@ -188,6 +201,10 @@ class CartController
         $products = [];
         foreach ($items as $ix => $item){
             $p = Products::getProduct($item['id']);
+
+            if (empty($p)){
+                error("Producto con ID={$item['id']} no encontrado", 404);
+            }
 
             // https://stackoverflow.com/a/54375782/980631
             $regular_price = (float) $p->get_regular_price(); // Regular price

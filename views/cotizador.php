@@ -13,12 +13,14 @@ use boctulus\SW\core\libs\Url;
         $('#clear-cart-button').click(function (e) {
             e.preventDefault();
 
-            $.post(`/cart/empty}`, function (data, status) {
+            $.post(`/cart/empty`, function (data, status) {
                console.log('Carrito borrado');
             })
             .fail(function (data) {
                 console.log("error", data);
             });
+
+            return false;
         });
 
         // Actualizado 7/7/23
@@ -105,7 +107,7 @@ use boctulus\SW\core\libs\Url;
                         </td>
                         <td class="product-details">
                             <div class="cart-item-details">
-                                <a href="<?= $item['url'] ?>"><?= $item['title'] ?></a> <label class="screen-reader-text"><?= $item['sku'] . ' '. $item['title'] ?></label>
+                                <a href="<?= $item['url'] ?>" data-product_id="<?= $item['id'] ?>"><?= $item['title'] ?></a> <label class="screen-reader-text"><?= $item['sku'] . ' '. $item['title'] ?></label>
                                 
                                 <!--dl class="variation">
                                     <dt class="variation-Color">Color</dt>
@@ -123,7 +125,7 @@ use boctulus\SW\core\libs\Url;
                         <td class="product-price" data-title="Precio">
                         </td>
 
-                        <td class="product-sku" data-title="SKU">
+                        <td class="product-sku" data-title="SKU" data-product_id="<?= $item['id'] ?>">
                             <?= $item['sku'] ?> 
                         </td>
 

@@ -8,17 +8,18 @@ namespace boctulus\SW\core\libs;
 
 class Cart 
 {
-	static function getCart(){
+	static function getCart($user_id = null)
+	{
 		if (is_cli()){
 			dd("Cart no puede funcionar sin session de usuario y por ende con modo 'cli'");	
 			exit;
 		}
-		
-		if ( null === WC()->cart ) {
-			WC()->cart = new \WC_Cart();
+
+		if (empty($user_id)){			
+			return WC()->cart;
+		} else {
+			return WC()->cart->get_cart_for_session($user_id);
 		}
-		
-		return WC()->cart;
 	}
 
 	/*
@@ -30,11 +31,6 @@ class Cart
 		}
 
 		return count(static::getItems());
-	}
-
-	static function empty() {
-		$cart = static::getCart();
-		$cart->empty_cart();
 	}
 
 	static function getItems(){
@@ -193,6 +189,17 @@ class Cart
 		foreach ($product_ids as $pid){
 			static::add($pid, rand(1,10));
 		}
+	}
+
+	static function empty($user_id = null) 
+	{
+		$cart = static::getCart($user_id); // obtiene instancia del carrito	
+		
+		foreach ($cart as $cart_item_key => $cart_item) {
+			$product_id = $cart_item['product_id'];			
+			static::remove($product_id);
+		}
+	
 	}
 
 	/*

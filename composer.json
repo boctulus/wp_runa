@@ -1,4 +1,6 @@
 {
     "name": "boctulus/wp_runa",
-    "require": {}
+    "require": {
+        "spatie/array-to-xml": "^2.17"
+    }
 }

@@ -8,4 +8,5 @@
 
 return [
     '/cart/quote'  => 'boctulus\SW\controllers\CartController@save_form',
+    '/cart/empty'  => 'boctulus\SW\controllers\CartController@empty',
 ];

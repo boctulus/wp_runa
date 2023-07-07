@@ -173,7 +173,8 @@ if (!in_array('SimpleXML', get_loaded_extensions())){
     add_action('wp_loaded', function(){
         if (defined('WC_ABSPATH') && !is_admin())
         {
-        // dd(Users::isLogged(), 'Logged?');
+            // dd(Users::isLogged(), 'Logged?');
+            // dd(Users::getCurrentUserId(), 'USER ID');
 
             if (!Users::isLogged()){
                 remove_action( 'woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart' );
