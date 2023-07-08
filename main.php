@@ -64,9 +64,14 @@ require_once __DIR__ . '/shortcodes.php';
 
 function assets(){
 	//css_file('/third_party/bootstrap/bootstrap.min.css');
-	css_file('/css/styles.css');
-    
     // js_file('/third_party/bootstrap/bootstrap.bundle.min.js');
+
+	css_file('/css/styles.css');
+
+    if (Page::isCart()){
+        css_file('/css/cotizador.css');
+    }
+    
     js_file('/third_party/sweetalert2/sweetalert.js');
 
     js_file('/js/utilities.js');
@@ -76,20 +81,6 @@ function assets(){
 }
 
 enqueue('assets');
-
-function agregar_script_en_home() {
-    if ( ! is_admin() && is_home() ) {
-        wp_enqueue_script( 'mi-script', '', array(), '1.0', true );
-        wp_add_inline_script( 'mi-script', "
-            (function() {
-                // Código JavaScript aquí
-                console.log('HERE');
-                jQuery('.woocommerce-mini-cart__total').remove();
-            })();
-        ");
-    }
-}
-add_action( 'wp_enqueue_scripts', 'agregar_script_en_home' );
 
 /*
     Me aseguro que la extension SimpleXML este instalada

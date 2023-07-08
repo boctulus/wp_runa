@@ -1,15 +1,21 @@
 
 if (!is_admin_page())
-{
-    console.log('HERE');
-
+{   
     /*
         Remuevo subtotal de desplegable 
     */
 
     jQuery('.et_b_header-cart').click((e) => {
         e.preventDefault();
-        jQuery('.woocommerce-mini-cart__total').remove();
+        jQuery('.woocommerce-mini-cart__total').hide();
+
+        // fixeo enlace que se rompe
+        jQuery('.mini-cart-buttons').click(()=> {location.replace('/carrito')})
+
+        // parche para mi local
+        if (window.location.origin != 'https://zoh.deltaservidor.com'){
+            jQuery(jQuery('span.et-svg')[0]).click(()=> {location.replace('/cart')})
+        }
     })
     
 

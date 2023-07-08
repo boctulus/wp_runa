@@ -4,7 +4,6 @@ use boctulus\SW\core\libs\Url;
 
 ?>
 
-
 <script>
     addEventListener("DOMContentLoaded", (event) => {
         if (typeof $ === 'undefined' && typeof jQuery !== 'undefined') {

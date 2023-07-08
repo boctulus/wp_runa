@@ -47,7 +47,32 @@ class Cart
             $p = [];
 
             $p['id']            = $item['data']->get_id();
-            $p['img']           = $prod->get_image(); // accepts 2 arguments ( size, attr )
+
+			// accepts 2 arguments ( size, attr )
+            $p['img']           = $prod->get_image();
+			
+			// Check if the product is a variable product and the parent product doesn't have an image
+			if ($prod->is_type('variation') && empty($p['img'])) {
+				// $parent_product_id = $prod->get_parent_id();
+				// $parent_product    = wc_get_product($parent_product_id);
+
+				$parent_product    = $p['id'];
+		
+				// Get variations of the parent product
+				$variations = $parent_product->get_available_variations();
+		
+				// Find the first variation with an image
+				foreach ($variations as $variation) {
+					$variation_product   = wc_get_product($variation['variation_id']);
+					$variation_image_url = Products::getFeaturedImage($variation_product);
+		
+					if (!empty($variation_image_url)) {
+						$p['img_url'] = $variation_image_url;
+						break;
+					}
+				}
+			}
+
             $p['img_url']       = Strings::match($p['img'], '/< *img[^>]*src *= *["\']?([^"\']*)/i');
             $p['title']         = $prod->get_title();
             $p['url']           = get_post_permalink($item['id']);

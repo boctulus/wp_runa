@@ -12,13 +12,24 @@
 
 define('ROOT_PATH', realpath(__DIR__ . '/..') . DIRECTORY_SEPARATOR);
 
-$_pth = explode(DIRECTORY_SEPARATOR, ROOT_PATH);
-$name = $_pth[count($_pth)-2];
+$_pth        = explode(DIRECTORY_SEPARATOR, ROOT_PATH);
+$plugin_name = $name = $_pth[count($_pth)-2];
 
+
+$msg_activated   = "Plugin $plugin_name activado";
+$msg_already_act = "Plugin $plugin_name ya estaba activo";
 
 if (file_exists(ROOT_PATH . "$name.ph_")){
     rename(ROOT_PATH. "$name.ph_", ROOT_PATH."$name.php");
-    print_r("Plugin $name activado");
-} else {
-    print_r("Plugin $name ya estaba activo");
-}
+    print_r($msg_activated);
+    return;
+} 
+
+$name = 'index';
+if (file_exists(ROOT_PATH . "$name.ph_")){
+    rename(ROOT_PATH. "$name.ph_", ROOT_PATH."$name.php");
+    print_r($msg_activated);
+    return;
+} 
+
+print_r($msg_already_act);
