@@ -93,103 +93,45 @@ if (!in_array('SimpleXML', get_loaded_extensions())){
 
 /////////////////////////[ ACTIONS ]///////////////////////////
 
-    /*
-        Oculta el precio si el usuario no esta logueado
-    */
-    function customized_price_html( $price, $product ) { 
-        if (!Users::isLogged()){
-            $price = '';
-        }
-        
-        return $price; 
-    } 
-        
-    add_filter( 'woocommerce_get_price_html', 'customized_price_html', 100, 2 ); 
+// require_once __DIR__ . '/scripts/hide_prices.php';
 
-    /*
-        Cambio el boton de "Agrear al carrito" por otro como "Cotizar" si el usuario
-        no esta lougueado
-    */
-    function woocommerce_add_to_cart_button_text() {  
-        $text = 'Add to cart';
+/*
+    Cambiar el texto del boton "proceed to checkout" y la url del checkout
 
-        if (!Users::isLogged()){
-            $text = config()['add_to_cart_button_text'] ?? 'Add to cart';
-        }
+    Otra forma de cambiar textos:
+    https://stackoverflow.com/a/34290090/980631
+*/
 
-        return __($text, 'woocommerce' ); 
+function custom_button_proceed_to_checkout() {
+    $text = "Proceed to checkout";
+    
+    if (!Users::isLogged()){
+        $text = "Cotizar pedido";
     }
 
-    // Change add to cart text on single product page
-    add_filter( 'woocommerce_product_single_add_to_cart_text', 'woocommerce_add_to_cart_button_text' ); 
+    echo '<a href="'.esc_url(wc_get_checkout_url()).'" class="checkout-button button alt wc-forward">' .
+    __($text, "woocommerce") . '</a>';
+}
 
-    // Change add to cart text on product archives page
-    add_filter( 'woocommerce_product_add_to_cart_text',        'woocommerce_add_to_cart_button_text' );  
+remove_action( 'woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20 );
+add_action( 'woocommerce_proceed_to_checkout', 'custom_button_proceed_to_checkout', 20 );
 
+/*
+    Cambio el boton de "Agrear al carrito" por otro como "Cotizar" si el usuario
+    no esta lougueado
+*/
+function woocommerce_add_to_cart_button_text() {  
+    $text = 'Add to cart';
 
-    /*
-        Cambiar el texto del boton "proceed to checkout" y la url del checkout
-
-        Otra forma de cambiar textos:
-        https://stackoverflow.com/a/34290090/980631
-    */
-
-    function custom_button_proceed_to_checkout() {
-        $text = "Proceed to checkout";
-        
-        if (!Users::isLogged()){
-            $text = "Cotizar pedido";
-        }
-
-        echo '<a href="'.esc_url(wc_get_checkout_url()).'" class="checkout-button button alt wc-forward">' .
-        __($text, "woocommerce") . '</a>';
+    if (!Users::isLogged()){
+        $text = config()['add_to_cart_button_text'] ?? 'Add to cart';
     }
 
-    remove_action( 'woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20 );
-    add_action( 'woocommerce_proceed_to_checkout', 'custom_button_proceed_to_checkout', 20 );
+    return __($text, 'woocommerce' ); 
+}
 
-    /*
-        Hide prices del cart
-    */
-
-    function hide_cart_item_prices( $price, $cart_item, $cart_item_key ) {
-        return '';
-    }
-    add_filter( 'woocommerce_cart_item_price', 'hide_cart_item_prices', 10, 3 );
-
-    function hide_cart_totals( $value ) {
-        return '';
-    }
-    add_filter( 'woocommerce_cart_totals_order_total_html', 'hide_cart_totals' );
-
-    function hide_cart_item_totals( $total, $cart_item, $cart_item_key ) {
-        return '';
-    }
-    add_filter( 'woocommerce_cart_item_subtotal', 'hide_cart_item_totals', 10, 3 );
-
-
-    /*
-        Extras, por si las dudas
-    */
-
-    add_action('wp_loaded', function(){
-        if (defined('WC_ABSPATH') && !is_admin())
-        {
-            // dd(Users::isLogged(), 'Logged?');
-            // dd(Users::getCurrentUserId(), 'USER ID');
-
-            if (!Users::isLogged()){
-                remove_action( 'woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart' );
-                remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_price', 10 );
-                remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30 );
-                remove_action( 'woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_price', 10 );
-            
-                //add_filter( 'woocommerce_is_purchasable', '__return_false' );
-                //add_filter( 'woocommerce_get_price_html', '__return_empty_string' );
-            }
-        }    
-    });
-
+// Change add to cart text on single product page
+add_filter( 'woocommerce_product_single_add_to_cart_text', 'woocommerce_add_to_cart_button_text' );
 
 ///////////////////////////////////////////////////////////////
 

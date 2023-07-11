@@ -24,7 +24,10 @@ class Env
             static::$data = $_ENV;  
         }
 
-        static::$data = parse_ini_file(ROOT_PATH . '.env');
+        // Doy prioridad a '.dev-env' sobre '.env'
+        $env_file     = file_exists(ROOT_PATH . '.dev-env') && trim(file_get_contents(ROOT_PATH . '.dev-env')) !='' ? '.dev-env' : '.env';
+
+        static::$data = parse_ini_file(ROOT_PATH . $env_file);
     }
 
     static function get(?string $key = null, $default_value = null){

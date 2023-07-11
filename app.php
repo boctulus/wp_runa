@@ -1,5 +1,7 @@
 <?php
 
+use boctulus\SW\core\libs\Files;
+
 /*
     @author Pablo Bozzolo < boctulus@gmail.com >
 */
@@ -35,20 +37,29 @@ if ($cfg["use_composer"] ?? true){
     require_once APP_PATH . 'vendor/autoload.php';
 }
 
+/*
+    Parse command line arguments into the $_GET variable <sep16@psu.edu>
+*/
+
+if (php_sapi_name() == "cli"){
+    parse_str(implode('&', array_slice($argv, 1)), $_GET);
+}
+
 /* Helpers */
 
-$helper_dirs = [
+$includes = [
     __DIR__ . '/core/helpers', 
-    __DIR__ . '/helpers'
+    __DIR__ . '/helpers',
+    __DIR__ . '/boot'
 ];
 
 $excluded    = [
     'cli.php'
 ];
 
-foreach ($helper_dirs as $dir){
+foreach ($includes as $dir){
     if (!file_exists($dir) || !is_dir($dir)){
-        throw new \Exception("Directory '$dir' is missing");
+        Files::mkdir($dir);
     }
 
     foreach (new \DirectoryIterator($dir) as $fileInfo) {
@@ -56,6 +67,11 @@ foreach ($helper_dirs as $dir){
         
         $path     = $fileInfo->getPathName();
         $filename = $fileInfo->getFilename();
+
+        // No incluyo archivos que comiencen con "_"
+        if (substr($filename, 0, 1) == '_'){
+            continue;
+        }
 
         if (in_array($filename, $excluded)){
             continue;

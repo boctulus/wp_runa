@@ -17,6 +17,12 @@ define( 'ABSPATH', realpath(__DIR__ . '/../../..') . DIRECTORY_SEPARATOR);
 require_once ABSPATH . '/wp-config.php';
 require_once ABSPATH . '/wp-load.php';
 
+/*
+    Parse command line arguments into the $_GET variable <sep16@psu.edu>
+*/
+
+parse_str(implode('&', array_slice($argv, 1)), $_GET);
+
 
 /* Helpers */
 
