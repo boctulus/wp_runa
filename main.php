@@ -60,24 +60,24 @@ function sw_init_session() {
 // Start session on init hook.
 // add_action('init', 'sw_init_session' );
 
-require_once __DIR__ . '/shortcodes.php';
+require_once __DIR__ . '/shortcodes.php'; // ok
 
 function assets(){
-	//css_file('/third_party/bootstrap/bootstrap.min.css');
+	// css_file('/third_party/bootstrap/bootstrap.min.css');
     // js_file('/third_party/bootstrap/bootstrap.bundle.min.js');
 
 	css_file('/css/styles.css');
 
     if (Page::isCart()){
-        css_file('/css/cotizador.css');
+        css_file('/css/cotizador.css'); // ok
     }
     
-    js_file('/third_party/sweetalert2/sweetalert.js');
+    js_file('/third_party/sweetalert2/sweetalert.js'); // ok
 
-    js_file('/js/utilities.js');
-    js_file('/js/notices.js');
-    js_file('/js/storage.js');
-    js_file('/js/at_home.js');
+    js_file('/js/utilities.js');  // ok
+    js_file('/js/notices.js');  // ok
+    js_file('/js/storage.js');  // ok
+    js_file('/js/at_home.js');  // ok
 }
 
 enqueue('assets');

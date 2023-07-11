@@ -22,7 +22,7 @@ addEventListener("DOMContentLoaded", (event) => {
 })    
 </script>
 
-<div class="container">
+<div id="runa_container">
     <h1>Datos de contacto</h1>
 
     <form id="quoter_contact_form">

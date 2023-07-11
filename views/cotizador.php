@@ -72,7 +72,7 @@ use boctulus\SW\core\libs\Url;
 </script>
 
 
-<div class="container">
+<div id="runa_container">
 
 
     <!---  
