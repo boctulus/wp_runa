@@ -131,14 +131,30 @@ class Cart
         return $arr;    
     }
 
-	static function find($product_id){
-		$cart = static::getCart();
+	/*
+        Devuelve el identificador dentro del carrito
 
-		$product_cart_id = $cart->generate_cart_id( $product_id );
-   		$cart_item_key   = $cart->find_product_in_cart( $product_cart_id );
+        Funciona con productos simples y variables.
+    */
+    static function find($product_id){
+        $cart = static::getCart();
+        $product = wc_get_product($product_id);
 
-		return $cart_item_key;
-	}
+        if ($product && $product->is_type('variable')) {
+            // Producto es de tipo variable
+            $variation_id = $product_id;
+            $product_id = $product->get_parent_id();
+
+            $product_cart_id = $cart->generate_cart_id($variation_id);
+            $cart_item_key = $cart->find_product_in_cart($product_cart_id);
+        } else {
+            // Producto es simple
+            $product_cart_id = $cart->generate_cart_id($product_id);
+            $cart_item_key = $cart->find_product_in_cart($product_cart_id);
+        }
+
+        return $cart_item_key;
+    }
 
 	static function getQuantity($product_id){
 		// Obtener la cantidad de cada producto en el carrito
@@ -155,29 +171,23 @@ class Cart
 	}
 
 	/*
-		Los siguientes metodos *no* funciona via Ajax y tampoco generaran error alguno
+		Funciona EXCEPTO con productos variables !
 	*/
 
 	static function setQuantity($product_id, int $qty)
 	{
-		/*
-			Por alguna extrana razon es necesario llamar a getQuantity() antes
-			o sino falla
-		*/
-
-		$cart = static::getCart();
 		$prev = static::getQuantity($product_id);
-
-		$cart_item_key = null;
 
 		if (empty($cart_item_key)){
 			$cart_item_key = static::find($product_id);
 		}
 
 		if (empty($cart_item_key)){
-			//Logger::log("No se pudo encontrar item con pid=$product_id en carrito");
+			Logger::logError("No se pudo encontrar item con pid=$product_id en carrito");
 			return false;
 		}
+
+		$cart = static::getCart();
 
 		//Logger::log("Seteando '$qty' unidades de $product_id");
 		$cart->set_quantity( $cart_item_key, $qty );
@@ -214,6 +224,7 @@ class Cart
 		return true;
 	}
 
+	// delete
 	static function remove($product_id){
 		return static::setQuantity($product_id, 0);
 	}
