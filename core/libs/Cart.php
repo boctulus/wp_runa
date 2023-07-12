@@ -132,29 +132,45 @@ class Cart
     }
 
 	/*
-        Devuelve el identificador dentro del carrito
+		Devuelve identificador dentro del carrito
+	*/
+	static function findSimple($product_id){
+		$cart = static::getCart();
 
-        Funciona con productos simples y variables.
-    */
-    static function find($product_id){
-        $cart = static::getCart();
-        $product = wc_get_product($product_id);
+		$product_cart_id = $cart->generate_cart_id(	 $product_id );
+   		$cart_item_key   = $cart->find_product_in_cart( $product_cart_id );
 
-        if ($product && $product->is_type('variable')) {
-            // Producto es de tipo variable
-            $variation_id = $product_id;
-            $product_id = $product->get_parent_id();
+		return $cart_item_key;
+	}
 
-            $product_cart_id = $cart->generate_cart_id($variation_id);
-            $cart_item_key = $cart->find_product_in_cart($product_cart_id);
-        } else {
-            // Producto es simple
-            $product_cart_id = $cart->generate_cart_id($product_id);
-            $cart_item_key = $cart->find_product_in_cart($product_cart_id);
-        }
+	/*
+		Devuelve identificador dentro del carrito
+	*/	static function findVariation($variation_id){
+		$cart = static::getCart();
+		$cart_items = $cart->get_cart();
+	
+		foreach ($cart_items as $cart_item_key => $cart_item) {
+			if ($cart_item['variation_id'] == $variation_id) {
+				return $cart_item_key;
+			}
+		}
+	
+		return false;
+	}
 
-        return $cart_item_key;
-    }
+	static function find($product_id){
+		$prod = wc_get_product($product_id);
+
+		// variante
+		if (!$prod->is_type('simple')){
+			$cart_item_key = static::findVariation($product_id);
+		} else {
+			// simple
+			$cart_item_key = static::findSimple($product_id);
+		}
+
+		return $cart_item_key;
+	}
 
 	static function getQuantity($product_id){
 		// Obtener la cantidad de cada producto en el carrito
@@ -176,12 +192,8 @@ class Cart
 
 	static function setQuantity($product_id, int $qty)
 	{
-		$prev = static::getQuantity($product_id);
-
-		if (empty($cart_item_key)){
-			$cart_item_key = static::find($product_id);
-		}
-
+		$cart_item_key = static::find($product_id);
+		
 		if (empty($cart_item_key)){
 			Logger::logError("No se pudo encontrar item con pid=$product_id en carrito");
 			return false;
@@ -237,17 +249,15 @@ class Cart
 		}
 	}
 
-	/*
-		No esta funcionando con Ajax
-	*/
-	static function empty($user_id = null) 
+	static function empty() 
 	{
-		$cart = static::getCart($user_id); // obtiene instancia del carrito	
+		$cart = static::getCart(); 
 		
-		foreach ($cart as $cart_item_key => $cart_item) {
-			$product_id = $cart_item['product_id'];			
-			static::remove($product_id);
-		}	
+		$cart_items = $cart->get_cart();
+	
+		foreach ($cart_items as $cart_item_key => $cart_item) {
+			$cart->set_quantity( $cart_item_key, 0 );
+		}
 	}
 
 	/*
