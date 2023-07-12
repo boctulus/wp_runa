@@ -66,6 +66,10 @@ function enqueue(string $fn_name, $priority = null){
     add_action('wp_enqueue_scripts', $fn_name, $priority);
 }
 
+function enqueue_admin(string $fn_name, $priority = 10, $accepted_args =1){
+    add_action('admin_enqueue_scripts', $fn_name, $priority, $accepted_args);
+}
+
 function include_no_render(string $path, ?Array $vars = null){
     if (!empty($vars)){
         extract($vars);

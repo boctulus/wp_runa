@@ -105,7 +105,7 @@ use boctulus\SW\core\libs\Url;
                         <td class="product-name" data-title="Producto">
                             <div class="product-thumbnail">
                                 <a href="<?= $item['url'] ?>">
-                                    <img width="300" height="300" src="<?= $item['img_url'] ?>" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="">
+                                    <img width="100" height="100" src="<?= $item['img_url'] ?>" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="">
                                     
                                 </a>
                             </div>
@@ -114,12 +114,12 @@ use boctulus\SW\core\libs\Url;
                             <div class="cart-item-details">
                                 <a href="<?= $item['url'] ?>" data-product_id="<?= $item['id'] ?>"><?= $item['title'] ?></a> <label class="screen-reader-text"><?= $item['sku'] . ' '. $item['title'] ?></label>
                                 
-                                <!--dl class="variation">
-                                    <dt class="variation-Color">Color</dt>
+                                <dl class="variation">
+                                    <dt class="variation-Color" style="display:none;">Color</dt>
                                     <dd class="variation-Color">
-                                        <p>Black</p>
+                                        <p><?= ucfirst($item['color']) ?></p>
                                     </dd>
-                                </dl-->
+                                </dl>
 
                                 <!-- boton de borrado OK -->
                                 <a href="#" aria-label="Borrar este artículo" data-product_id="<?= $item['id'] ?>" data-product_sku="<?= $item['sku'] ?>"  class="remove-item text-underline" title="Eliminar este artículo">Eliminar</a>
@@ -169,22 +169,24 @@ use boctulus\SW\core\libs\Url;
 
         <div class="actions clearfix">
             <div class="col-md-12 col-sm-12 mob-center">       
-                 
-                    <?php
-                        if (empty($items)):
-                    ?>        
-                        <a class="button-quote btn bordered" href="<?= get_permalink(wc_get_page_id('shop')) ?>">Volve a la tienda</a>
-                    <?php
-                        else:
-                    ?>
+                    
+                    <div class="pull-right text-right" style="margin-right: -15px;"> 
+                        <?php
+                            if (empty($items)):
+                        ?>        
+                            <a class="button-quote btn bordered" href="<?= get_permalink(wc_get_page_id('shop')) ?>">Volve a la tienda</a>
+                        <?php
+                            else:
+                        ?>
 
-                    <a class="button-quote btn bordered" href="#" id="to_contact">Complete sus datos</a>
+                        <a class="button-quote btn bordered" href="#" id="to_contact">Complete sus datos</a>
 
-                    <?php
-                        endif;
-                    ?>
+                        <?php
+                            endif;
+                        ?>
+                    </div>
                 
-                    <div class="    pull-left text-left">      
+                    <div class="pull-left text-left" style="margin-left: -15px;">      
                         <a class="clear-cart btn bordered" <?= (count($items) == 0 ? 'disabled' : '');  ?> id="clear-cart-button">
 
                         <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 24 24" style="enable-background:new 0 0 24 24" xml:space="preserve" width=".8em" height=".8em" fill="currentColor">

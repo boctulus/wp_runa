@@ -46,34 +46,41 @@ class Cart
 
             $p = [];
 
-            $p['id']            = $item['data']->get_id();
+            $p['id']  = $item['data']->get_id();
 
 			// accepts 2 arguments ( size, attr )
-            $p['img']           = $prod->get_image();
-			
-			// Check if the product is a variable product and the parent product doesn't have an image
-			if ($prod->is_type('variation') && empty($p['img'])) {
-				// $parent_product_id = $prod->get_parent_id();
-				// $parent_product    = wc_get_product($parent_product_id);
+            $p['img']  = $prod->get_image();
 
-				$parent_product    = $p['id'];
+			$empty_img = Strings::contains('woocommerce-placeholder-', $p['img']);
 		
+			// Check if the product is a variable product and the parent product doesn't have an image
+			if ($prod->is_type('variable') && $empty_img) 
+			{	
 				// Get variations of the parent product
-				$variations = $parent_product->get_available_variations();
-		
+				$variations = $prod->get_available_variations();
+
 				// Find the first variation with an image
 				foreach ($variations as $variation) {
-					$variation_product   = wc_get_product($variation['variation_id']);
-					$variation_image_url = Products::getFeaturedImage($variation_product);
-		
-					if (!empty($variation_image_url)) {
-						$p['img_url'] = $variation_image_url;
-						break;
+					if ($variation['variation_id'] == $p['id']){
+						$p['sku']           = $variation['sku'];
+						$p['attrs']         = $variation['attributes'] ?? [];
+						$p['color']         = $variation['attributes']['attribute_pa_color'] ?? null;
+						$p['img_url']       = $variation['image']['gallery_thumbnail_src'];	
+						$p['description']   = $variation['variation_description'];
+						$p['weight']		= $variation['weight'];
+						$p['dimensions']    = $variation['dimensions'];
+						$p['in_stock']		= $variation['is_in_stock'];
 					}
 				}
+			} else {
+				$p['sku']			= get_post_meta($item['product_id'] , '_sku', true);
+				$p['title']         = $prod->get_title();
+				$p['description']   = $prod->get_description();
+				$p['weight']		= $prod->get_weight();
+				$p['dimensions']    = $prod->get_dimensions();
+				$p['in_stock']		= $prod->is_in_stock();
 			}
 
-            $p['img_url']       = Strings::match($p['img'], '/< *img[^>]*src *= *["\']?([^"\']*)/i');
             $p['title']         = $prod->get_title();
             $p['url']           = get_post_permalink($item['id']);
             $p['link']          = '<a href="'. get_post_permalink($p['id']). '">'. $p['title'] .'</a>';
@@ -99,8 +106,7 @@ class Cart
             $p['price']         = get_post_meta($item['product_id'] , '_price', true);
             $p['regular_price'] = get_post_meta($item['product_id'] , '_regular_price', true);
             $p['sale_price']    = get_post_meta($item['product_id'] , '_sale_price', true);
-            $p['sku']			= get_post_meta($item['product_id'] , '_sku', true);
-
+            
         	// Generate variation URL if product is variable
 			if ($prod->is_type('variation')) {
 				$parent_product_id = $prod->get_parent_id();

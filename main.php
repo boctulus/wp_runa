@@ -60,7 +60,7 @@ function sw_init_session() {
 // Start session on init hook.
 // add_action('init', 'sw_init_session' );
 
-require_once __DIR__ . '/shortcodes.php'; // ok
+require_once __DIR__ . '/shortcodes.php'; 
 
 function assets(){
 	// css_file('/third_party/bootstrap/bootstrap.min.css');
@@ -69,18 +69,20 @@ function assets(){
 	css_file('/css/styles.css');
 
     if (Page::isCart()){
-        css_file('/css/cotizador.css'); // ok
+        css_file('/css/cotizador.css'); 
     }
     
-    js_file('/third_party/sweetalert2/sweetalert.js'); // ok
+    js_file('/third_party/sweetalert2/sweetalert.js'); 
 
-    js_file('/js/utilities.js');  // ok
-    js_file('/js/notices.js');  // ok
-    js_file('/js/storage.js');  // ok
-    js_file('/js/at_home.js');  // ok
+    js_file('/js/utilities.js');  
+    js_file('/js/notices.js');  
+    js_file('/js/storage.js');  
+    js_file('/js/at_home.js');  
 }
 
 enqueue('assets');
+enqueue_admin('assets');
+
 
 /*
     Me aseguro que la extension SimpleXML este instalada
