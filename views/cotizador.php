@@ -47,18 +47,24 @@ use boctulus\SW\core\libs\Url;
             });
         });
 
-        // Actualizado 7/7/23
+        // Actualizado 12/7/23
         $('.minus').click(function (e) {
             e.preventDefault();
             let input = $(this).parent().find('input.qty');
             let qty = parseInt(input.val());
 
-            if (qty > 1) {
-                qty--;
-                input.val(qty);
+            if (qty <= 1) {
+                return;    
             }
 
+            qty--;
+            input.val(qty);
+
             var productId = input.data("product_id");
+
+            if (typeof productId === 'undefined'){
+                return;
+            }
 
             console.log("Product ID:", productId);
             console.log("Cantidad actual:", qty);
@@ -66,7 +72,7 @@ use boctulus\SW\core\libs\Url;
             // llamada a Ajax para decrement()
         });
 
-        // Actualizado 7/7/23
+        // Actualizado 12/7/23
         $('.plus').click(function (e) {
             e.preventDefault();
             let input = $(this).parent().find('input.qty');
@@ -76,6 +82,10 @@ use boctulus\SW\core\libs\Url;
             input.val(qty);
 
             var productId = input.data("product_id");
+
+            if (typeof productId === 'undefined'){
+                return;
+            }
 
             console.log("Product ID:", productId);
             console.log("Cantidad actual:", qty);
