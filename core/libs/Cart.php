@@ -215,17 +215,18 @@ class Cart
 	}
 
 	/*
-		Add to cart X units
+		Add to cart X units 
 	*/
 	static function add($product_id, $qty){
-		$cart     = static::getCart();
-
-		$prev_qty = static::getQuantity($product_id);
-
-		Logger::log("Agregando '$qty' unidades de $product_id");
-		$cart->add_to_cart($product_id, $qty);
+		$prev_qty = static::getQuantity($product_id); // funciona?
 
 		$expected = $prev_qty + $qty;
+
+		if ($qty <= 0){
+			return null;
+		}
+
+		static::setQuantity($product_id, $expected);
 
 		if (static::getQuantity($product_id) != $expected){
 			return false;
@@ -234,6 +235,16 @@ class Cart
 		Logger::dd(static::getQuantity($product_id), "Nueva cantidad para pid=$product_id en carrito");
 
 		return true;
+	}
+
+	// probar
+	static function increment($product_id){
+		return static::add($product_id, 1);
+	}
+
+	// probar
+	static function decrement($product_id){
+		return static::add($product_id, -1);
 	}
 
 	// delete

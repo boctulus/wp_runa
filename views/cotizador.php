@@ -57,6 +57,13 @@ use boctulus\SW\core\libs\Url;
                 qty--;
                 input.val(qty);
             }
+
+            var productId = input.data("product_id");
+
+            console.log("Product ID:", productId);
+            console.log("Cantidad actual:", qty);
+
+            // llamada a Ajax para decrement()
         });
 
         // Actualizado 7/7/23
@@ -67,7 +74,16 @@ use boctulus\SW\core\libs\Url;
 
             qty++;
             input.val(qty);
+
+            var productId = input.data("product_id");
+
+            console.log("Product ID:", productId);
+            console.log("Cantidad actual:", qty);
+
+            // llamada a Ajax para increment()
         });
+
+
     });
 </script>
 
