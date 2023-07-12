@@ -54,11 +54,7 @@ addEventListener("DOMContentLoaded", (event) => {
                         <label for="gir">Giro<span class="description">(obligatorio)</span></label>
                     </th>
                     <td>
-                        <select name="gir" id="gir" required>
-                            <option selected="selected"></option>
-                            <option id="sin giro">Sin giro</option>
-                            <option id="con giro">Con giro</option>
-                        </select>
+                        <input type="text" name="gir" id="gir" class="regular-text" required>
                     </td>
                 </tr>
 

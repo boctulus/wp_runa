@@ -28,12 +28,20 @@ class Page
         return is_singular($post_types);
     }
 
-    static function isHone(){
-        return is_home();
+    static function isHome(){
+        return trim(Url::currentUrl(), '/') == base_url();
     }
 
     static function is404(){
         return is_404();
+    }
+
+    static function isCategory(){
+        return is_category();
+    }
+
+    static function isTag(){
+        return is_tag();
     }
     
     /*

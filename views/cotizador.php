@@ -72,7 +72,7 @@ use boctulus\SW\core\libs\Url;
 </script>
 
 
-<div id="runa_container">
+<div id="runa_container" style="margin-bottom:5vh">
 
 
     <!---  
@@ -102,7 +102,7 @@ use boctulus\SW\core\libs\Url;
                     ?>
 
                     <tr class="woocommerce-cart-form__cart-item cart_item st-item-meta">
-                        <td class="product-name" data-title="Producto">
+                        <td class="product-name" data-title="Producto" data-product_id="<?= $item['id'] ?>">
                             <div class="product-thumbnail">
                                 <a href="<?= $item['url'] ?>">
                                     <img width="100" height="100" src="<?= $item['img_url'] ?>" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="">
@@ -232,7 +232,7 @@ use boctulus\SW\core\libs\Url;
         </div>
         
     </form>
-
+    
 
 </div>
 

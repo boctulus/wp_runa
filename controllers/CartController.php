@@ -276,7 +276,7 @@ class CartController
             'art' => $items
         ];
 
-        //Logger::dd($arr, 'req'); //
+        Logger::dd($arr, 'req'); //
 
         $cfg = config();
 
@@ -315,8 +315,8 @@ class CartController
                 throw new \Exception("Error: " . $client->error());
             }
 
-            // Logger::varExport($client->dd(), 'request.php');
-            // Logger::dd($client->data(), 'RES DATA');
+            Logger::varExport($client->dd(), 'request.php');
+            Logger::dd($client->data(), 'RES DATA');
            
             return response([
                 'data'    => $client->data()

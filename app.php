@@ -28,7 +28,7 @@ if ($cfg["use_composer"] ?? true){
         throw new \Exception("Falta composer.json");
     }       
     
-     if (!file_exists(ROOT_PATH . 'vendor'. DIRECTORY_SEPARATOR .'autoload.php')){
+    if (!file_exists(ROOT_PATH . 'vendor'. DIRECTORY_SEPARATOR .'autoload.php')){
         chdir(__DIR__);
         exec("composer install --no-interaction");
         sleep(10);

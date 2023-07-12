@@ -10,6 +10,7 @@ use boctulus\SW\core\libs\Logger;
 use boctulus\SW\core\libs\Plugins;
 use boctulus\SW\core\libs\Template;
 
+
 /*
     By boctulus
 */
@@ -18,6 +19,7 @@ use boctulus\SW\core\libs\Template;
 
 $quoter_slug = '/cotizador';
 $quoter_stp2 = '/contact';   
+
 
 /*
     Es requisito de RUNA que el IVA este aplicado
@@ -62,11 +64,14 @@ function sw_init_session() {
 
 require_once __DIR__ . '/shortcodes.php'; 
 
+// ok
 function assets(){
 	// css_file('/third_party/bootstrap/bootstrap.min.css');
     // js_file('/third_party/bootstrap/bootstrap.bundle.min.js');
 
-	css_file('/css/styles.css');
+    if (!Page::isHome()){
+        css_file('/css/styles.css');
+    }
 
     if (Page::isCart()){
         css_file('/css/cotizador.css'); 
@@ -111,7 +116,7 @@ function custom_button_proceed_to_checkout() {
         $text = "Cotizar pedido";
     }
 
-    echo '<a href="'.esc_url(wc_get_checkout_url()).'" class="checkout-button button alt wc-forward">' .
+    echo '<a href="'.esc_url(wc_get_checkout_url()).'" class="checkout-button button alt wc-forward se-rompe">' .
     __($text, "woocommerce") . '</a>';
 }
 
@@ -138,9 +143,9 @@ add_filter( 'woocommerce_product_single_add_to_cart_text', 'woocommerce_add_to_c
 ///////////////////////////////////////////////////////////////
 
 
-Page::replaceContent(function(&$content){
-    // $content = preg_replace('/Mi cuenta/', "CuentaaaaaaaX", $content);
-});
+// Page::replaceContent(function(&$content){
+//     // $content = preg_replace('/Mi cuenta/', "CuentaaaaaaaX", $content);
+// });
 
 
 

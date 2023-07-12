@@ -33,23 +33,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 /////////////////////////////////////////////////
 
 
-dd(
-	wc_get_cart_url()
-);
-
-exit;
-
-
-$xml_encoded = '%3Cped%3E%3Cnum%3E101%3C%2Fnum%3E%3Ccli%3E%3Cnom%3EPablo+Bozzolo%3C%2Fnom%3E%3Crut%3E4.534.543-6%3C%2Frut%3E%3Cgir%3ECon+giro%3C%2Fgir%3E%3Cfon%3E644149161%3C%2Ffon%3E%3Cema%3Eboctulus%40gmail.com%3C%2Fema%3E%3Cdir%3EDiego+de+Torres+5%3C%2Fdir%3E%3Ccom%3ECalama%3C%2Fcom%3E%3C%2Fcli%3E%3Cart%3E%3Ccod%3EYR0-446%3C%2Fcod%3E%3Ccan%3E7%3C%2Fcan%3E%3Cpre%3E54851%3C%2Fpre%3E%3Cdes%3E0%3C%2Fdes%3E%3Ctot%3E54851%3C%2Ftot%3E%3C%2Fart%3E%3Cart%3E%3Ccod%3EYR0-465%3C%2Fcod%3E%3Ccan%3E4%3C%2Fcan%3E%3Cpre%3E51900%3C%2Fpre%3E%3Cdes%3E0%3C%2Fdes%3E%3Ctot%3E51900%3C%2Ftot%3E%3C%2Fart%3E%3C%2Fped%3E';
-
-dd(
-	urldecode($xml_encoded)
-);
-
-exit;
-
-
-
 function test_runa(){
 	$cfg = config();
 
@@ -63,7 +46,7 @@ function test_runa(){
 		  'rut' => '1-9',
 		  'nom' => 'david lara oyarzun',
 		  'dir' => 'los dominicos 7177',
-		  'gir' => 'sin giro',
+		  'gir' => 'Mi empresa',
 		  'fon' => '89993450773',
 		  'ema' => 'dlara@runasssssssss.cl',
 		  'com' => 'huechuraba',
@@ -98,6 +81,8 @@ function test_runa(){
 
 	$url = Url::buildUrl($url, $params);
 
+	dd($url, 'API URL');
+
 	$client = new ApiClient;
 
 	$client
@@ -121,6 +106,6 @@ function test_runa(){
 }      
 
 
-//test_runa();
+test_runa();
 
 
