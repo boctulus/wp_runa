@@ -34,7 +34,7 @@ use boctulus\SW\core\libs\Url;
             let a  = $(this);
             let tr = a.closest('tr');
 
-            let pid = a.data('product_id');
+            let pid = a.data('pid');
 
             console.log(pid);
 
@@ -47,7 +47,16 @@ use boctulus\SW\core\libs\Url;
             });
         });
 
-        // Actualizado 12/7/23
+        /*
+            Si desea disminuir la cantidad de un recurso existente identificado por el ID, 
+            se podría considerar un enfoque más apropiado utilizando un endpoint como este:
+
+            PUT /api/v1/items/{id}/decrease_qty
+
+            En este caso, el verbo HTTP PUT se utilizaría para modificar el recurso existente identificado por el ID proporcionado en la URL. 
+            El cuerpo de la solicitud puede contener los detalles necesarios para disminuir la cantidad.
+        */
+
         $('.minus').click(function (e) {
             e.preventDefault();
             let input = $(this).parent().find('input.qty');
@@ -60,16 +69,21 @@ use boctulus\SW\core\libs\Url;
             qty--;
             input.val(qty);
 
-            var productId = input.data("product_id");
+            var pid = input.data("pid");
 
-            if (typeof productId === 'undefined'){
+            if (typeof pid === 'undefined'){
                 return;
             }
 
-            console.log("Product ID:", productId);
+            console.log("Product ID:", pid);
             console.log("Cantidad actual:", qty);
 
-            // llamada a Ajax para decrement()
+            $.post(`/cart/decrement/${pid}`, function (data, status) {
+               console.log(`DEC O.K. para PID=${pid}`);
+            })
+            .fail(function (data) {
+                console.log("error", data);
+            });
         });
 
         // Actualizado 12/7/23
@@ -81,16 +95,21 @@ use boctulus\SW\core\libs\Url;
             qty++;
             input.val(qty);
 
-            var productId = input.data("product_id");
+            var pid = input.data("pid");
 
-            if (typeof productId === 'undefined'){
+            if (typeof pid === 'undefined'){
                 return;
             }
 
-            console.log("Product ID:", productId);
+            console.log("Product ID:", pid);
             console.log("Cantidad actual:", qty);
 
-            // llamada a Ajax para increment()
+            $.post(`/cart/increment/${pid}`, function (data, status) {
+               console.log(`INC O.K. para PID=${pid}`);
+            })
+            .fail(function (data) {
+                console.log("error", data);
+            });
         });
 
 
@@ -102,7 +121,7 @@ use boctulus\SW\core\libs\Url;
 
 
     <!---  
-        Los atributos "data-product_id" son utilizados por codigo Javascript -> favor de conservar
+        Los atributos "data-pid" son utilizados por codigo Javascript -> favor de conservar
 
         El id "quote-cart-form" es utilizado para bindear el form --conservar--
     -->
@@ -128,7 +147,7 @@ use boctulus\SW\core\libs\Url;
                     ?>
 
                     <tr class="woocommerce-cart-form__cart-item cart_item st-item-meta">
-                        <td class="product-name" data-title="Producto" data-product_id="<?= $item['id'] ?>">
+                        <td class="product-name" data-title="Producto" data-pid="<?= $item['id'] ?>">
                             <div class="product-thumbnail">
                                 <a href="<?= $item['url'] ?>">
                                     <img width="100" height="100" src="<?= $item['img_url'] ?>" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="">
@@ -138,7 +157,7 @@ use boctulus\SW\core\libs\Url;
                         </td>
                         <td class="product-details">
                             <div class="cart-item-details">
-                                <a href="<?= $item['url'] ?>" data-product_id="<?= $item['id'] ?>"><?= $item['title'] ?></a> <label class="screen-reader-text"><?= $item['sku'] . ' '. $item['title'] ?></label>
+                                <a href="<?= $item['url'] ?>" data-pid="<?= $item['id'] ?>"><?= $item['title'] ?></a> <label class="screen-reader-text"><?= $item['sku'] . ' '. $item['title'] ?></label>
                                 
                                 <dl class="variation">
                                     <dt class="variation-Color" style="display:none;">Color</dt>
@@ -148,7 +167,7 @@ use boctulus\SW\core\libs\Url;
                                 </dl>
 
                                 <!-- boton de borrado OK -->
-                                <a href="#" aria-label="Borrar este artículo" data-product_id="<?= $item['id'] ?>" data-product_sku="<?= $item['sku'] ?>"  class="remove-item text-underline" title="Eliminar este artículo">Eliminar</a>
+                                <a href="#" aria-label="Borrar este artículo" data-pid="<?= $item['id'] ?>" data-product_sku="<?= $item['sku'] ?>"  class="remove-item text-underline" title="Eliminar este artículo">Eliminar</a>
                                 <span class="mobile-price sf-hidden"></span>
                             </div>
                         </td>
@@ -156,7 +175,7 @@ use boctulus\SW\core\libs\Url;
                         <td class="product-price" data-title="Precio">
                         </td>
 
-                        <td class="product-sku" data-title="SKU" data-product_id="<?= $item['id'] ?>">
+                        <td class="product-sku" data-title="SKU" data-pid="<?= $item['id'] ?>">
                             <?= $item['sku'] ?> 
                         </td>
 
@@ -164,7 +183,7 @@ use boctulus\SW\core\libs\Url;
                             <div class="quantity">
                                 <span class="minus"><i class="minus et-icon et-minus"></i></span> <label class="screen-reader-text"><?= $item['sku'] . ' '. $item['title'] ?></label>
                                 
-                                <input type="number" class="input-text qty text" step="1" min="1" value="<?= $item['qty'] ?>" title="Cantidad" size="4" placeholder="" inputmode="numeric" autocomplete="off" data-product_id="<?= $item['id'] ?>"><label class="screen-reader-text"><?= $item['sku'] . ' '. $item['title'] ?></label>
+                                <input type="number" class="input-text qty text" step="1" min="1" value="<?= $item['qty'] ?>" title="Cantidad" size="4" placeholder="" inputmode="numeric" autocomplete="off" data-pid="<?= $item['id'] ?>"><label class="screen-reader-text"><?= $item['sku'] . ' '. $item['title'] ?></label>
 
                                 <span class="plus"><i class="plus et-icon et-plus"></i></span>
                             </div>
@@ -288,7 +307,7 @@ use boctulus\SW\core\libs\Url;
         jQuery('td.product-name').each((index, td) => {
             const td_el = jQuery(td)
 
-            const id = td_el.data('product_id');
+            const id = td_el.data('pid');
             const a = td_el.children('a');
             const text = a.text();
             const qty = parseInt(td_el.parent().children('td.product-quantity').children('div').children('input.qty').val())

@@ -218,13 +218,9 @@ class Cart
 		Add to cart X units 
 	*/
 	static function add($product_id, $qty){
-		$prev_qty = static::getQuantity($product_id); // funciona?
+		$prev_qty = static::getQuantity($product_id); 
 
 		$expected = $prev_qty + $qty;
-
-		if ($qty <= 0){
-			return null;
-		}
 
 		static::setQuantity($product_id, $expected);
 
@@ -244,7 +240,23 @@ class Cart
 
 	// probar
 	static function decrement($product_id){
-		return static::add($product_id, -1);
+		$prev_qty = static::getQuantity($product_id); 
+
+		$expected = $prev_qty - 1;
+
+		if ($expected <= 1){
+			return null;
+		}
+
+		static::setQuantity($product_id, $expected);
+
+		if (static::getQuantity($product_id) != $expected){
+			return false;
+		}
+
+		Logger::dd(static::getQuantity($product_id), "Nueva cantidad para pid=$product_id en carrito");
+
+		return true;
 	}
 
 	// delete

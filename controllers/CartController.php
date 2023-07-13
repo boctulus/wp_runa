@@ -142,6 +142,46 @@ class CartController
         }   
     }
 
+    function decrement($pid){
+        try {
+            $ok = Cart::decrement($pid);
+
+            if (!$ok){
+                error("No se pudo decrementar para pid=$pid  en el carrito");
+            }
+
+            response([
+                'message' => "Producto con pid=$pid fue exitosamente decrementado"
+            ]);
+
+        } catch (\Exception $e){
+            $err = "Error con el request " . $e->getMessage();
+            Logger::log($err);
+
+            return error($err);
+        }   
+    }
+
+    function increment($pid){
+        try {
+            $ok = Cart::increment($pid);
+
+            if (!$ok){
+                error("No se pudo incrementar para pid=$pid  en el carrito");
+            }
+
+            response([
+                'message' => "Producto con pid=$pid fue exitosamente incrementado"
+            ]);
+
+        } catch (\Exception $e){
+            $err = "Error con el request " . $e->getMessage();
+            Logger::log($err);
+
+            return error($err);
+        }   
+    }
+
     /*  
         Custom endpint
     */
