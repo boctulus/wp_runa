@@ -9,9 +9,29 @@ namespace boctulus\SW\core\libs;
 use boctulus\SW\core\libs\Strings;
 use boctulus\SW\core\libs\Arrays;
 
-class Url 
-{    
-     /*
+class Url
+{
+    static function inArray(array $links, $link) {
+        foreach ($links as $existingLink) {
+            $existingLinkId = parse_url($existingLink, PHP_URL_QUERY);
+            $linkId = parse_url($link, PHP_URL_QUERY);
+
+            if ($existingLinkId === $linkId) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    static function isValid(string $url){
+        if (!Strings::startsWith('http://', $url) && !Strings::startsWith('https://', $url)){
+            return false;
+        }
+
+        return filter_var($url, FILTER_VALIDATE_URL);
+    }
+
+    /*
         Obtiene la url final luego de redirecciones
 
         (no siempre funciona)
@@ -120,10 +140,15 @@ class Url
 		return $result;
 	}
 
-    static function getSlugs(string $url){
+    static function getSlugs($url = null, $as_string = false){
+        $url          = $url ?? static::currentUrl();
+
         $segments_str = parse_url($url, PHP_URL_PATH);
         $segments_str = Strings::rTrim('/', Strings::lTrim('/', $segments_str));
 
+        if ($as_string){
+            return (trim($segments_str) !== '' ? '/' : '') . $segments_str;
+        }
     
         $slugs = explode('/', $segments_str);
         
@@ -134,13 +159,23 @@ class Url
         return $slugs;
     }
 
-	static function query() : Array {
+	static function queryString($url = null) : Array {
+        if ($url !== null){
+            return static::parseStrQuery($url);
+    }
+
         if (!isset($_SERVER['QUERY_STRING'])){
             return [];
         }
 
 		return static::parseStrQuery($_SERVER['QUERY_STRING']);
 	}
+
+
+    static function query($url = null){
+        return static::queryString($url);
+    }
+
 
     /*
         Si esta cerrado el puerto 443 puede demorar demasiado en contestar !
@@ -197,7 +232,11 @@ class Url
         return $is_ssl ? 'https' : 'http';
     }
 
-    static function getProtocol(string $url){
+    static function getProtocol(?string $url = null){
+        if (empty($url)){
+            return static::httpProtocol();
+        }
+       
         if (Strings::startsWith('http://', $url)){
             return 'http';
         }
@@ -209,15 +248,29 @@ class Url
         return null;
     }
 
-    static function getProtocolOrFail(string $url){
+    static function getProtocolOrFail(?string $url = null){
         $protocol = static::getProtocol($url);
 
         if (empty($protocol)){
-            throw new \InvalidArgumentException("Url '$url' has no valid http or https protocol");
+            throw new \InvalidArgumentException("Impossible to determinatte if the protocol is http or https");
         }
 
         return $protocol;
     }
+    
+    /*
+        Devuelve algo como:
+
+        Host: http://simplerest.lan:80
+    */
+    static function constructHostHeader() {
+        $host     = static::getHostname();
+        $protocol = static::httpProtocol();
+    
+        $port = ($protocol == 'https') ? '443' : '80'; // default port for http and https
+        $header = "Host: $host:$port\r\n";
+        return $header;
+    }  
 
     /**
      * urlCheck - complement for parse_url
@@ -340,11 +393,19 @@ class Url
     }
 
     /*
-        funcion auxiliar para parseStrQuery()
+        @return string|array
     */
-    protected static function getQueryParam(string $url, ?string $param = null) : ?Array {
+    static function getQueryParam(string $url = null, $param = null, $autodecode = true) {
+        if (empty($url)){
+            $url = static::currentUrl();
+        }
+
         if ($param === null){
             return static::getQueryParams($url);
+        }
+
+        if (!Strings::startsWith('http', $url)){
+            throw new \InvalidArgumentException("URL '$url' is invalid");
         }
 
         $query = parse_url($url, PHP_URL_QUERY);
@@ -360,15 +421,37 @@ class Url
             }
         }
 
+        if ($autodecode && $x !== null && Strings::contains('%2F', $x)){
+            $x = urldecode($x);
+        }
+
         return $x;
     }
 
-    static function makeQueryString($data, string $numeric_prefix = "", ?string $arg_separator = '&', int $encoding_type = PHP_QUERY_RFC1738){
+    static function encodeParams(array $data, string $numeric_prefix = "", ?string $arg_separator = '&', int $encoding_type = PHP_QUERY_RFC1738){
         return http_build_query($data, $numeric_prefix, $arg_separator, $encoding_type);
     }
 
-    static function buildUrl(string $base_url, $data, string $numeric_prefix = "", ?string $arg_separator = null, int $encoding_type = PHP_QUERY_RFC1738){
-        return  Strings::removeTrailingSlash($base_url) . '?'. static::makeQueryString($data);
+    static function buildUrl(string $base_url, array $data, string $numeric_prefix = "", ?string $arg_separator = null, int $encoding_type = PHP_QUERY_RFC1738){
+        return  Strings::removeTrailingSlash($base_url) . '?'. static::encodeParams($data);
+    }
+    
+    /*
+        Agrega o cambia un parametro en una url
+
+        Ej:
+
+        echo Url::addQueryParam('http://simplerest.lan/api/v1/products', 'q', 'fiesta') . "\n";
+        echo Url::addQueryParam('http://simplerest.lan/api/v1/products?v=1', 'q', 'fiesta') . "\n";
+        echo Url::addQueryParam('http://simplerest.lan/api/v1/products?v=1', 'v', '3') . "\n";
+    */
+    public static function addQueryParam(string $url, $param_name, $param_value) {
+        $parsed_url = Strings::before($url, '?');
+        $query_arr  = Url::getQueryParams($url);
+
+        $query_arr[$param_name] = $param_value;
+     
+        return static::buildUrl($parsed_url, $query_arr);
     }
 
     static function currentUrl(){
@@ -376,14 +459,18 @@ class Url
             return '';
         }
 
-        $actual_link = (isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+        $actual_link = (isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) === 'on' ? "https" : "http") . "://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
         return $actual_link;
+    }
+
+    static function getCurrentUrl(){
+        return static::currentUrl();
     }
 
     static function getHostname(?string $url = null, bool $include_protocol = false)
     {
-        if (is_cli() && $url === ''){
-            return '';
+        if (is_cli() && empty($url)){
+            return config()['app_url'];
         }
 
         if (is_null($url)){
@@ -448,7 +535,7 @@ class Url
 
     static function download(string $url, $dest_path = null, bool $disable_ssl = true, Array $options = []){
         if (empty($dest_path)){
-            $dest_path = __DIR__ . '/../downloads';
+            $dest_path = STORAGE_PATH;
         }
     
         $client = new ApiClient($url);
@@ -520,5 +607,38 @@ class Url
         return $str;
     }
 
+    /*
+        https://stackoverflow.com/a/13646735/980631
+    */
+    static function getVisitorIP()
+    {
+        // Get real visitor IP behind CloudFlare network
+        if (isset($_SERVER["HTTP_CF_CONNECTING_IP"])) {
+                  $_SERVER['REMOTE_ADDR']    = $_SERVER["HTTP_CF_CONNECTING_IP"];
+                  $_SERVER['HTTP_CLIENT_IP'] = $_SERVER["HTTP_CF_CONNECTING_IP"];
+        }
+        $client  = @$_SERVER['HTTP_CLIENT_IP'];
+        $forward = @$_SERVER['HTTP_X_FORWARDED_FOR'];
+        $remote  = $_SERVER['REMOTE_ADDR'];
+    
+        if(filter_var($client, FILTER_VALIDATE_IP))
+        {
+            $ip = $client;
+        }
+        elseif(filter_var($forward, FILTER_VALIDATE_IP))
+        {
+            $ip = $forward;
+        }
+        else
+        {
+            $ip = $remote;
+        }
+    
+        return $ip;
+    }
    
+    // alias
+    static function ip(){
+        return static::getVisitorIP();
+    }
 }

@@ -13,6 +13,29 @@ class Files
 	static protected $backup_path;
 	static protected $callable;
 
+	const LINUX_DIR_SLASH = '/';
+	const WIN_DIR_SLASH   = '\\';
+	const SLASHES 		  = ['/', '\\'];
+
+	/*
+		Fuerza la descarga del archivo
+	*/
+	static function download($file){
+		if (!file_exists($file)) {
+			throw new \InvalidArgumentException("File not found for '$file'");
+		}
+
+		header('Content-Description: File Transfer');
+		header('Content-Type: application/octet-stream');
+		header('Content-Disposition: attachment; filename="'.basename($file).'"');
+		header('Expires: 0');
+		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+		header('Pragma: public');
+		header('Content-Length: ' . filesize($file));
+		@readfile($file);
+		exit;
+	}
+
 	/*
 		Si es false, funciones curl no funcionaran
 	*/
@@ -25,13 +48,6 @@ class Files
 	*/
 	static function isAllowUrlFopenEnabled(){
 		return ini_get('allow_url_fopen');
-	}
-	
-	/*
-		Remover en siguientes versiones
-	*/
-	static function logger($data, ?string $path = null, $append = true){
-		return Logger::log($data, $path, $append);
 	}
 
 	/*
@@ -113,21 +129,36 @@ class Files
 		return array_diff($files_path1, $files_path2);
 	}
 
-
 	/*
-		Remueve el path (la parte constanre) de un array de un array de entradas de directorio 
+		Remueve el path (la parte constante) de un array de un array de entradas de directorio 
+
+		Ej:
+
+			$clean_path  = static::removePath($path, static::PLUGINDIR)[0];
+
+		Ej:
+
+			$clean_paths = static::removePath([ $path1, $path2, $path_n ], static::PLUGINDIR);
 	*/
-	static function removePath(Array $list, string $path) : Array {
+	static function removePath($to_clean, string $path) {
 		$path_non_trailing_slash = Strings::removeTrailingSlash($path);
 
 		$len = strlen($path_non_trailing_slash) + 1;
-        foreach ($list as $ix => $f){
-            $list[$ix] = substr($f, $len);
+
+		if (!is_array($to_clean)){
+			return substr($to_clean, $len);
+		}
+
+        foreach ($to_clean as $ix => $f){
+            $to_clean[$ix] = substr($f, $len);
         }
 
-		return $list;
+		return $to_clean;
 	}
 
+	/* 
+		str_replace sobre archivo
+	*/
 	static function replace(string $filename, $search, $replace){
 		$file  = file_get_contents($filename);
 		$file  = str_replace($search, $replace, $file);
@@ -135,6 +166,9 @@ class Files
 		return file_put_contents($filename, $file);
 	}
 
+	/* 
+		preg_replace sobre archivo
+	*/
 	static function pregReplace(string $filename, $search, $replace){
 		$file = file_get_contents($filename);
 		$file = preg_replace($search, $replace, $file);
@@ -142,7 +176,27 @@ class Files
 		return file_put_contents($filename, $file);
 	}
 
+	/*
+		Convierte todos los slashes de la ruta a los apropiados o especificados
+	*/
+	static function convertSlashes($path, $to_slash = null){
+		if ($to_slash === null){
+			$to_slash = DIRECTORY_SEPARATOR;
+		}
+
+		$path = str_replace(static::SLASHES, $to_slash, $path);
+
+		return $path;
+	}
+
+	// alias 
+	static function normalize($path, $to_slash = null){
+		return static::convertSlashes($path, $to_slash);
+	}
+
 	static function isAbsolutePath(string $path){
+		$path = static::convertSlashes($path);
+
 		if (Strings::contains('..', $path) || Strings::startsWith('.' . DIRECTORY_SEPARATOR , $path)|| Strings::startsWith('..' . DIRECTORY_SEPARATOR , $path)){
 			return false;
 		}
@@ -196,12 +250,36 @@ class Files
 		return $path;
 	}
 
-	static function glob(string $path, string $pattern, $flags = 0){
-		if (Strings::lastChar($path) != '/'){
-			$path .= '/';
+	/*
+		Ej:
+
+		$zips    = Files::glob($ori, '*.zip');
+		$entries = Files::glob($content_dir, '*', GLOB_ONLYDIR, '__MACOSX');
+	*/
+	static function glob(string $path, string $pattern, $flags = 0, $exclude = null){
+		$last_char = Strings::lastChar($path);
+
+		if ($last_char != '/' && $last_char != '\\'){
+			$path .= DIRECTORY_SEPARATOR;
 		}
 
-		return glob($path . $pattern, $flags);
+		$entries = glob($path . $pattern, $flags);
+
+		if (!empty($exclude)){
+			if (!is_array($exclude)){
+				$exclude = [ $exclude ];
+			}
+
+			foreach ($entries as $ix => $entry){
+				$filename = basename($entry);
+				
+				if (in_array($filename, $exclude)){
+					unset($entries[$ix]);
+				}
+			}
+		}
+
+		return $entries;
 	}
 
 	// https://stackoverflow.com/a/17161106/980631
@@ -251,7 +329,7 @@ class Files
 	static function getDir(string $path, bool $should_exist = false, bool $throw = false){
 		if (!$should_exist){
 			if (!is_dir($path)){
-				$path = str_replace('\\', DIRECTORY_SEPARATOR, $path);
+				$path = str_replace(static::SLASHES, DIRECTORY_SEPARATOR, $path);
 				$path = Strings::beforeLast($path, DIRECTORY_SEPARATOR);
 			}
 
@@ -286,17 +364,18 @@ class Files
 	static function setCallback(?callable $fn) : void {
 		static::$callable = $fn;
 	}
-
+	
 	/*
 		Copy single files
+		
+		@return bool
 	*/
 	static function cp(string $ori, string $dst, bool $simulate = false, bool $overwrite = true, ?callable $callable = null){
 		$ori = trim($ori);
         $dst = trim($dst);
 		
 		if (!is_file($ori)){
-			//return;
-			throw new \InvalidArgumentException("File '$ori' not found");
+			return false;
 		}
 
 		if (!file_exists($ori)){
@@ -370,11 +449,11 @@ class Files
             $ok = true;
         }       
 
-        if ($ok){
-            StdOut::pprint("-- ok", true);
-        } else {
-            StdOut::pprint("-- FAILED !", true);
-        }
+        // if ($ok){
+        //     StdOut::pprint("-- ok", true);
+        // } else {
+        //     StdOut::pprint("-- FAILED !", true);
+        // }
 
         return $ok;
     }
@@ -386,9 +465,9 @@ class Files
         @param $ori source directory
 		@param $dst destination directory
 		@param $files to be copied
-        @param $except files a excluir (de momento sin ruta). It can be an array or a glob pattern
+        @param $exclude files a excluir (de momento sin ruta). It can be an array or a glob pattern
     */
-    static function copy(string $ori, string $dst, ?Array $files = null, ?Array $except = null, ?callable $callable = null)
+    static function copy(string $ori, string $dst, ?Array $files = null, ?Array $exclude = null, ?callable $callable = null)
     {
 		if (empty($dst)){
 			throw new \InvalidArgumentException("Destination dst can not be empty");
@@ -447,35 +526,35 @@ class Files
 		$files = array_merge($files, $glob_includes);
 		
 
-		if (empty($except)){
-			$except = [];
+		if (empty($exclude)){
+			$exclude = [];
 		}
 
 		$except_dirs = [];
-		if (is_array($except)){
+		if (is_array($exclude)){
 			/*
 				Glob ignored files
 			*/
 			$glob_excepts = [];
-			foreach ($except as $ix => $e){
+			foreach ($exclude as $ix => $e){
 				if (Strings::startsWith('glob:', $e)){
-					$glob_excepts = array_merge($glob_excepts, Files::recursiveGlob($ori_with_trailing_slash . substr($e, 5)));
-					unset($except[$ix]);
+					$glob_excepts = array_merge($glob_excepts, static::recursiveGlob($ori_with_trailing_slash . substr($e, 5)));
+					unset($exclude[$ix]);
 				}
 			}
-			$except = array_merge($except, $glob_excepts);
+			$exclude = array_merge($exclude, $glob_excepts);
 
-			foreach ($except as $ix => $e){
-				if (!Files::isAbsolutePath($e)){
-					$except[$ix] = trim(Files::getAbsolutePath($ori . '/'. $e));
+			foreach ($exclude as $ix => $e){
+				if (!static::isAbsolutePath($e)){
+					$exclude[$ix] = trim(static::getAbsolutePath($ori . '/'. $e));
 				}
 
-				if (is_dir($except[$ix])){
-					$except_dirs[] = $except[$ix];
+				if (is_dir($exclude[$ix])){
+					$except_dirs[] = $exclude[$ix];
 				}
 			}
 
-			// d($except, 'except');
+			// d($exclude, 'exclude');
 			// d($except_dirs, 'except_dirs');
 			// exit;
 		}
@@ -537,7 +616,7 @@ class Files
 						}
 					}
 						
-					foreach ($except as $ix => $e){
+					foreach ($exclude as $ix => $e){
 						if ($full_path == $e){
                         	continue 2;
 						}
@@ -610,7 +689,7 @@ class Files
 			Copio efectivamente
 		*/
 		foreach ($to_cp as $f){
-			if (in_array(trim($f['ori_path']), $except)){
+			if (in_array(trim($f['ori_path']), $exclude)){
 				continue;
 			}
 
@@ -742,9 +821,9 @@ class Files
 		return @rmdir($dir);
 	}
 
-	static function delTree(string $dir, bool $include_self = false, bool $warn_if_not_exists = false) {
+	static function delTree(string $dir, bool $include_self = false, bool $throw = false) {
 		if (!is_dir($dir)){
-			if ($warn_if_not_exists){
+			if ($throw){
 				throw new \InvalidArgumentException("Invalid directory '$dir'");
 			} else {
 				return;
@@ -752,7 +831,7 @@ class Files
 		}
 
 		if (!$include_self){
-			return Files::globDelete($dir, '{*,.*,*.*}', true, true);
+			return static::globDelete($dir, '{*,.*,*.*}', true, true);
 		}
 		
 		/*
@@ -780,79 +859,26 @@ class Files
 		static::delTree($dir, $include_self, true);
 	}
 
-
-	/*
-		https://stackoverflow.com/a/1334949/980631
-
-		Modified by @boctulus
-	*/
-	static function zip(string $ori, string $dst, ?Array $except = null, bool $overwrite = true)
-	{
-		if (!extension_loaded('zip') || !file_exists($ori)) {
-			return false;
+	// chatGPT alternative to delTree()
+	static function deleteDirectory(string $dir) {
+		if (!is_dir($dir)) {
+			return;
 		}
 	
-		$zip = new \ZipArchive();
-		if (!$zip->open($dst, $overwrite && file_exists($dst) ? \ZipArchive::OVERWRITE : \ZipArchive::CREATE)) {
-			return false;
-		}
-	
-		if (is_null($except)){
-			$except = [];
-		}
-
-		$ori = str_replace('\\', '/', realpath($ori));
-	
-		if (is_dir($ori) === true)
-		{
-			$new_excluded = [];
-			foreach ($except as $ix => $file){
-				if (!static::isAbsolutePath($file)){
-					$except[$ix] = Files::getAbsolutePath($file, $ori);
-				}
-
-				if (is_dir($except[$ix])){
-					$new_excluded = array_merge($new_excluded, static::recursiveGlob($except[$ix] . '/*'));	
-				}
-			}
-
-			$except = array_merge(array_values($except), array_values($new_excluded));
-
-			$files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($ori), \RecursiveIteratorIterator::SELF_FIRST);
-	
-			foreach ($files as $file)
-			{
-				$file = str_replace('\\', '/', $file);
-	
-				// Ignore "." and ".." folders
-				if( in_array(substr($file, strrpos($file, '/')+1), array('.', '..')) )
-					continue;
-	
-				$file = realpath($file);
-	
-				if (!empty($except) && in_array($file, $except)){
-					continue;
-				}
-
-				if (is_dir($file) === true && !in_array($file, $except))
-				{
-					$zip->addEmptyDir(str_replace($ori . '/', '', $file . '/'));
-				}
-				else if (is_file($file) === true)
-				{
-					$zip->addFromString(str_replace($ori . '/', '', $file), file_get_contents($file));
-				}
+		$files = array_diff(scandir($dir), array('.', '..'));
+		foreach ($files as $file) {
+			$path = $dir . '/' . $file;
+			if (is_dir($path)) {
+				self::deleteDirectory($path);
+			} else {
+				unlink($path);
 			}
 		}
-		else if (is_file($ori) === true)
-		{
-			$zip->addFromString(basename($ori), file_get_contents($ori));
-		}
 	
-		return $zip->close();
+		rmdir($dir);
 	}
 
-	static function mkDir($dir, int $permissions = 0777, bool $recursive = true){
+	static function mkDir(string $dir, int $permissions = 0777, bool $recursive = true){
 		$ok = null;
 
 		if (!is_dir($dir)) {
@@ -861,8 +887,8 @@ class Files
 
 		return $ok;
 	}
-	
-	static function mkDirOrFail($dir, int $permissions = 0777, $recursive = true, string $error = "Failed trying to create %s"){
+
+	static function mkDirOrFail(string $dir, int $permissions = 0777, $recursive = true, string $error = "Failed trying to create %s"){
 		$ok = null;
 
 		if (!is_dir($dir)) {
@@ -876,30 +902,111 @@ class Files
 	}
 
 	/*
-		Verifica si un archivo o directorio se puede escribir
+		Recibe un PATH
+		
+		Si la ruta ya existe, nada que hacer.
+		Sino existe la ruta se intenta crear el directorio
+
+		Se diferencia de mkDir() en que no acepta un $path que deba ser un directorio
+		sino es un path que apuntaria a un archivo (que puede no haber sido creado ni tampoco el directorio)
+
+		@return	bool|null
+
+		En caso de que sea dudoso de si se trata de un archivo o una ruta de directorio y no se efectura ninguna accion,
+		devuelve null
 	*/
-	static function isWritable(string $path){
-		if (is_dir($path)){
-			$dir = Strings::beforeLast($path, DIRECTORY_SEPARATOR);
-			return is_writable($dir);
-		} else {
-			if (file_exists($path)){
-				return is_writable($path);
-			} else {
-				$dir = Strings::beforeLast($path, DIRECTORY_SEPARATOR);
-				return is_writable($dir);
-			}
-		}
-
-		return is_writable($path);
-	}
-
-	static function writableOrFail(string $path, string $error = "Permission error. Path '%s' is not writable"){
-		if (PHP_OS_FAMILY == 'Windows'){
+	static function mkDestination(string $path)
+	{
+		// Si es un archivo o directorio (y existe)
+		if (file_exists($path) || is_dir($path)){
 			return true;
 		}
 
-		if (!static::isWritable($path)){
+		// Podria ser un path directorio (aun no creado) o un archivos
+		if (Strings::containsAny(['\\', '/'], $path)){
+            $dir = static::getDir($path);
+
+            if (!is_dir($dir)){
+                static::mkDirOrFail($dir);
+				return true;
+            }
+        }
+	}
+
+	/*
+		Verifica si un archivo o directorio se puede escribir
+	*/
+	static function isWritable(string $path)
+	{
+		$path = static::convertSlashes($path); // pasa cualquier barra a DIRECTORY_SEPARATOR
+
+		if (is_dir($path)) {
+			$dir = Strings::beforeLast($path, DIRECTORY_SEPARATOR);
+			return static::isDirectoryWritable($dir);
+		} else {
+			if (file_exists($path)) {
+				return static::isFileWritable($path);
+			} else {
+				$dir = Strings::beforeLast($path, DIRECTORY_SEPARATOR);
+				return static::isDirectoryWritable($dir);
+			}
+		}
+
+		return static::isFileWritable($path);
+	}
+
+	static function isDirectoryWritable(string $directory)
+	{
+		if (System::isWindows()) {
+			// Verificar permisos de escritura en Windows
+			return is_writable($directory);
+		} else {
+			// Verificar permisos de escritura en sistemas Unix (Linux, macOS, etc.)
+			return is_writable($directory) && static::hasWritePermission($directory);
+		}
+	}
+
+	static function isFileWritable(string $file)
+	{
+		if (System::isWindows()) {
+			// Verificar permisos de escritura en Windows
+			return is_writable($file);
+		} else {
+			// Verificar permisos de escritura en sistemas Unix (Linux, macOS, etc.)
+			return is_writable($file) && static::hasWritePermission(dirname($file));
+		}
+	}
+
+	static function hasWritePermission(string $path)
+	{
+		$stat = stat($path);
+		$mode = $stat['mode'];
+
+		// Verificar si el bit de permisos de escritura está configurado para el propietario
+		if (($mode & 0x0080) !== 0) {
+			return true;
+		}
+
+		// Verificar si el bit de permisos de escritura está configurado para el grupo
+		if (($mode & 0x0010) !== 0) {
+			return true;
+		}
+
+		// Verificar si el bit de permisos de escritura está configurado para otros usuarios
+		if (($mode & 0x0002) !== 0) {
+			return true;
+		}
+
+		return false;
+	}
+
+	static function writableOrFail(string $path, string $error = "Permission error. Path '%s' is not writable")
+	{
+		if (System::isWindows()) {
+			return true;
+		}
+
+		if (!static::isWritable($path)) {
 			$path = realpath($path);
 			throw new \Exception(sprintf($error, $path));
 		}
@@ -913,10 +1020,10 @@ class Files
 	/*
 		Escribe archivo o falla.
 	*/
-	static function writeOrFail(string $path, string $string, int $flags = 0){
+	static function writeOrFail(string $path, $content, int $flags = 0){
 		if (is_dir($path)){
 			$path = realpath($path);
-			throw new \InvalidArgumentException("'$path' is not a valid file. It's a directory!");
+			throw new \InvalidArgumentException("$path is not a valid file. It's a directory!");
 		} 
 
 		$dir = static::getDir($path);
@@ -927,14 +1034,27 @@ class Files
 
 		static::writableOrFail($dir);
 
-		$ok = (bool) @file_put_contents($path, $string, $flags);
+		// Pruebo a ver si tiene __toString()
+		if (is_string($content)){
+			$string = $content;
+		} elseif (is_object($content)){
+			$string = (string) $content;
+		} elseif (is_array($content)){
+			$string = implode(PHP_EOL, $content);
+		} 
 
-		if (!$ok){
-			$path = realpath($path);
-			throw new \Exception("Path '$path' could not be written");
-		}
+		$bytes = @file_put_contents($path, $string, $flags);
+
+		return $bytes;
 	}
 
+	static function append(string $path, string $string, $add_newline_before = true) : bool {
+		return static::write($path, ($add_newline_before ? Strings::carriageReturn($path) : "") . $string, FILE_APPEND);
+	}
+
+	static function appendOrFail(string $path, string $string, $add_newline_before = true){
+		static::writeOrFail($path, ($add_newline_before ? Strings::carriageReturn($path) : "") . $string, FILE_APPEND);
+	}
 	
 	/*
 		Para cache lo mejor sería usar PHP FAST CACHE 
@@ -991,12 +1111,40 @@ class Files
 		return static::file_get_contents_locking($filename, $flags);
 	}
 
+	/*
+		Lee archivo o falla.
+	*/
+	static function readOrFail(string $path, bool $use_include_path = false, $context = null, int $offset = 0, $length = null){
+		if (is_dir($path)){
+			$path = realpath($path);
+			throw new \InvalidArgumentException("$path is not a valid file. It's a directory!");
+		} 
+
+		if (!file_exists($path)){	
+			throw new \InvalidArgumentException("Path '$path' does not exist!");
+		}
+
+		$content =  @file_get_contents($path, $use_include_path, $context, $offset, $length);
+
+		if ($content === false || $content === null){
+			$path = realpath($path);
+			throw new \Exception("File '$path' was unabble to be written!");
+		}
+
+		return $content;
+	}
+
+	// alias
+	static function getContent(string $path, bool $use_include_path = false, $context = null, int $offset = 0, $length = null){
+		return static::readOrFail($path, $use_include_path, $context, $offset, $length);
+	}
+
 	static function touch(string $filename, int $flags = 0){
 		if (file_exists($filename)){
 			return touch($filename);
 		}
 
-		return file_put_contents($filename, '', $flags) !== false;
+		return static::writeOrFail($filename, '', $flags) !== false;
 	}
 
 	static function getTempFilename(?string $extension = null){
@@ -1005,24 +1153,16 @@ class Files
 
 	static function saveToTempFile($data, ?string $filename = null, $flags = null, $context = null){
 		$filename = $filename ?? static::getTempFilename();
-		file_put_contents($filename, $data, $flags, $context);
+		static::writeOrFail($filename, $data, $flags, $context);
 
 		return $filename;
 	}
 
 	static function getFromTempFile(string $filename){
-		return file_get_contents(sys_get_temp_dir() . DIRECTORY_SEPARATOR . $filename);
+		return static::readOrFail(sys_get_temp_dir() . DIRECTORY_SEPARATOR . $filename);
 	}
 
 	static function fileExtension(string $filename){
 		return Strings::last($filename, '.');
 	}
-}  
-
-
-
-
-
-
-
-
+}      

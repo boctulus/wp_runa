@@ -10,10 +10,60 @@ if ( ! function_exists( 'wp_crop_image' ) ) {
 
 /*
     Product utility class
+
+    Investigar '_transient_wc_attribute_taxonomies' como option_name en wp_options
 */
-class Products
+class Products extends Posts
 {
-    // Investigar '_transient_wc_attribute_taxonomies' como option_name en wp_options
+    static $post_type   = 'product';
+    static $cat_metakey = 'product_cat';
+
+    /*
+        Fuente:
+
+        \wp-content\plugins\woocommerce\includes\data-stores\class-wc-product-data-store-cpt.php
+
+        Indgar todos los metodos que aparecen ahi. Ej: update_post_meta()
+
+        Usar en dump() e createProduct() y updateProduct() de forma concistente
+
+        Crear el metodo importProduct() que de existir o no el "ID" o el "sku" actualice o bien cree los productos
+    */
+    static $meta_key_to_props = array(
+        '_sku'                   => 'sku',
+        '_regular_price'         => 'regular_price',
+        '_sale_price'            => 'sale_price',
+        '_price'                 => 'price',
+        '_sale_price_dates_from' => 'date_on_sale_from',
+        '_sale_price_dates_to'   => 'date_on_sale_to',
+        'total_sales'            => 'total_sales',
+        '_tax_status'            => 'tax_status',
+        '_tax_class'             => 'tax_class',
+        '_manage_stock'          => 'manage_stock',
+        '_backorders'            => 'backorders',
+        '_low_stock_amount'      => 'low_stock_amount',
+        '_sold_individually'     => 'sold_individually',
+        '_weight'                => 'weight',
+        '_length'                => 'length',
+        '_width'                 => 'width',
+        '_height'                => 'height',
+        '_upsell_ids'            => 'upsell_ids',
+        '_crosssell_ids'         => 'cross_sell_ids',
+        '_purchase_note'         => 'purchase_note',
+        '_default_attributes'    => 'default_attributes',
+        '_virtual'               => 'virtual',
+        '_downloadable'          => 'downloadable',
+        '_download_limit'        => 'download_limit',
+        '_download_expiry'       => 'download_expiry',
+        '_thumbnail_id'          => 'image_id',
+        '_stock'                 => 'stock_quantity',
+        '_stock_status'          => 'stock_status',
+        '_wc_average_rating'     => 'average_rating',
+        '_wc_rating_count'       => 'rating_counts',
+        '_wc_review_count'       => 'review_count',
+        '_product_image_gallery' => 'gallery_image_ids',
+    );
+
 
     static function productExists($sku){
         global $wpdb;
@@ -123,65 +173,18 @@ class Products
         return $prods_ay;
     }
 
-    static function getIDs($post_type = 'product', $post_status = null){
-        global $wpdb;
-
-        $include_post_status = '';
-        if ($post_status !== null){
-            $include_post_status = "AND post_status = '$post_status'";
-        }
-
-        $sql = "SELECT ID FROM `{$wpdb->prefix}posts` WHERE post_type = '$post_type' $include_post_status";
-       
-        $res = $wpdb->get_results($sql, ARRAY_A);   
-
-        return  array_column($res, 'ID') ?? null;
-	}
-
-    static function getLastPost($post_type = 'product', $post_status = null){
-        global $wpdb;
-
-		$args = [
-            'post_type' => $post_type,
-            'posts_per_page' => 1
-        ];
-
-        $include_post_status = '';
-        if ($post_status !== null){
-            $include_post_status = "AND post_status = '$post_status'";
-        }
-
-        $sql = "SELECT ID FROM `{$wpdb->prefix}posts` WHERE post_type = '$post_type' $include_post_status ORDER BY ID DESC LIMIT 1;";
-        $res = $wpdb->get_results($sql, ARRAY_A);   
-
-        return $res[0] ?? null;
-	}
-
-    static function getLastPid($post_type = 'product', $post_status = null){
-        $post = static::getLastPost($post_type, $post_status);
-
-        if ($post == null){
-            return null;
-        }
-
-        return (int) $post['ID'] ?? null;
-	}
-
-    static function getAll($post_type = 'post', $status = 'publish', $limit = -1, $order = null){
-        global $wpdb;
-        
-        $sql = "SELECT SQL_CALC_FOUND_ROWS  * FROM {$wpdb->prefix}posts  WHERE 1=1  AND (({$wpdb->prefix}posts.post_type = '$post_type' AND ({$wpdb->prefix}posts.post_status = '$status')));";
-    
-        return $wpdb->get_results($sql, ARRAY_A);
+    static function searchProduct($keywords, $attributes = null, $select = '*', $post_status = null, $limit = null, $offset = null){
+        return parent::search(
+            $keywords,
+            $attributes,
+            $select,
+            true,
+            'product',
+            $post_status,
+            $limit,
+            $offset
+        );
     }
-    
-    static function getOne($post_type = 'post', $status = 'publish', $limit = -1, $order = null){
-        global $wpdb;
-        
-        $sql = "SELECT SQL_CALC_FOUND_ROWS  * FROM {$wpdb->prefix}posts  WHERE 1=1  AND (({$wpdb->prefix}posts.post_type = '$post_type' AND ({$wpdb->prefix}posts.post_status = '$status')));";
-    
-        return $wpdb->get_row($sql, ARRAY_A);
-    }    
 
     static function getProductPropertiesBySKU($sku){
         $result_ay = static::getByMeta('SKU', $sku);
@@ -193,7 +196,23 @@ class Products
         return $result_ay[0];
     }
 
-    static function getProductIdBySKU($sku, $post_status = null){
+    static function getProductIDBySKU($sku, $post_status = null){
+        $pid = wc_get_product_id_by_sku($sku);
+    
+        if ($pid != null){
+            return $pid;
+        }
+    
+        $result_ay = static::getByMeta('SKU', $sku, 'product', $post_status);
+    
+        if (empty($result_ay)){
+            return;
+        }
+    
+        return $result_ay[0]['ID'];
+    }    
+
+    static function getIdBySKU($sku, $post_status = null){
         $pid = wc_get_product_id_by_sku($sku);
 
         if ($pid != null){
@@ -207,17 +226,6 @@ class Products
         }
 
         return $result_ay[0]['ID'];
-    }
-
-    static function setStatus($pid, $status){
-        global $wpdb;
-
-        if ($pid == null){
-            throw new \InvalidArgumentException("PID can not be null");
-        }
-
-        $sql = "UPDATE `{$wpdb->prefix}posts` SET `post_status` = '$status' WHERE `{$wpdb->prefix}posts`.`ID` = $pid;";
-        return $wpdb->get_results($sql);    
     }
 
     static function getPrice($p){
@@ -253,19 +261,14 @@ class Products
     */
     static function setHighAvailability($pid = null){
         if ($pid == null){
-            $pids = Products::getIDs();
+            $pids = static::getIDs();
         } else {
             $pids = [ $pid ];
         }
 
         foreach($pids as $pid){
-            Products::setStock($pid, 9999);
+            static::setStock($pid, 9999);
         }   
-    }
-
-    // alias
-    static function updateStatus($pid, $status){
-        return static::setStatus($pid, $status);
     }
 
     static function setProductStatus($product, $status){
@@ -276,7 +279,7 @@ class Products
             $product->set_status($status);
             $product->save();
         } else {
-            throw new \InvalidArgumentException("Estado de producto '$status' invalido.");
+            throw new \InvalidArgumentException("Estado '$status' invalido.");
         }
     }
 
@@ -288,27 +291,26 @@ class Products
         static::setProductStatus($pid, 'publish');
     }
 
-    // 'publish'
-    static function restore($pid){
-        return static::setStatus($pid, 'publish');
-    }
-
     static function restoreBySKU($sku){
-        $pid = static::getProductIdBySKU($sku);
+        $pid = static::getProductIDBySKU($sku);
         return static::setStatus($pid, 'publish');
-    }
-
-    static function trash($pid){
-        return static::setStatus($pid, 'trash');
     }
 
     static function trashBySKU($sku){
-        $pid = static::getProductIdBySKU($sku);
+        $pid = static::getProductIDBySKU($sku);
         return static::setStatus($pid, 'trash');
     }
 
     static function getAttributeValuesByProduct($product, $attr_name){
-        $product = Products::getProduct($product);
+        $product = static::getProduct($product);
+
+        if ($product === null){
+            throw new \Exception("Producto no puede ser nulo");
+        }
+
+        if ($product === false){
+            throw new \Exception("Producto no encontrado");
+        }
 
         return $product->get_attribute($attr_name);
     }
@@ -366,7 +368,7 @@ class Products
 
         Ej:
 
-        Products::getMetaByPid($pid, 'product_cat')
+        static::getMetaByPID($pid, static::$cat_metakey)
 
         Salida:
 
@@ -378,7 +380,7 @@ class Products
                 'slug' => 'medicamentos',
                 'term_group' => '0',
                 'term_taxonomy_id' => '20',
-                'taxonomy' => 'product_cat',
+                'taxonomy' => static::$cat_metakey,
                 'description' => '',
                 'parent' => '0',
                 'count' => '1389',
@@ -390,7 +392,7 @@ class Products
                 'slug' => 'antialergicos-antihistaminicos',
                 'term_group' => '0',
                 'term_taxonomy_id' => '34',
-                'taxonomy' => 'product_cat',
+                'taxonomy' => static::$cat_metakey,
                 'description' => '',
                 'parent' => '0',
                 'count' => '93',
@@ -398,7 +400,7 @@ class Products
             // ...
         )
     */
-    static function getMetaByPid($pid, $taxonomy = null){
+    static function getMetaByPID($pid, $taxonomy = null){
 		global $wpdb;
 
 		$pid = (int) $pid;
@@ -431,7 +433,7 @@ class Products
         return !Strings::endsWith('/placeholder.png', $src);
     }
 
-    static function getTagsByPid($pid){
+    static function getTagsByPID($pid){
 		global $wpdb;
 
 		$pid = (int) $pid;
@@ -445,7 +447,7 @@ class Products
 	}
     
     // ok
-    static function updateProductTypeByProductId($pid, $new_type){
+    static function updateProductTypeByProductID($pid, $new_type){
         $types = ['simple', 'variable', 'grouped', 'external'];
     
         if (!in_array($new_type, $types)){
@@ -522,12 +524,12 @@ class Products
     }
 
     static function deleteProductBySKU($sku, bool $permanent = false){
-        $pid = static::getProductIdBySKU($sku);
+        $pid = static::getProductIDBySKU($sku);
 		static::deleteProduct($pid, $permanent);
     }
 
     static function deleteLastProduct($force = false){
-        $pid = static::getLastPid();
+        $pid = static::getLastID();
         static::deleteProduct($pid, $force);
     }
 
@@ -545,7 +547,23 @@ class Products
         $wpdb->query("DELETE pm FROM {$prefix}postmeta pm LEFT JOIN {$prefix}posts wp ON wp.ID = pm.post_id WHERE wp.ID IS NULL");
     } 
 
-    static function getRandomProductIds($qty = 1, $type = 'product'){
+    static function getFirst($qty = 1, $type = 'product'){
+        global $wpdb;
+
+        if (empty($qty) || $qty < 0){
+            throw new \InvalidArgumentException("Quantity can not be 0 or null or negative");
+        }
+
+        $sql = "SELECT ID FROM {$wpdb->prefix}posts WHERE post_type IN ('$type') ORDER BY ID DESC LIMIT $qty";
+
+        $res     = $wpdb->get_results($sql, ARRAY_A);
+        $res_ids = array_column($res, 'ID');
+
+        return ($qty == 1) ? ($res_ids[0] ?? false) : $res_ids;
+    }
+
+
+    static function getRandomProductIDs($qty = 1, $type = 'product'){
         global $wpdb;
 
         if (empty($qty) || $qty < 0){
@@ -566,7 +584,7 @@ class Products
         return $id;    
     }
 
-    static function getFeaturedImageId($product){
+    static function getFeaturedImageID($product){
         if (!is_object($product) && is_numeric($product)){
             $product = wc_get_product($product);    
         }
@@ -589,7 +607,7 @@ class Products
             throw new \InvalidArgumentException("Size parameter value is incorrect");
         }
 
-        $image_id = static::getFeaturedImageId($product);
+        $image_id = static::getFeaturedImageID($product);
         
         if (empty($image_id)){
             return;
@@ -724,7 +742,7 @@ class Products
     }
 
     static function getProductCategoryNames($pid){
-        return wp_get_post_terms( $pid, 'product_cat', array('fields' => 'names') );
+        return wp_get_post_terms( $pid, static::$cat_metakey, array('fields' => 'names') );
     }
 
     /*
@@ -735,7 +753,7 @@ class Products
             throw new \InvalidArgumentException("Categorias no pueden ser array de array");
         }
 
-        wp_set_object_terms($pid, $categos, 'product_cat');
+        wp_set_object_terms($pid, $categos, static::$cat_metakey);
     }
 
     /*
@@ -791,13 +809,13 @@ class Products
     }
 
 
-    static function updateProductBySku( $args, $update_images_even_it_has_featured_image = true )
+    static function updateProductBySKU($args, $update_images_even_it_has_featured_image = true)
     {
         if (!isset($args['sku']) || empty($args['sku'])){
             throw new \InvalidArgumentException("SKU es requerido");
         }
 
-        $pid = static::getProductIdBySKU($args['sku']);
+        $pid = static::getProductIDBySKU($args['sku']);
 
         if (empty($pid)){
             throw new \InvalidArgumentException("SKU {$args['sku']} no encontrado");
@@ -807,7 +825,7 @@ class Products
 
         // Si hay cambio de tipo de producto, lo actualizo
         if ($product->get_type() != $args['type']){
-            self::updateProductTypeByProductId($pid, $args['type']);
+            self::updateProductTypeByProductID($pid, $args['type']);
         }
 
         // Product name (Title) and slug
@@ -988,12 +1006,12 @@ class Products
 
         // Images and Gallery
         
-        $current_featured_image = Products::getFeaturedImageId($pid);
+        $current_featured_image = static::getFeaturedImageID($pid);
 
         if (empty($current_featured_image) || $update_images_even_it_has_featured_image){
             $images = $args['gallery_images'] ?? $args['images'] ?? [];
-            
-            if ($images >0){
+
+            if (count($images) >0){
                 $att_ids = [];
                 foreach ($images as $img){
                     $img_url = is_array($img) ? $img[0] : $img;
@@ -1038,7 +1056,7 @@ class Products
     }
 
     /*
-        Use *after* post creation
+        Debe usarse luego de crear el producto
 
         @param $pid product id
         @param array[] $attributes - This needs to be an array containing *ALL* your attributes so it can insert them in one go
@@ -1061,12 +1079,8 @@ class Products
             'Precio por 100 ml o 100 G' => '',
             'Requiere receta' => 'Si',
         )
-
-        Creo estos son los atributos no-reusables
-
-        Viejo nombre: createProductAttributesForSimpleProducs
     */
-    static function setProductAttributesForSimpleProducts($pid, Array $attributes){
+    static function setProductAttributesForSimpleProducts($pid, Array $attributes, array $hidden = []){
         $i = 0;
 
         if (empty($attributes)){
@@ -1075,11 +1089,13 @@ class Products
 
         // Loop through the attributes array
         foreach ($attributes as $name => $value) {
+            $is_hidden = in_array($name, $hidden) ? 0 : 1;
+
             $product_attributes[$i] = array (
                 'name' => htmlspecialchars( stripslashes( $name ) ), // set attribute name
                 'value' => $value, // set attribute value
                 'position' => 1,
-                'is_visible' => 1,
+                'is_visible' => $is_hidden,
                 'is_variation' => 0,
                 'is_taxonomy' => 0
             );
@@ -1098,7 +1114,7 @@ class Products
     /*
         Forma de uso:
 
-        Products::addAttributeForSimpleProducts($pid, 'vel', '80');
+        static::addAttributeForSimpleProducts($pid, 'vel', '80');
     */
     static function addAttributeForSimpleProducts($pid, $key, $val){
         /*
@@ -1115,7 +1131,7 @@ class Products
             ), ..
         */
         
-        $_attrs = Products::getCustomAttr($pid);
+        $_attrs = static::getCustomAttr($pid);
         $attrs  = [];
     
         foreach($_attrs as $att){
@@ -1124,13 +1140,13 @@ class Products
     
         $attrs[ $key ] = $val;
     
-        Products::setProductAttributesForSimpleProducts($pid, $attrs);
+        static::setProductAttributesForSimpleProducts($pid, $attrs);
     }
     
     /*
         Forma de uso:
 
-        Products::addAttributesForSimpleProducts($pid, [
+        static::addAttributesForSimpleProducts($pid, [
             'fuerza' => 45,
             'edad' => 29
         ]);
@@ -1141,7 +1157,7 @@ class Products
             throw new \InvalidArgumentException("El Array de atributos debe ser asociativo");
         }
 
-        $_attrs = Products::getCustomAttr($pid);
+        $_attrs = static::getCustomAttr($pid);
         $attrs  = [];
     
         foreach($_attrs as $att){
@@ -1155,7 +1171,7 @@ class Products
             $attrs[ $key ] = $val;
         }
     
-        Products::setProductAttributesForSimpleProducts($pid, $attrs);
+        static::setProductAttributesForSimpleProducts($pid, $attrs);
     }
 
     // alias
@@ -1363,7 +1379,7 @@ class Products
     // Custom function for product creation (For Woocommerce 3+ only)
     static function createProduct($args, $create_attributes_for_simple_products = false)
     {
-        if (isset($args['sku']) && !empty($args['sku']) && !empty(static::getProductIdBySKU($args['sku']))){
+        if (isset($args['sku']) && !empty($args['sku']) && !empty(static::getProductIDBySKU($args['sku']))){
             throw new \InvalidArgumentException("SKU {$args['sku']} ya está en uso.");
         }
 
@@ -1659,14 +1675,14 @@ class Products
 		
 		// Get Product Taxonomies
 		
-		$obj['tags']             = static::getTagsByPid($pid); /// deberia ser tag_ids
+		$obj['tags']             = static::getTagsByPID($pid); /// deberia ser tag_ids
 
 
 		$obj['categories'] = [];
 		$category_ids = $product->get_category_ids(); 
 	
 		foreach ($category_ids as $cat_id){
-			$terms = get_term_by( 'id', $cat_id, 'product_cat' );
+			$terms = get_term_by( 'id', $cat_id, static::$cat_metakey );
 			$obj['categories'][] = [
 				'name' => $terms->name,
 				'slug' => $terms->slug,
@@ -2045,7 +2061,7 @@ class Products
      
         Uso:
 				
-		Products::createAttributeTaxonomy(Precio EasyFarma Plus', 'precio_easyfarma_plus');
+		static::createAttributeTaxonomy(Precio EasyFarma Plus', 'precio_easyfarma_plus');
 
         Los atributos son creados en la tabla `wp_woocommerce_attribute_taxonomies`
 
@@ -2119,7 +2135,7 @@ class Products
     /*
         Quizás de poca utilidad porque no toma en cuenta el stock
     */
-    static function getProductsByTermId($term_id){
+    static function getProductsByTermID($term_id){
         global $wpdb;
 
 		$sql = "SELECT * from `{$wpdb->prefix}term_relationships` WHERE term_taxonomy_id = $term_id";
@@ -2149,7 +2165,7 @@ class Products
             //  ...
         )
     */
-    static function getAttr($att, $cat){
+    static function getAttrByCategory($att, $cat){
         $arr = [];
 
         if (!is_array($cat)){
@@ -2193,11 +2209,11 @@ class Products
 
         Ejemplo de uso:
 
-        Products::getCustomAttr($pid)
+        static::getCustomAttr($pid)
 
         o
 
-        Products::getCustomAttr($pid, 'Código ISP')
+        static::getCustomAttr($pid, 'Código ISP')
 
         Salida:
 
@@ -2213,11 +2229,13 @@ class Products
     static function getCustomAttr($pid, $attr_name = null){
         global $wpdb;
 
-        if (!is_int($pid)){
-            throw new \InvalidArgumentException("PID debe ser un entero");
-        }
+        // if (!is_int($pid)){
+        //     throw new \InvalidArgumentException("PID debe ser un entero.");
+        // }
 
-        $sql = "SELECT meta_value FROM `{$wpdb->prefix}postmeta` WHERE post_id = $pid AND meta_key = '_product_attributes'";
+        // $pid = (int) $pid;
+
+        $sql = "SELECT meta_value FROM `{$wpdb->prefix}postmeta` WHERE post_id = '$pid' AND meta_key = '_product_attributes'";
 
         $res = $wpdb->get_results($sql, ARRAY_A);   
 
@@ -2243,7 +2261,7 @@ class Products
     /*
         Uso:
 
-        Products::getCustomAttrByLabel('Precio por 100 ml o 100 G')
+        static::getCustomAttrByLabel('Precio por 100 ml o 100 G')
 
         Salida:
 
@@ -2275,7 +2293,7 @@ class Products
     /*
         Forma de uso:
 
-        Products::getCustomAttrByName('forma_farmaceutica')
+        static::getCustomAttrByName('forma_farmaceutica')
 
         Salida:
 
@@ -2373,53 +2391,6 @@ class Products
         return wc_get_products( $query_args );
     }
 
-    /*
-        OJO: hace un AND entre cada categoria en la query
-    */
-    static function getProductsByCategory(string $by, Array $cate_ids, $post_status = null)
-    {
-        if (!in_array($by, ['slug', 'id', 'name'])){
-            throw new \InvalidArgumentException("Invalid field '$by' for quering");
-        }
-
-        if ($post_status != null && !in_array($post_status, ['publish', 'draft', 'pending', 'private', 'trash', 'auto-draft'])){
-            throw new \InvalidArgumentException("Invalid post_status '$post_status'");
-        }
-
-        // When you have more term_id's seperate them by comma.
-        $cate_ids_str = implode(',', $cate_ids);
-
-        $args = array(
-            'post_type' => 'product',
-            'numberposts' => -1,
-            'post_status' => $post_status,
-            'fields' => 'ids',
-            'tax_query' => array(
-                array(
-                    'taxonomy' => 'product_cat',
-                    'field' => $by,
-                    'terms' => $cate_ids_str,
-                    'operator' => 'IN',
-                    )
-                 ),
-        );
-
-        return get_posts( $args);
-    }
-
-    static function getProductsByCategoryId(Array $cate_ids, $post_status = null){
-        return static::getProductsByCategory('id', $cate_ids, $post_status);
-    }
-
-
-    static function load_template_part($slug, $name  = '') {
-        ob_start();
-        wc_get_template_part($slug, $name);
-        $var = ob_get_contents();
-        ob_end_clean();
-        return $var;
-    }
-
      /*
 		Status
 
@@ -2462,470 +2433,6 @@ class Products
         return $status;
     }
 
-    /*
-        Categories
-    */
-
-    static function createCatego($name, $slug = null, $description = null, $id_parent = null){
-        // dd([
-        //     $name, // the term 
-        //     'product_cat', // the taxonomy
-        //     array(
-        //         'description'=> $description,
-        //         'slug' => $slug,
-        //         'parent' => $id_parent
-        //     )
-        //     ], 'NUEVA CATEGO'
-        // );
-
-        $cid = wp_insert_term(
-            $name, // the term 
-            'product_cat', // the taxonomy
-            array(
-                'description'=> $description,
-                'slug' => $slug,
-                'parent' => $id_parent
-            )
-        );
-
-        // category_id
-        return $cid;
-    }
-
-    static function createOrUpdateCatego($name, $slug = null, $description = null, $id_parent = null)
-    {
-        $id = static::getCategoryIdByName($name);
-
-        if ($id !== null){
-            //dd("Updating ... $name");
-
-            $cid = wp_update_term(
-                $id, 
-                'product_cat', // the taxonomy
-                array(
-                    'description'=> $description,
-                    'slug' => $slug,
-                    'parent' => $id_parent
-                )
-            );
-        } else {
-            //dd("Creating ... $name");
-
-            $cid = wp_insert_term(
-                $name, // the term 
-                'product_cat', // the taxonomy
-                array(
-                    'description'=> $description,
-                    'slug' => $slug,
-                    'parent' => $id_parent
-                )
-            );
-        }
-
-        // category_id
-        return $cid;
-    }
-
-    static function getCategoryBySlug($slug){
-		global $wpdb;
-
-		$sql = "SELECT * from `{$wpdb->prefix}terms` WHERE slug = '$slug'";
-		return $wpdb->get_row($sql);
-	}
-
-    static function getCategoryById(int $id){
-		// global $wpdb;
-
-		// $sql = "SELECT * from `{$wpdb->prefix}terms` WHERE term_id = '$id'";
-		// return $wpdb->get_row($sql);
-
-        return get_term($id);
-	}
-
-    static function getCategoryIdByName($name){
-        $category = get_term_by( 'slug', $name, 'product_cat' );
-
-        if ($category === null || $category === false){
-            return null;
-        }
-
-        return $category->term_id;
-    }
-
-    static function getCategoriesFromProductSKU($sku){
-        $pid = static::getProductIdBySKU($sku);
-        
-        return static::getCategoriesFromProductId($pid);
-    }
-
-    static function getCategoSlugs(){
-        $categos = static::getCategories();
-    
-        $ret = [];
-        foreach ($categos as $catego){
-            $ret[] = $catego->slug;
-        }
-    
-        return $ret;
-    }    
-
-    static function getCategoryChildren($category_id){
-        return get_term_children($category_id, 'product_cat');
-    }
-
-    static function getCategoryChildrenBySlug($category_slug){
-        $cat = static::getCategoryBySlug($category_slug);
-
-        if ($cat === null){
-            return null;
-        }
-
-        $category_id = $cat->term_id;
-        return static::getCategoryChildren($category_id);
-    }
-
-    /*
-        https://devwl.pl/wordpress-get-all-children-of-a-parent-product-category/
-    */
-    static function getTopLevelCategories(){
-		global $wpdb;
-
-		$sql = "SELECT t.term_id, t.name, t.slug,  tt.taxonomy, tt.parent, tt.count FROM {$wpdb->prefix}terms t
-        LEFT JOIN {$wpdb->prefix}term_taxonomy tt ON t.term_id = tt.term_taxonomy_id
-        WHERE tt.taxonomy = 'product_cat' 
-        AND tt.parent = 0
-        ORDER BY tt.taxonomy;";
-
-		return $wpdb->get_results($sql);
-	}
-
-    static function getAllCategories(){
-		global $wpdb;
-
-		$sql = "SELECT t.term_id, t.name, t.slug,  tt.taxonomy, tt.parent, tt.count FROM {$wpdb->prefix}terms t
-        LEFT JOIN {$wpdb->prefix}term_taxonomy tt ON t.term_id = tt.term_taxonomy_id
-        WHERE tt.taxonomy = 'product_cat' 
-        ORDER BY tt.taxonomy;";
-
-		return $wpdb->get_results($sql);
-	}
-
-
-    /*
-        $only_subcategos    determina si las categorias de primer nivel deben o no incluirse 
-    */
-    static function getCategories(bool $only_subcategos = false){
-        static $ret;
-
-        if ($ret !== null){
-            return $ret;
-        }
-
-        $taxonomy     = 'product_cat';
-        $orderby      = 'name';  
-        $show_count   = 1;      // 1 for yes, 0 for no
-        $pad_counts   = 0;      // 1 for yes, 0 for no
-        $hierarchical = 1;      // 1 for yes, 0 for no  
-        $title        = '';  
-        $empty        = 0;
-
-        $args = array(
-                'taxonomy'     => $taxonomy,
-                'orderby'      => $orderby,
-                'show_count'   => $show_count,
-                'pad_counts'   => $pad_counts,
-                'hierarchical' => $hierarchical,
-                'title_li'     => $title,
-                'hide_empty'   => $empty
-        );
-        
-        $all_categories = get_categories( $args );
-
-        if (!$only_subcategos){
-            return $all_categories;    
-        }
-
-        $ret = [];
-        foreach ($all_categories as $cat) {
-            if($cat->category_parent == 0) {
-                $category_id = $cat->term_id;       
-                $link = '<a href="'. get_term_link($cat->slug, 'product_cat') .'">'. $cat->name .'</a>';
-
-                $args2 = array(
-                        'taxonomy'     => $taxonomy,
-                        'child_of'     => 0,
-                        'parent'       => $category_id,
-                        'orderby'      => $orderby,
-                        'show_count'   => $show_count,
-                        'pad_counts'   => $pad_counts,
-                        'hierarchical' => $hierarchical,
-                        'title'        => $title,
-                        'hide_empty'   => $empty
-                );
-                $sub_cats = get_categories( $args2 );
-
-                if($sub_cats) {
-                    foreach($sub_cats as $sub_category) {
-                        $ret[] = $sub_category;
-                    }   
-                } 
-            }       
-        }
-
-        return $ret;
-    }
-
-    /*
-        Dado el id de una categoria devuelve algo como
-
-        A > A2 > A2-1 > A2-1a
-    */
-    static function breadcrumb(int $cat_id){
-        $search = $cat_id;
-
-        $path = [];
-        $parent_id = null;
-
-        while($parent_id !== 0){
-            $catego     = get_term($cat_id);
-            $parent_id = $catego->parent;
-
-            if ($parent_id == 0){
-                break;
-            }
-
-            $path[]    = get_the_category_by_ID($parent_id);            
-            $cat_id    = $parent_id;
-        }
-
-        $path       = array_reverse($path);
-        $last_sep   = empty($path) ? '' : '>';
-        $first_sep  = '/';
-        
-        $breadcrumb = ltrim($first_sep . ' '). ltrim(implode(' > ', $path) . " $last_sep " . get_the_category_by_ID($search));
-     
-        return $breadcrumb;
-    }
-
-    static function getCategoriesFromProductId($pid){
-        return wc_get_product_term_ids($pid, 'product_cat' );
-    }
-
-    static function getCategoryNameById($cat_id){
-        if( $term = get_term_by( 'id', $cat_id, 'product_cat' ) ){
-            return $term->name;
-        }
-
-        throw new \InvalidArgumentException("Category Id '$cat_id' not found");
-    }
-
-    /*
-        Devolucion de array de metas incluidos atributos de productos
-
-        array (
-            '_sku' =>
-            array (
-                0 => '7800063000770',
-            ),
-            '_regular_price' =>
-            array (
-                0 => '2790',
-            ),
-
-            // ...
-            
-            '_product_attributes' =>
-            array (
-                0 => 'a:0:{}',
-            ),
-            
-            // ...
-
-            '_laboratorio' =>
-            array (
-                0 => 'Mintlab',
-            ),
-            '_enfermedades' =>
-            array (
-                0 => 'Gripe',
-            ),        
-        )
-
-        Si $single es true, en vez de devolver un array, se devuelve un solo valor,
-        lo cual tiene sentido con $key != ''
-    */
-    static function getMetasByProduct($pid, $meta_key = '', bool $single = false){
-        if (!empty($meta_key)){
-            if (!Strings::startsWith('_', $meta_key)){
-                $meta_key = '_' . $meta_key;
-            }
-        }
-
-        return get_post_meta($pid, $meta_key, $single);
-    }
-
-    static function getMeta($post_id, $meta_key){
-        if (!Strings::startsWith('_', $meta_key)){
-            $meta_key = '_' . $meta_key;
-        }
-
-        return get_post_meta($post_id, $meta_key, true);
-    }
-
-    static function setMeta($post_id, $meta_key, $dato, bool $sanitize = true){
-        if (!Strings::startsWith('_', $meta_key)){
-            $meta_key = '_' . $meta_key;
-        }
-
-        if ($sanitize){
-            $dato = sanitize_text_field($dato);
-        }
-
-        update_post_meta( $post_id, $meta_key, $dato); 
-    }
-
-    /*
-        Retorna productos contienen determinado valor en una meta_key
-    */
-    static function getByMeta($meta_key, $meta_value, $post_type = 'product', $post_status = null ) {
-        global $wpdb;
-
-        if (!Strings::startsWith('_', $meta_key)){
-            $meta_key = '_' . $meta_key;
-        }
-
-        /*
-            SELECT p.*, pm.* FROM wp_postmeta pm
-            LEFT JOIN wp_posts p ON p.ID = pm.post_id 
-            WHERE p.post_type = 'product' 
-            AND pm.meta_key = '_forma_farmaceutica' 
-            AND pm.meta_value='triangulo'
-            AND p.post_status = 'publish'
-            ;
-        */
-
-        $sql = "SELECT p.*, pm.* FROM wp_postmeta pm
-        LEFT JOIN {$wpdb->prefix}posts p ON p.ID = pm.post_id 
-        WHERE p.post_type = '%s' 
-        AND pm.meta_key = '%s' 
-        AND pm.meta_value='%s'
-        ";
-
-        if ($post_status !== null){
-            $sql .= " AND p.post_status = '$post_status'";
-        }
-
-        $r = $wpdb->get_results($wpdb->prepare($sql, $post_type, $meta_key, $meta_value), ARRAY_A);
-    
-        return $r;
-    }
-
-    /*
-        Retorna la cantidad de productos contienen determinado valor en una meta_key
-    */
-    static function countByMeta($meta_key, $meta_value, $post_type = 'product', $status = 'publish' ) {
-        global $wpdb;
-
-        if (!Strings::startsWith('_', $meta_key)){
-            $meta_key = '_' . $meta_key;
-        }
-
-        /*
-            SELECT COUNT(*) FROM wp_postmeta pm
-            LEFT JOIN wp_posts p ON p.ID = pm.post_id 
-            WHERE p.post_type = 'product' 
-            AND pm.meta_key = '_forma_farmaceutica' 
-            AND pm.meta_value='crema'
-            AND p.post_status = 'publish'
-            ;
-        */
-        $sql = "SELECT COUNT(*) FROM wp_postmeta pm
-        LEFT JOIN wp_posts p ON p.ID = pm.post_id 
-        WHERE p.post_type = '%s' 
-        AND pm.meta_key = '%s' 
-        AND pm.meta_value='%s'
-        AND p.post_status = '%s'
-        ";
-
-        $r = (int) $wpdb->get_var($wpdb->prepare($sql, $post_type, $meta_key, $meta_value, $status));
-    
-        return $r;
-    }
-
-    /*
-        Uso. Ej:
-
-        Products::getTaxonomyFromTerm('Crema')
-
-        retorna
-
-        array (
-            0 => 'pa_forma_farmaceutica',
-            1 => 'pa_dosis',
-        )
-    */
-    static function getTaxonomyFromTerm(string $term_name){
-        global $wpdb;
-
-        /*  
-            SELECT * FROM wp_terms AS t 
-            LEFT JOIN wp_termmeta AS tm ON t.term_id = tm.term_id 
-            LEFT JOIN wp_term_taxonomy AS tt ON tt.term_id = t.term_id
-            WHERE t.name = 'Crema'
-        */
-
-        $sql = "SELECT taxonomy FROM wp_terms AS t 
-        LEFT JOIN {$wpdb->prefix}termmeta AS tm ON t.term_id = tm.term_id 
-        LEFT JOIN {$wpdb->prefix}term_taxonomy AS tt ON tt.term_id = t.term_id
-        WHERE name = '%s'";
-
-        $r = $wpdb->get_col($wpdb->prepare($sql, $term_name));
-    
-        return $r;
-    }
-
-    static function getTermIdsByTaxonomy(string $taxonomy){
-        global $wpdb;
-
-        if (!Strings::startsWith('pa_', $taxonomy)){
-            $taxonomy = 'pa_' . $taxonomy;
-        }
-
-        $sql = "SELECT term_id FROM `{$wpdb->prefix}term_taxonomy` WHERE `taxonomy` = '$taxonomy';";
-
-        return $wpdb->get_col($sql);
-    }
-
-    /*
-        Devuelve si un termino existe para una determinada taxonomia
-
-        Nota: atributos re-utilizables de productos variables son "terms" tambien
-    */
-    static function termExists($term_name, string $taxonomy){
-        if (!Strings::startsWith('pa_', $taxonomy)){
-            $taxonomy = 'pa_' . $taxonomy;
-        }
-        
-        return (term_exists($term_name, $taxonomy) !== null);
-    }
-
-
-    /*
-        Delete Attribute Term by Name
-
-        Borra los terminos agregados con insertAttTerms() de la tabla 'wp_terms' por taxonomia (pa_forma_farmaceutica, etc)
-    */
-    static function deleteTermByName(string $term_name, string $taxonomy, $args = []){
-        if (!Strings::startsWith('pa_', $taxonomy)){
-            $taxonomy = 'pa_' . $taxonomy;
-        }
-
-        $term_ids = static::getTermIdsByTaxonomy($taxonomy);
-
-        foreach ($term_ids as $term_id){
-            wp_delete_term($term_id, $taxonomy, $args);
-        }
-    }
 
     static function hide($product){
         if (is_object($product)){
@@ -2981,8 +2488,164 @@ class Products
 
         Realmente es el $product_id que es buscado como _sku
     */
-    static function getSKUFromProductId($product_id)
+    static function getSKUFromProductID($product_id)
     {
         return static::getMeta($product_id, '_sku');
     }
+
+    // before load_template_part()
+    static function loadTemplatePart($slug, $name  = '') {
+        ob_start();
+        wc_get_template_part($slug, $name); // WC
+        $var = ob_get_contents();
+        ob_end_clean();
+        return $var;
+    }
+    
+    /*
+        Fuente:
+
+        \wp-content\plugins\woocommerce\includes\data-stores\class-wc-product-data-store-cpt.php
+    */
+    static function clearCache(&$product)
+    {
+        wc_delete_product_transients( $product->get_id() );
+        if ( $product->get_parent_id( 'edit' ) ) {
+            wc_delete_product_transients( $product->get_parent_id( 'edit' ) );
+            \WC_Cache_Helper::invalidate_cache_group( 'product_' . $product->get_parent_id( 'edit' ) );
+        }
+        \WC_Cache_Helper::invalidate_attribute_count( array_keys( $product->get_attributes() ) );
+        \WC_Cache_Helper::invalidate_cache_group( 'product_' . $product->get_id() );    
+    }
+
+
+     /*
+        Crea categoria pero si la categoria existe y tenia padre entonces no la toca para evitar resetear el padre con valor nulo
+        (podria haberse usado en TGSync)
+
+        @return category_id
+    */
+    static function createOrUpdateCategoButNoOverwriteParentWithNullIfItHas($name, $slug = null, $description = null, $id_parent = null){
+        if (!empty($id_parent)){
+            return static::createOrUpdateCatego($name, $slug, $description,  $id_parent);
+        }
+
+        // objeto de la categoria
+        $_cat   = static::getCategoryByName($name, ARRAY_A);
+
+        // Si existe
+        if (!empty($_cat)){
+            // padre actual
+            $_parent = $_cat['parent'];
+        }
+
+        // Solo si la categoria no exite O ... si existe pero no tiene actualmente padre 
+        if (empty($_cat) || (!empty($_cat) && empty($_parent))){
+            $cid  = static::createOrUpdateCatego($name, $slug, $description,  $id_parent);
+        } else {
+            $cid  = $_cat['term_id'];
+        }
+
+        return $cid;
+    }
+
+    // Get Products by Category
+
+    /*
+        OJO: hace un AND entre cada categoria en la query
+    */
+    static function getProductsByCategory(string $by, Array $cate_ids, $post_status = null)
+    {
+        if (!in_array($by, ['slug', 'id', 'name'])){
+            throw new \InvalidArgumentException("Invalid field '$by' for quering");
+        }
+
+        if ($post_status != null && !in_array($post_status, ['publish', 'draft', 'pending', 'private', 'trash', 'auto-draft'])){
+            throw new \InvalidArgumentException("Invalid post_status '$post_status'");
+        }
+
+        // When you have more term_id's seperate them by comma.
+        $cate_ids_str = implode(',', $cate_ids);
+
+        $args = array(
+            'post_type' => static::$post_type,
+            'numberposts' => -1,
+            'post_status' => $post_status,
+            'fields' => 'ids',
+            'tax_query' => array(
+                array(
+                    'taxonomy' => static::$cat_metakey,
+                    'field' => $by,
+                    'terms' => $cate_ids_str,
+                    'operator' => 'IN',
+                    )
+                 ),
+        );
+
+        return get_posts( $args);
+    }
+
+    static function getProductsByCategoryID(Array $cate_ids, $post_status = null){
+        return static::getProductsByCategory('id', $cate_ids, $post_status);  // no seria "ID" ?
+    }
+
+
+    // Get category
+
+    /*
+        Category  <----- CategoryName
+    */
+    static function getCategoryByName($name, string $output = OBJECT){
+        $category = get_term_by( 'slug', $name, 'product_cat', $output );
+
+        if ($category === null || $category === false){
+            return null;
+        }
+
+        return $category;
+    }
+    /*
+        CategoryId  <- CategoryName
+    */
+    static function getCategoryIdByName($name){
+        $category = get_term_by( 'slug', $name, 'product_cat' );
+
+        if ($category === null || $category === false){
+            return null;
+        }
+
+        return $category->term_id;
+    }
+
+    /*
+        CategoryName  <- ProductID
+    */
+    static function getCategoryNameByProductID($cat_id){
+        return parent::getCategoryNameByID($cat_id);
+    }
+
+    // Get categories
+
+    /*
+        Categories  <- ProductID
+    */
+    static function getCategoriesFromProductID($pid){
+        return static::getCategoriesFromID($pid);
+    }
+
+    /*
+        Categories  <- ProductID
+    */    
+    static function getCategoriesFromID($pid){
+        return wc_get_product_term_ids($pid, static::$cat_metakey);
+    }
+
+    /*
+        Categories  <- SKU
+    */
+    static function getCategoriesFromProductSKU($sku){
+        $pid = static::getProductIDBySKU($sku);
+        
+        return static::getCategoriesFromProductID($pid);
+    }  
 }

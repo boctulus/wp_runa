@@ -11,6 +11,13 @@ use boctulus\SW\core\libs\Url;
 */
 class ApiClient
 {
+    const     HTTP_METH_POST   = "POST";
+    const     HTTP_METH_GET    = "GET";
+    const     HTTP_METH_PATCH  = "PATCH";
+    const     HTTP_METH_PUT    = "PUT";
+    const     HTTP_METH_DELETE = "DELETE";
+    const     HTTP_METH_HEAD   = "HEAD";
+
     // Request
     protected $url;
     protected $verb;
@@ -22,6 +29,7 @@ class ApiClient
     protected $cert_ssl  = null;
 
     // Response
+    protected $raw_response;
     protected $response;
     protected $filename;
     protected $res_headers;
@@ -37,6 +45,53 @@ class ApiClient
     protected $expiration;
     protected $read_only = false;
 
+    // Mock
+    protected $mocked;
+
+    // Extras
+    protected $query_params = [];
+
+
+    /*
+        Debe usarse *antes* de llamar a request(), get(), post(), etc
+
+        $mock puede ser la ruta a un archivo .json, .php o un array
+    */
+    function mock($mock, bool $ignore_empty = false)
+    {   
+        if (!$ignore_empty && empty($mock)){
+            throw new \Exception("Empty mock!");
+        }
+
+        if (is_string($mock) && Strings::endsWith('.php', $mock)){
+            if (!file_exists($mock)){
+                throw new \Exception("Mock file '$mock' not found");
+            }
+
+            $mock = require $mock;
+        }
+
+        if (is_string($mock) && Strings::endsWith('.json', $mock)){
+            if (!file_exists($mock)){
+                throw new \Exception("Mock file '$mock' not found");
+            }
+
+            $mock = file_get_contents($mock);
+        }
+
+        // if (is_array($mock)){
+        //     $mock = json_encode($mock, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_SLASHES);
+        // }
+
+        $this->response = $mock;
+        $this->mocked   = true;
+
+        if ($this->auto_decode == false){
+            if (!Strings::isJSON($this->response)){
+                $this->response = json_encode($this->response);
+            }
+        }
+    }
 
     function dump(){
         return [
@@ -49,11 +104,6 @@ class ApiClient
             'max_retries' => $this->max_retries,
             'ssl'         => $this->cert_ssl,
         ];
-    }
-
-    // alias de dump()
-    function dd(){
-        return $this->dump();
     }
 
     function exec(Array $args){
@@ -73,10 +123,14 @@ class ApiClient
         $this->url = $url;
         return $this;
     }
+
+    function getUrl(){
+        return $this->url;
+    }
     
-    // alias
-    function url($url){
-        return $this->setUrl($url);
+    // setter & getter
+    function url($url, $val = null){
+        return ($val === null) ? $this->url : $this->setUrl($url);
     }
 
     function __construct($url = null)
@@ -86,6 +140,23 @@ class ApiClient
 
     static function instance($url = null) : ApiClient {
         return new ApiClient($url);
+    }
+
+    // Add new query param
+    function queryParam(string $name, $value){
+        $this->query_params[$name] = $value;
+        return $this;
+    }
+
+    /*
+        Add array of params
+    */
+    function queryParams(array $params){
+        foreach ($params as $name => $value){
+            $this->query_params[$name] = $value;
+        }
+        
+        return $this;
     }
 
     function readOnly(bool $flag = true){
@@ -101,9 +172,11 @@ class ApiClient
     /*
         Ejecuta un callback cuano $cond es verdadero
     */
-    function when($cond, $fn, ...$args){
+    function when($cond, callable $fn_success,  callable $fn_fail = null, ...$args){
         if ($cond){
-            $fn($this, ...$args);
+            $fn_success($this, ...$args);
+        } elseif ($fn_fail != null){
+            $fn_fail($this, ...$args);
         }
         
         return $this;
@@ -157,7 +230,7 @@ class ApiClient
     }
 
     // alias
-    function decode(bool $val){
+    function decode(bool $val = true){
         return $this->setDecode($val);
     }
 
@@ -178,9 +251,24 @@ class ApiClient
         return $this->setCache($expiration_time);
     }
 
+    /*
+        Revisar. No funcionaria bien
+    */
+    function cacheUntil(string $datetime){
+        $expiration_time = Date::diffInSeconds($datetime);
+
+        // dd($expiration_time, 'EXP TIME (SECS)');
+
+        return $this->setCache($expiration_time);
+    }
+
     function clearCache(){
         unlink($this->getCachePath());
         return $this;
+    }
+
+    function getRawResponse(){
+        return $this->raw_response;
     }
 
     function getStatus(){
@@ -201,8 +289,14 @@ class ApiClient
         return $this->error;
     }
 
-    function data(){
-        return $this->response;
+    function data(bool $raw = false){
+        if ($raw === false){
+            if ($this->auto_decode && Strings::isJSON($this->response)){
+                return json_decode($this->response, true);
+            }
+        }
+
+        return $raw ? $this->raw_response : $this->response;
     }
 
     function getResponse(?bool $decode = null, ?bool $as_array = null){       
@@ -244,6 +338,10 @@ class ApiClient
         ];
 
         return $this;
+    }
+
+    function withoutStrictSSL(){
+        return $this->disableSSL();
     }
 
     /*
@@ -392,14 +490,18 @@ class ApiClient
             $header_fn
         );
 
-        $response  = curl_exec($curl);
-        $err_msg   = curl_error($curl);
-        $http_code = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        $response      = curl_exec($curl);
+        $err_msg       = curl_error($curl);
+        $http_code     = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
         $content_type  = curl_getinfo($curl,CURLINFO_CONTENT_TYPE);
         $effective_url = curl_getinfo($curl, CURLINFO_EFFECTIVE_URL);
 
         curl_close($curl);
+
+
+        // Preservo la respuesta
+        $this->raw_response = $response;
 
         $data = ($decode && $response !== false) ? json_decode($response, true) : $response;
 
@@ -430,6 +532,18 @@ class ApiClient
     }
 
     function request(string $url, string $http_verb, $body = null, ?Array $headers = null, ?Array $options = null){
+        if ($this->mocked){
+            return $this;
+        }
+
+        $url = $url ?? $this->url;
+
+        if (!empty($this->query_params)){
+            foreach($this->query_params as $param_name => $param_value){
+                $url = Url::addQueryParam($url, $param_name, $param_value);
+            }
+        }
+
         $this->url  = $url;
         $this->verb = strtoupper($http_verb);
 
@@ -456,13 +570,12 @@ class ApiClient
 
         $body    = $body    ?? $this->body    ?? null;
         $headers = $headers ?? $this->req_headers ?? null;        
-        $decode  = $this->auto_decode; 
-
+    
         if ($this->expiration == null){
             $expired = true;
         } else {
             $cached_path     = $this->getCachePath();
-            $expired         = Cache::expiredFile($cached_path, $this->expiration);    
+            $expired         = is_file($cached_path) ? FileCache::expired(filemtime($cached_path), $this->expiration) : true;  // fixex on jun-17/24
         }
        
         if (!$expired){
@@ -481,12 +594,21 @@ class ApiClient
                     }
                 }
                 
-                $this->status   = $res['http_code'];
-                $this->error    = $res['error'];
-                $this->response = $res['data'];
+                // Solo sino hay errores (hago un return y con eso) evito continuar obteniendo una respuesta fresca
+                if (empty($res['error']))
+                {    
+                    $this->status   = $res['http_code'];
+                    $this->error    = $res['error'];
+                    $this->response = $res['data'];
 
-                return $this;
+                    return $this;
+                }
             }
+        }
+
+        // Evito sobrecargar al servidor
+        if (isset(config()['sleep_time'])){
+            rest(config()['sleep_time'], true);
         }
 
         $ok = null;
@@ -536,25 +658,173 @@ class ApiClient
         return $this;
     }
 
-    function get($url = null, ?Array $headers = null, ?Array $options = null){        
-        return $this->request($this->url ?? $url, 'GET', null, $headers, $options);
+    function get($url = null, ?Array $headers = null, ?Array $options = null){    
+        $url = $this->url ?? $url;
+
+        if ($url === null){
+            throw new \InvalidArgumentException("Param url is needed. Set in " . __METHOD__ . " or constructor or setUrl()");
+        }
+        
+        return $this->request($url, 'GET', null, $headers, $options);
     }
 
     function delete($url = null, ?Array $headers = null, ?Array $options = null){
-        return $this->request($this->url ?? $url, 'DELETE', null, $headers, $options);
+        $url = $this->url ?? $url;
+
+        if ($url === null){
+            throw new \InvalidArgumentException("Param url is needed. Set in " . __METHOD__ . " or constructor or setUrl()");
+        }
+
+        return $this->request($url, 'DELETE', null, $headers, $options);
     }
 
     function post($url = null, $body = null, ?Array $headers = null, ?Array $options = null){
-        return $this->request($this->url ?? $url, 'POST', $body, $headers, $options);
+        $url = $this->url ?? $url;
+
+        if ($url === null){
+            throw new \InvalidArgumentException("Param url is needed. Set in " . __METHOD__ . "() or constructor or setUrl()");
+        }
+
+        return $this->request($url, 'POST', $body, $headers, $options);
     }
 
     function put($url = null, $body = null, ?Array $headers = null, ?Array $options = null){
-        return $this->request($this->url ?? $url, 'PUT', $body, $headers, $options);
+        $url = $this->url ?? $url;
+
+        if ($url === null){
+            throw new \InvalidArgumentException("Param url is needed. Set in " . __METHOD__ . " or constructor or setUrl()");
+        }
+
+        return $this->request($url, 'PUT', $body, $headers, $options);
     }
 
     function patch($url = null, $body = null, ?Array $headers = null, ?Array $options = null){
-        return $this->request($this->url ?? $url, 'PATCH', $body, $headers, $options);
+        $url = $this->url ?? $url;
+
+        if ($url === null){
+            throw new \InvalidArgumentException("Param url is needed. Set in " . __METHOD__ . " or constructor or setUrl()");
+        }
+
+        return $this->request($url, 'PATCH', $body, $headers, $options);
     }
+
+    function setMethod(string $verb){
+        $verb = strtoupper($verb);
+        
+        if (!in_array($verb, ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])){
+            throw new \InvalidArgumentException("Unsupported verb \"$verb\"");
+        }
+
+        $this->verb = $verb;
+        return $this;
+    }
+
+    function send($url = null, $body = null, ?Array $headers = null, ?Array $options = null){
+        return $this->request($url ?? $this->url, $this->verb, $body, $headers, $options);
+    }
+
+    function getBody(){
+        return $this->data();
+    }
+
+    // Ej: "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6"
+    function setUserAgent(string $webbrowser){
+        $this->option(CURLOPT_USERAGENT, $webbrowser);
+        return $this;
+    }
+    
+    // Para descargar archivos binarios
+    function setBinary(){
+        $this->option(CURLOPT_RETURNTRANSFER, true);
+        return $this;
+    }
+
+    /*
+        Ej:
+
+        $url = 'https://www.learningcontainer.com/wp-content/uploads/2020/05/sample.tar';
+        $cli = new ApiClient($url); // setea $url dentro de la clase
+
+        $cli
+        ->setBinary()
+        ->withoutStrictSSL();
+
+        $bytes = $cli->downloadZipFile(ETC_PATH . 'file.zip');
+
+        dd($bytes, 'BYTES escritos');
+    */
+    function download($filepath, $url = null, $body = null, $headers = null, $options = null)
+    {   
+        $fp = fopen($filepath, 'w+');
+        $ch = curl_init($url ?? $this->url);
+   
+        $this->setOption(CURLOPT_RETURNTRANSFER, false);
+        $this->setOption(CURLOPT_FILE, $fp);
+
+        $url = $url ?? $this->url;
+
+        if (!empty($this->query_params)){
+            foreach($this->query_params as $param_name => $param_value){
+                $url = Url::addQueryParam($url, $param_name, $param_value);
+            }
+        }
+
+        $this->url  = $url;
+
+        //
+        // Sino se aplico nada sobre SSL, vale lo que diga el config
+        // 
+        if (!$this->cert_ssl){    
+            $cert = config()['ssl_cert'];
+            
+            if ($cert === false){
+                $this->disableSSL();
+            }
+
+            if (!empty($cert)){
+                $this->setSSLCrt($cert);
+            }    
+        }
+
+        if (!empty($this->options) && !empty($options)){
+            $options = array_merge($this->options, $options);
+        } else {
+            $options = $options ?? $this->options ?? null;
+        }
+
+        $body    = $body    ?? $this->body    ?? null;
+        $headers = $headers ?? $this->req_headers ?? null;        
+    
+        if (!empty($this->options)){
+            foreach ($this->options as $curl_op => $value){
+                curl_setopt($ch, $curl_op, $value);
+            }    
+        }
+        
+        curl_exec($ch);
+
+        // if (!empty($this->header_callback)){
+        //     curl_setopt($ch, CURLOPT_HEADERFUNCTION, $this->header_callback);
+        // }
+
+        $response      = curl_exec($ch);
+        $err_msg       = curl_error($ch);
+        $http_code     = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        $content_type  = curl_getinfo($ch,CURLINFO_CONTENT_TYPE);
+        $effective_url = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+   
+        curl_close($ch);
+        fclose($fp);
+
+        $this->response      = $response;
+        $this->status        = $http_code;
+        $this->error         = $err_msg;
+        $this->content_type  = $content_type;
+        $this->effective_url = $effective_url;
+
+        return filesize($filepath);
+    }   
 
     /*
         Authentication
@@ -586,29 +856,16 @@ class ApiClient
         CACHE
 
         En vez de guardar en disco..... usar Transientes con drivers como Memcached o REDIS !
+
+        Debe generar un HASH con todos los parametros y sino son iguales... se considera otra cache
     */
 
     function getCachePath(){
-        static $path;
-
         if (empty($this->url)){
-            throw new \Exception("Undefined url");
+            throw new \Exception("Undefined URL");
         }
 
-        if (isset($path[$this->url])){
-            return $path[$this->url];
-        }
-
-        $filename = str_replace(['%'], ['p'], urlencode(Url::normalize($this->url))) . '.php';
-        $filename = str_replace('/', '', $filename);
-
-        // Evito problemas con nombres largos
-        if (strlen($filename) > 250){
-            return null;
-        }
-
-        $path[$this->url] = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $filename;
-        return $path[$this->url];
+        return FileCache::getCachePath($this->url);
     }
 
 	protected function saveResponse(Array $response){
@@ -639,7 +896,7 @@ class ApiClient
 
     /*
 
-        Tomado de CodeIgniter ---------------------------------------->
+        From CI ---------------------------------------->
 
     */
 
@@ -726,7 +983,6 @@ class ApiClient
 	{
 		return function_exists('curl_init');
 	}
-
-
 }
+
 

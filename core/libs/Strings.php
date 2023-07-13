@@ -8,11 +8,16 @@ namespace boctulus\SW\core\libs;
 
 class Strings 
 {	
+	static $regex = [
+		'URL'	=> "/\b(?:(?:https?|ftp):\/\/|www\.)[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]/i",
+		// ...
+	];
+
 	/*
 		Extrae la parte numerica de una cadena que contenga una cantidad
 		y la castea a un float
 	*/
-	static function parseCurrency(?string $num, $thousand_sep = null, $decimal_sep = null){
+	static function parseFloat(string $num, $thousand_sep = null, $decimal_sep = null){
 		if ($thousand_sep != null){
 			static::replace($thousand_sep, '', $num);
 		}
@@ -28,10 +33,21 @@ class Strings
 		return $result;
 	}
 
+	// alias -- depredicar?
+	static function parseCurrency(string $num, $thousand_sep = null, $decimal_sep = null){
+		return static::parseFloat($num, $thousand_sep, $decimal_sep);
+	}
+
+	static function parseFloatOrFail(string $num, $thousand_sep = null, $decimal_sep = null){
+		if (static::parseFloat($num, $thousand_sep, $decimal_sep) === false){
+			throw new \Exception("String '$num' is not a Float");
+		}
+	}
+
 	/*
 		Interpreta un string como un número entero con la posibilidad de que contenga separador de miles
 	*/
-	static function parseInt(?string $num, string $thousand_sep = '.'){
+	static function parseInt(string $num, string $thousand_sep = '.'){
 		$num = trim($num);
 
 		if (!preg_match('/(^[-0-9][0-9.]*$)/', $num, $matches)){
@@ -54,10 +70,97 @@ class Strings
 		return (int) implode('', $pa);
 	}
 
-	static function parseIntOrFail(?string $num, string $thousand_sep = '.'){
+	static function parseIntOrFail(string $num, string $thousand_sep = '.'){
 		if (static::parseInt($num, $thousand_sep) === false){
 			throw new \Exception("String '$num' is not an Integer");
 		}
+	}
+
+	/*
+		null	=> null|Exception
+		false	=> 0|Exception
+		"{int}" => int|false
+	*/
+	static function toInt($num = null, bool $accept_null = true, bool $accept_false = true){
+		if (is_int($num)){
+			return $num;
+		}
+
+		if ($num === null){
+			if ($accept_null){
+				return null;
+			} else {
+				throw new \InvalidArgumentException("Numberic string can not be null");
+			}			
+		}
+	
+		if ($num === false){
+			if ($accept_false){
+				return 0;
+			} else {
+				throw new \InvalidArgumentException("Boolean can not be false");
+			}			
+		}
+
+		if (!is_numeric($num)){
+			return false;
+		}
+
+		return (int) $num;
+	}
+
+	/*
+		null	=> null|Exception
+		false	=> 0|Exception
+		"{int}" => int|Exception
+	*/
+	static function toIntOrFail($num, bool $accept_null = true, bool $accept_false = true){
+		if (is_int($num)){
+			return $num;
+		}
+
+		if ($num === null){
+			if ($accept_null){
+				return null;
+			} else {
+				throw new \InvalidArgumentException("Numberic string can not be null");
+			}			
+		}
+	
+		if ($num === false){
+			if ($accept_false){
+				return 0;
+			} else {
+				throw new \InvalidArgumentException("Boolean can not be false");
+			}			
+		}
+
+		if (!is_numeric($num)){
+			throw new \Exception("Conversion for '$num' failed");
+		}
+
+		return (int) $num;
+	}
+
+	/*
+		int|string|null => Exception
+	*/
+	static function fromInt($num = null, bool $accept_null = true){		
+		if ($num === null){
+			if ($accept_null){
+				return null;
+			} else {
+				throw new \InvalidArgumentException("Int can not be null");
+			}			
+		}
+
+		$num = (string) $num;
+	
+		if ((!is_numeric($num) && !static::match($num, '/([0-9]+)/')) || (Strings::contains('.', $num))){
+			throw new \Exception("Invalid integer for '$num'");
+		}
+
+		return $num;
 	}
 
 	/*
@@ -65,7 +168,11 @@ class Strings
 
 		Evita castear null o false a 0.0
 	*/
-	static function convertIntoFloat(?string $num = null){
+	static function toFloat($num = null){
+		if (is_float($num)){
+			return $num;
+		}
+
 		if ($num === null){
 			return null;
 		}
@@ -81,8 +188,11 @@ class Strings
 		return (float) $num;
 	}
 
+	static function toFloatOrFail($num){
+		if (is_float($num)){
+			return $num;
+		}
 
-	static function convertIntoFloatOrFail(?string $num){
 		if ($num === null){
 			throw new \InvalidArgumentException("'$num' can not be null");
 		}
@@ -92,10 +202,32 @@ class Strings
 		}
 
 		if (!is_numeric($num)){
-			throw new \Exception("Conversion for '$num' fails");
+			throw new \Exception("Conversion for '$num' failed");
 		}
 
 		return (float) $num;
+	}
+
+
+	/*
+		float|string|null => Exception
+	*/
+	static function fromFloat($num = null, bool $accept_null = true){
+		if ($num === null){
+			if ($accept_null){
+				return null;
+			} else {
+				throw new \InvalidArgumentException("Float can not be null");
+			}			
+		}
+
+		$num = (string) $num;
+	
+		if (!is_numeric($num) && !static::match($num, '/([0-9\.]+)/')){
+			throw new \Exception("Invalid float for '$num'");
+		}
+
+		return $num;
 	}
 
 	static function formatNumber($x, string $locale = "it-IT"){
@@ -113,19 +245,19 @@ class Strings
 	/*
 		Reemplazo para la función nativa explode()
 	*/
-	static function explode(?string $str, string $separator = ','){
+	static function explode(string $str, string $separator = ','){
 		return Arrays::trimArray(explode($separator, rtrim(trim($str), $separator)));
 	}
 
 	/*
 		Cada línea la convierte en un <p>párrafo</p>
 	*/
-	static function paragraph(?string $str){
+	static function paragraph(string $str){
 		return '<p>' . implode('</p><p>', array_filter(explode("\n", $str))) . '</p>';
 	}
 
 	// N-ésimo segmento luego de hacer un explode por $separator
-	static function segment(?string $string, string $separator,  int $position){
+	static function segment(string $string, string $separator,  int $position){
 		$array = explode($separator, $string);
 
 		if (isset($array[$position])){
@@ -136,7 +268,7 @@ class Strings
 	}
 
 	// N-ésimo segmento luego de hacer un explode por $separator
-	static function segmentOrFail(?string $string, string $separator,  int $position){
+	static function segmentOrFail(string $string, string $separator,  int $position){
 		$array = explode($separator, $string);
 
 		if (count($array) === 1 && $position > 0){
@@ -151,32 +283,48 @@ class Strings
 	}
 
 	// String antes de la N-ésima ocurrencia del substring
-	static function before(?string $string, string $substr, $occurrence = 1){
+	static function before(string $string, string $substr, $occurrence = 1){
 		$parts = explode($substr, $string, $occurrence +1);
 
 		return $parts[$occurrence -1];
 	}
 
 	// String antes de la primera ocurrencia del substring
-	static function first(?string $string, string $substr){
+	static function first(string $string, string $substr){
 		$parts = explode($substr, $string, 2);
 
 		return $parts[0];
 	}
 
-	// String después de la primera ocurrencia del substring
-	static function after(?string $string, string $substr){
-		$parts = explode($substr, $string, 2);
+	// String después de la N-esima ocurrencia del substring
+	static function after(string $string, string $substr, int $occurence = 1){
+		$parts = explode($substr, $string, $occurence+1);
 
-		if (!isset($parts[1])){
+		if (!isset($parts[$occurence])){
 			return false;
 		}
 
-		return $parts[1];
+		return implode($substr, array_slice($parts, $occurence));
+	}
+
+	static function beforeIfContains(string $str, string $substr, int $occurence = 1){
+		if (!static::contains($substr, $str)){
+			return $str;
+		} else {
+			return static::before($str, $substr, $occurence);
+		}
+	}
+	
+	static function afterIfContains(string $str, string $substr, int $occurence = 1){
+		if (!static::contains($substr, $str)){
+			return $str;
+		} else {
+			return static::after($str, $substr, $occurence);
+		}
 	}
 
 	// String después de la primera ocurrencia del substring
-	static function afterOrFail(?string $string, string $substr){
+	static function afterOrFail(string $string, string $substr){
 		$parts = explode($substr, $string, 2);
 
 		if (!isset($parts[1])){
@@ -187,29 +335,51 @@ class Strings
 	}
 
 	// String después de la última ocurrencia del substring (que podría ser empty)
-	static function last(?string $str, string $substr){
+	static function last(string $str, string $substr){
 		$parts = explode($substr, $str);
 
 		return $parts[count($parts)-1];
 	}
 
 	// String antes de la última ocurrencia del substring
-	static function beforeLast(?string $string, string $substr){
+	static function beforeLast(string $string, string $substr){
 		$parts = explode($substr, $string);
 
 		return implode($substr, array_slice($parts, 0, count($parts)-1));
 	}
 
-	static function untilLast(?string $string, string $substr){
+	/*
+		Ensayar para todos los casos incluida la no ocurrencia
+	*/
+	static function untilLast(string $string, string $substr){
 		$parts = explode($substr, $string);
 
 		return implode($substr, array_slice($parts, 0, count($parts)-1)) . $substr;
 	}
 
-
 	// Segment before the last one
-	static function beforeLastSegment(?string $string, string $substr){
+	static function beforeLastSegment(string $string, string $substr){
 		return static::last(static::beforeLast($string, $substr), $substr);
+	}
+
+	static function lastSegment(string $string, string $delimeter){
+		$segments = explode($delimeter, $string);
+
+		if (count($segments) === 1){
+			return null;
+		}
+
+        return $segments[count($segments)-1];
+	}
+
+	static function lastSegmentOrFail(string $string, string $delimeter){
+		$ret = static::lastSegment($string, $delimeter);
+
+		if ($ret === null){
+			throw new \Exception("Substring '$delimeter' not found in '$string'");
+		}
+
+		return $ret;
 	}
 
 	static function trim($dato = null, bool $even_null = true, bool $auto_cast_numbers = true){
@@ -233,7 +403,7 @@ class Strings
 	/*
 		Auto-detecta retorno de carro en un string
 	*/
-	static function carriageReturn(?string $str){
+	static function carriageReturn(string $str){
 		$qty_rn = substr_count($str, "\r\n");
 
 		if ($qty_rn != 0){
@@ -254,7 +424,49 @@ class Strings
 
 		return null;
 	}
+
+	// alias
+	static function newLine(string $str){
+		return static::carriageReturn($str);
+	}
 	
+	/*
+		Convierte string en array de lineas (rows)
+		usando retorno de carro en autodeteccion
+
+		@param string $str 
+		@param bool $trim
+		@param bool $empty_lines
+	*/
+	static function lines(?string $str, bool $trim = false, bool $empty_lines = true){
+		if (empty($str)){
+			return [];
+		}
+
+		$cr = static::carriageReturn($str);
+		
+		if (empty($cr)){
+			return [ $str ];
+		}
+
+		$lines = explode($cr, $str);
+
+		if (!$empty_lines){
+			foreach ($lines as $ix => $line){
+				$trimmed = trim($line);
+
+				if (empty($trimmed)){
+					unset($lines[$ix]);
+				} else {
+					if ($trim){
+						$lines[$ix] = $trimmed;
+					}
+				}
+			}
+		}
+
+		return $lines;
+	}
 
 	/*
 		Remueve del forma eficiente un substring del inicio de una cadena
@@ -263,7 +475,7 @@ class Strings
 
 		- Podria limitarse tambien a los primeros n-caracteres tambien
 	*/
-	static function lTrim(?string $substr, ?string $str = null){
+	static function lTrim(string $substr, ?string $str = null){
 		if (empty($str)){
 			return '';
 		}
@@ -282,7 +494,7 @@ class Strings
 		return $str;
 	} 
 
-	static function rTrim(?string $needle, string $haystack)
+	static function rTrim(string $needle, string $haystack)
     {
         if (substr($haystack, -strlen($needle)) === $needle){
 			return substr($haystack, 0, - strlen($needle));
@@ -296,7 +508,7 @@ class Strings
 	}
 
 	// alias
-	static function removeEnding(?string $substr, string $string){
+	static function removeEnding(string $substr, string $string){
 		return static::rTrim($substr, $string);
 	}
 
@@ -305,7 +517,7 @@ class Strings
 		y se come retornos de carro, espacios,... 
 		... hasta que se encuentra con algo distinto a derecha
 	*/
-	static function trimAfter(?string $substr, string $string, int $offset = 0, ?string $chars = " \t\r\n\0\x0B", int $extra_cr = 0){
+	static function trimAfter(string $substr, string $string, int $offset = 0, ?string $chars = " \t\r\n\0\x0B", int $extra_cr = 0){
 		if ($string === ''){
 			return $string;
 		}
@@ -328,7 +540,7 @@ class Strings
 		return $l . str_repeat("\r\n", $extra_cr) . ltrim($r, $chars);
 	}
 
-	static function trimEmptyLinesAfter(?string $substr, string $string, int $offset = 0, ?string $chars = " \t\r\n\0\x0B", int $extra_cr = 0){
+	static function trimEmptyLinesAfter(string $substr, string $string, int $offset = 0, ?string $chars = " \t\r\n\0\x0B", int $extra_cr = 0){
 		if ($string === ''){
 			return $string;
 		}
@@ -364,7 +576,7 @@ class Strings
 		return $l . str_repeat($cr, $extra_cr) . implode($cr, $lines);
 	}
 
-	static function trimEmptyLinesBefore(?string $substr, string $string, int $offset = 0, ?string $chars = " \t\r\n\0\x0B", int $extra_cr = 0){
+	static function trimEmptyLinesBefore(string $substr, string $string, int $offset = 0, ?string $chars = " \t\r\n\0\x0B", int $extra_cr = 0){
 		if ($string === ''){
 			return $string;
 		}
@@ -406,7 +618,7 @@ class Strings
 	/*
 		Remueve el sustring entre $startingWith y $endingWith
 	*/
-	static function removeSubstring(?string $startingWith, string $endingWith, string $string){
+	static function removeSubstring(string $startingWith, string $endingWith, string $string){
 		if (empty($string)){
 			return $string;
 		}
@@ -428,8 +640,10 @@ class Strings
 
 	/*
 		Apply tabs to some string
+
+		En vez de PHP_EOL, deberias usar Strings::carriageReturn($str)
 	*/
-	static function tabulate(?string $str, int $tabs, ?int $first = null, ?int $last = null){
+	static function tabulate(string $str, int $tabs, ?int $first = null, ?int $last = null){
 		$lines = explode(PHP_EOL, $str);
 
 		$cnt = count($lines);
@@ -469,7 +683,7 @@ class Strings
 	/*
 		Returns $s1 - $s2
 	*/
-	static function substract(?string $s1, string $s2){
+	static function substract(string $s1, string $s2){
 		$s2_len = strlen($s2);
 		$s1_len = strlen($s1);
 
@@ -485,7 +699,7 @@ class Strings
 	}
 
 	// alias
-	static function diff(?string $s1, string $s2){
+	static function diff(string $s1, string $s2){
 		return static::substract($s1, $s2);
 	}
 
@@ -493,13 +707,19 @@ class Strings
 		return array_map('trim', $strings);
 	}
 
-	static function trimMultiline(?string $str){
-		$lines = explode("\n", $str);
+	/*
+		Elimina espacios, tabs etc del comienzo de cada linea
+	*/
+	static function trimMultiline(string $str){
+		$cr    = static::carriageReturn($str);
+
+		$lines = explode($cr, $str);
 		$arr   = static::trimArray($lines);
-		return implode("\n", $arr);
+
+		return implode($cr, $arr);
 	}
 
-	static function trimFromLastOcurrence(?string $substr, string $str){
+	static function trimFromLastOcurrence(string $substr, string $str){
 		$pos = strrpos($str, $substr);
 
 		if ($pos === false){
@@ -512,10 +732,23 @@ class Strings
 	/*
 		Returns false if fails
 
-		$pattern can be an Array
-		$result_position can be an Array 
+		@param 	string|array 	$pattern
+		@param	string|array	$result_position
+
+		@return string|boolean
+
+		Ej:
+
+		$namespace = Strings::match($file_str, '/namespace[ ]{1,}([^;]+)/');
+		$table     = Strings::match($raw_sql, '/insert[ ]+(ignore[ ]+)?into[ ]+[`]?([a-z_]+[a-z0-9]?)[`]? /i', 2);
+
+		Si $pattern es un array, busca coindicencias con cada patron 
+
+		Nota: esta funcion deberia ser revisda (!)
+		
+		Tener en cuenta las dependencias de esta funcion.
 	*/
-	static function match(?string $str, $pattern, $result_position = null){
+	static function match(string $str, $pattern, $result_position = null){
 		if (is_array($pattern)){
 			if (is_null($result_position)){
 				$result_position = 1;
@@ -560,19 +793,33 @@ class Strings
 		return false;
 	}
 
-	static function matchOrFail(?string $str, string $pattern, string $error_msg = null) { 
-		if (preg_match($pattern, $str, $matches)){			
+	/*
+		Ej:
+
+		$id = static::matchOrFail($filename, '/installation-file-([0-9]+)\.zip$/');
+	*/
+	static function matchOrFail(string $str, string $pattern, $flags = 0, $offset = 0) { 
+		if (preg_match($pattern, $str, $matches, $flags, $offset)){			
 			return $matches[1];
 		}
 
-		if (empty($error_msg)){
-			$error_msg = "String $str does not match with $pattern";
-		}
-
-		throw new \Exception($error_msg);
+		throw new \Exception("String $str does not match with $pattern");
 	}
 
-	static function ifMatch(?string $str, $pattern, callable $fn_success, callable $fn_fail = NULL){
+	/*
+		Ej:
+
+		Strings::matchAll($str, Strings::$regex['URL']);
+	*/
+	static function matchAll(string $str, string $pattern, $flags = 0, $offset = 0) { 
+		if (preg_match_all($pattern, $str, $matches, $flags, $offset)){			
+			return $matches;
+		}
+
+		return false;
+	}
+
+	static function ifMatch(string $str, $pattern, callable $fn_success, callable $fn_fail = NULL){
 		if (preg_match($pattern, $str, $matches)){
 			return call_user_func($fn_success, $matches);
 		} else if (is_callable($fn_fail)){
@@ -624,7 +871,7 @@ class Strings
         }
     }
 
-	static function getParamRegex(?string $param_name, ?string $arg_expr = '[a-z0-9A-Z_-]+'){
+	static function getParamRegex(string $param_name, ?string $arg_expr = '[a-z0-9A-Z_-]+'){
 		$equals = !is_null($arg_expr) ? '[=|:]' : '';		
 		return '/^--'.$param_name. $equals . '('.$arg_expr.')$/';
 	}
@@ -632,7 +879,7 @@ class Strings
 	/*
 		$param_name can be string | Array
 	*/
-	static function matchParam(?string $str, $param_name, ?string $arg_expr = '[a-z0-9A-Z_-]+'){
+	static function matchParam(string $str, $param_name, ?string $arg_expr = '[a-z0-9A-Z_-]+'){
 
 		if (is_array($param_name)){
 			$patt = [];
@@ -669,14 +916,35 @@ class Strings
 		}
 	}
 	
+	// alias de enclose()
+	static function wrap($target, string $delimeter = "'", $delimeter2 = null){
+		return static::enclose($target, $delimeter, $delimeter2);
+	}
+
 	static function backticks($target){
 		return static::enclose($target, '`');
 	}
 
+	static function toSnakeCase(string $str) : string {
+        // Se convierte todo a minúsculas
+        $str = strtolower($str);
+        
+        // Se elimina cualquier caracter no-alfanumérico excepto espacios
+        $str = preg_replace('/[^a-z0-9\s]/', '', $str);
+        
+        // Se reemplazan espacios múltiples por uno solo
+        $str = preg_replace('/\s+/', ' ', $str);
+        
+        // Se reemplazan espacios por "_"
+        $str = str_replace(' ', '_', $str);
+        
+        return $str;
+    }
+	
 	/*
 		CamelCase to snake_case
 	*/
-	static function camelToSnake(?string $name, string $char = '_'){
+	static function camelToSnake(string $name, string $char = '_'){
 		$len = strlen($name);
 
 		if ($len== 0)
@@ -702,7 +970,7 @@ class Strings
 	/*
 		snake_case to CamelCase
 	*/
-	static function snakeToCamel(?string $str, bool $force = false){
+	static function snakeToCamel(string $str, bool $force = false){
 		if ($force || static::isAllCaps($str)){
 			return $str;
 		}
@@ -710,11 +978,11 @@ class Strings
         return implode('',array_map('ucfirst',explode('_', $str)));
     }
 
-	static function isAllCaps(?string $str){
+	static function isAllCaps(string $str){
 		return strtoupper($str) === $str;
 	}
 
-    static function startsWith(?string $substr, ?string $text, bool $case_sensitive = true)
+    static function startsWith(string $substr, ?string $text, bool $case_sensitive = true)
 	{
 		if (empty($text)){
 			return;
@@ -729,7 +997,7 @@ class Strings
         return (substr($text, 0, $length) === $substr);
     }
 
-    static function endsWith(?string $substr, string $text, bool $case_sensitive = true)
+    static function endsWith(string $substr, string $text, bool $case_sensitive = true)
 	{
 		if (!$case_sensitive){
 			$text = strtolower($text);
@@ -744,7 +1012,7 @@ class Strings
 
 		y corregir dependencias claro.
 	*/
-	static function contains(?string $substr, string $text, bool $case_sensitive = true)
+	static function contains(string $substr, string $text, bool $case_sensitive = true)
 	{
 		if (!$case_sensitive){
 			$text = strtolower($text);
@@ -772,7 +1040,7 @@ class Strings
 		Thanks https://medium.com/@shiba1014/regex-word-boundaries-with-unicode-207794f6e7ed
 		Thanks https://www.phpliveregex.com/
 	*/
-	static function containsWord(?string $word, string $text, bool $case_sensitive = true) : bool {
+	static function containsWord(string $word, string $text, bool $case_sensitive = true) : bool {
 		$mod = !$case_sensitive ? 'i' : '';
 		
 		if (preg_match('/(?<=[\s,.:;_"\']|^)' . $word . '(?=[\s,.:;_"\']|$)/'.$mod, $text)){
@@ -782,7 +1050,7 @@ class Strings
 		return false;
 	}
 
-	static function containsWordButNotStartsWith(?string $word, string $text, bool $case_sensitive = true) : bool {
+	static function containsWordButNotStartsWith(string $word, string $text, bool $case_sensitive = true) : bool {
 		return !static::startsWith($word, $text, $case_sensitive) && static::containsWord($word, $text, $case_sensitive);
 	}
 
@@ -813,16 +1081,142 @@ class Strings
 	}
 
 	/*
-		Recupera todas las palabras de un texto
+		Extrae las primeras $count palabras de un texto
+		
+		https://stackoverflow.com/a/5956635/980631
+	*/
+	static function getUpToNWords($sentence, $count = 10) {
+		preg_match("/(?:\w+(?:\W+|$)){0,$count}/", $sentence, $matches);
+		return $matches[0];
+	}
+
+	/*
+		Filtra por cantidad maxima de palabras y/o de caracteres
+
+        En caso de que ambos parametros sean no-nulos, se entrega un string que tenga como maximo 
+		esa cantidad de caracteres y como maximo esa cantidad de palabras (doble restriccion)
+	*/
+	static function getUpTo(string $sentence, $max_word_count = null, $max_char_len = null) {
+		if ($max_word_count === null) {
+            $max_word_count = PHP_INT_MAX;
+        }
+
+        $words = explode(' ', $sentence);
+
+        if ($max_word_count !== null && $max_char_len !== null) {
+            // Ambos parámetros son no nulos
+            $trimmedSentence = '';
+            $wordCount = 0;
+            $charCount = 0;
+
+            foreach ($words as $word) {
+                $wordCount++;
+                $wordLength = mb_strlen($word);
+
+                if ($charCount + $wordLength > $max_char_len) {
+                    break;
+                }
+
+                $charCount += $wordLength + 1; // +1 for space
+                $trimmedSentence .= $word . ' ';
+
+                if ($wordCount >= $max_word_count) {
+                    break;
+                }
+            }
+
+            $trimmedSentence = trim($trimmedSentence);
+        } elseif ($max_word_count !== null) {
+            // Solo se proporciona la cantidad máxima de palabras
+            $trimmedSentence = self::getUpToNWords($sentence, $max_word_count);
+        } elseif ($max_char_len !== null) {
+            // Solo se proporciona la cantidad máxima de caracteres
+            $trimmedSentence = mb_substr($sentence, 0, $max_char_len);
+        } else {
+            // Ningún parámetro proporcionado, devuelve la cadena original
+            $trimmedSentence = $sentence;
+        }
+
+        return trim($trimmedSentence);
+    }
+
+	/*
+		Recupera todas las palabras desde N caracteres por palabra un texto
 
 		https://stackoverflow.com/a/10685513/980631
 	*/
-	static function getWords(?string $str){
-		$n_words = preg_match_all('/([a-zA-Z]|\xC3[\x80-\x96\x98-\xB6\xB8-\xBF]|\xC5[\x92\x93\xA0\xA1\xB8\xBD\xBE]){4,}/', $str, $match_arr);
+	static function getWordsPerLength(string $str, int $min_chars){
+		preg_match_all('/([a-zA-Z]|\xC3[\x80-\x96\x98-\xB6\xB8-\xBF]|\xC5[\x92\x93\xA0\xA1\xB8\xBD\xBE]){'.$min_chars.',}/', $str, $match_arr);
 		return $match_arr[0];
 	}
 
-	static function equal(?string $s1, string $s2, bool $case_sensitive = true){
+	static function getWords(string $str){
+		// Reemplazar múltiples espacios, tabuladores y signos de puntuación con un espacio
+		$str = preg_replace('/\s+|[\p{P}]+/u', ' ', $str);
+
+		// Convertir el texto a minúsculas
+		$str = strtolower($str);
+	
+		// Dividir el texto en palabras
+		$words = explode(' ', $str);
+	
+		// Eliminar palabras vacías o que solo contengan espacios
+		$words = array_filter($words, function($palabra) {
+			return trim($palabra) !== '';
+		});
+	
+		// Devolver el array de palabras
+		return $words;
+	}
+
+	// alias
+	static function words(string $str){
+		return static::getWords($str);
+	}
+
+	static function wordsCount(string $str, bool $unique = false){
+		$words = static::getWords($str);
+		
+		if ($unique){
+			$words = array_unique($words);
+		}
+
+		return count($words);
+	}
+
+	/*
+		Revise el DOM y acorte los textos utilizando el metodo getUpToNWords() 
+		listado mas abajo a $n_words palabras 
+
+		No afecta codigo Javascript o CSS si lo hubiera.
+
+		No trunca nada dentro de atributos como style, class, etc
+	*/
+	static function reduceText(string $html, int $n_words): string {
+        // Cargar el HTML en un objeto DOMDocument
+        $dom = XML::getDocument($html);
+
+        // Obtener todos los nodos de texto
+        $xpath = new \DOMXPath($dom);
+		
+        $textNodes = $xpath->query('//text()');
+
+        // Acortar el texto de cada nodo
+        foreach ($textNodes as $node) {
+            $text            = $node->nodeValue;
+            $words           = preg_split('/\s+/', $text);
+            $shortenedWords  = array_slice($words, 0, $n_words);
+            $shortenedText   = implode(' ', $shortenedWords);
+            $node->nodeValue = $shortenedText;
+        }
+
+        // Obtener el HTML resultante
+        $reducedHtml = $dom->saveHTML();
+
+        return $reducedHtml;
+    }
+
+	static function equal(string $s1, string $s2, bool $case_sensitive = true){
 		if ($case_sensitive === false){
 			$s1 = strtolower($s1);
 			$s2 = strtolower($s2);
@@ -849,7 +1243,7 @@ class Strings
 	* 
 	* @author	filipkappa
 	*/
-	static function replaceNth(?string $search, string $replace, string $subject, ?int $occurrence)
+	static function replaceNth(string $search, string $replace, string $subject, ?int $occurrence)
 	{
 		$search = preg_quote($search);
 		return preg_replace("/^((?:(?:.*?$search){".--$occurrence."}.*?))$search/", "$1$replace", $subject);
@@ -899,20 +1293,18 @@ class Strings
 		@param int indice final
 		@return string el substr() de inicio a fin	
 	*/
-	static function middle(?string $str, int $ini, ?int $end = null) : string {
-		if (strlen($str) === 0){
-			return '';
-		}
-
-		if ($end === 0){
-			return '';
-		} else {
-			$len = $end - $ini;
-			return substr($str, $ini, $len);
-		}
+	static function middle(string $str, int $ini, int $end = 0) : string {
+		if (($ini==0) and ($end==0)){
+			return ($str[0]);
+		}else{  
+			if ($end==0){
+				$end = strlen($str);
+			} 	
+			return substr ($str,$ini,$end-$ini+1);
+		}  	
 	}
 
-	static function left(?string $str, int $to_pos){
+	static function left(string $str, int $to_pos){
 		if ($to_pos === 0){
 			return '';
 		}
@@ -920,7 +1312,7 @@ class Strings
 		return substr($str, 0, $to_pos);         
 	}
 
-	static function right(?string $str, int $from_pos){
+	static function right(string $str, int $from_pos){
 		if ($from_pos === 0){
 			return $str;
 		}
@@ -928,27 +1320,27 @@ class Strings
 		return substr($str, $from_pos);        
 	}
 
-	static function firstChar(?string $str) : string {
+	static function firstChar(string $str) : string {
 		return substr($str, 0, 1);
 	}
 
-	static function lastChar(?string $str) : string {
+	static function lastChar(string $str) : string {
 		return substr($str, -1);
 	}
 
-	static function exceptLastChar(?string $str) : string {
+	static function exceptLastChar(string $str) : string {
 		return substr($str, 0, -1);
 	}
 
 	// alias for exceptLastChar
-	static function untilLastChar(?string $str) : string {
+	static function untilLastChar(string $str) : string {
 		return substr($str, 0, -1);
 	}
 
 	/*
 		Parse php class from file
 	*/
-	static function getClassName(?string $file_str, bool $fully_qualified = true){
+	static function getClassName(string $file_str, bool $fully_qualified = true){
 		$pre_append = '';
 			
 		if ($fully_qualified){
@@ -968,7 +1360,7 @@ class Strings
 	/*
 		Parse php class given the filename
 	*/
-	static function getClassNameByFileName(?string $filename, bool $fully_qualified = true){
+	static function getClassNameByFileName(string $filename, bool $fully_qualified = true){
 		$file = file_get_contents($filename);
 		return self::getClassName($file, $fully_qualified);
 	}
@@ -1224,17 +1616,24 @@ class Strings
 		return $ok;
 	}
 
-	static function realPathNoCoercive(?string $path){
+	static function realPathNoCoercive($path = null){
+		if ($path === null){
+			return false;
+		}
+
 		$_path = realpath($path);
 
 		return $_path === false ? $path : $_path;
 	}
 
-	static function replaceSlashes(?string $path) : string {
+	static function replaceSlashes(string $path) : string {
 		return str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $path);
 	}
-        
-	static function removeUnnecessarySlashes(?string $path) : string {
+    
+	/*
+		'Util para normalizar rutas de archivos o URLs y asegurarse de que no haya barras diagonales duplicadas
+	*/
+	static function removeUnnecessarySlashes(string $path) : string {
        	return preg_replace('#/+#','/',$path);
 	}
 
@@ -1252,6 +1651,11 @@ class Strings
 		return $path;
 	}
 
+	// alias
+	static function trimTrailingSlash($path = null){
+		return static::removeTrailingSlash($path);
+	}
+
 	static function removeFirstSlash(?string $path = null) : ?string {
 		if (empty($path)){
 			return $path;
@@ -1261,10 +1665,19 @@ class Strings
 			return substr($path, 1);
 		}
 
+		if (Strings::startsWith('/', $path)){
+			return substr($path, 1);
+		}
+
 		return $path;
 	}
 
-	static function addTrailingSlash(?string $path) : string{
+	// alias
+	static function trimFirstSlash($path = null){
+		return static::removeFirstSlash($path);
+	}
+
+	static function addTrailingSlash(string $path) : string{
 		$path = static::realPathNoCoercive($path);
 
 		if (!Strings::endsWith('\\', $path) && !Strings::endsWith('/', $path)){
@@ -1277,7 +1690,7 @@ class Strings
 	/*
 		Desentrelaza un string en dos.
 	*/
-	static function deinterlace(?string $literal) : Array {
+	static function deinterlace(string $literal) : Array {
         $arr = str_split($literal);
 
         $str1 = '';
@@ -1335,16 +1748,233 @@ class Strings
         return $ret;
     }
 
-	static function removeInlineComments(?string $str) : string {	
+	static function fileExtension(string $filename){
+		return Files::fileExtension($filename);
+	}
+
+	/*
+		Chequeo rapido
+	*/
+	static function isJSON($val, bool $fast_check = false){
+		if ($val === null){
+			return false;
+		}
+
+		if (!is_string($val)){
+			return false;
+		}
+
+		if ($val == ''){
+			return false;
+		}
+
+		if (!$fast_check){
+			if (json_decode($val) === null){
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	static function formatJSON(string $str)
+	{
+		if (static::startsWith('http', $str)){
+			$str = consume_api($str);
+		} else if (static::endsWith('.json', $str)){
+			$str = file_get_contents($str);
+		}
+
+		$arr = json_decode($str, true);
+		$str = json_encode($arr, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+
+		return $str;
+	}
+
+	static function removeMultipleSpacesInLines(string $str) : string {	
 		return preg_replace('/\n\s*\n/', "\n", $str);
 	}	
 
-	static function removeMultiLineComments(?string $str) : string {	
+	static function removeMultiLineComments(string $str) : string {	
 		return preg_replace('!/\*.*?\*/!s', '', $str);	
 	}
 
-	static function removeComments(?string $str) : string {
-		return static::removeInlineComments(static::removeMultiLineComments($str));
+	static function wipeEmptyTags(string $input, $tag = null) : string {
+		if ($tag === null) {
+			// Eliminar cualquier etiqueta vacía
+			$pattern = '/<[^\/>]*>\s*<\/[^>]*>/';
+		} else {
+			// Escapar caracteres especiales en el tag
+			$tag = preg_quote($tag);
+			
+			// Crear el patrón de búsqueda con el tag
+			$pattern = '/<' . $tag . '>\s*<\/' . $tag . '>/';
+		}
+		
+		// Realizar el reemplazo
+		$output = preg_replace($pattern, '', $input);
+		
+		return $output;
+	}
+
+	/*
+		Hay una version analoga en la clase XML 
+
+		La diferencia es que esta *no* remueve tags si poseen atributos (puede ser algo bueno o malo)
+	*/
+	static function removeHTMLTextModifiers(string $html, $tags = null): string {
+		$tagsToRemove = ['b', 'i', 'u', 's', 'strong', 'em', 'sup', 'sub', 'mark', 'small'];
+	
+		if (is_array($tags) || is_string($tags)) {
+			// Si se proporciona un array o una cadena de etiquetas, se utilizan en lugar de las predeterminadas
+			$tagsToRemove = is_array($tags) ? $tags : [$tags];
+		}
+	
+		$pattern = '/<\/?(' . implode('|', $tagsToRemove) . ')>/i';
+		$page = preg_replace($pattern, '', $html);
+	
+		return $page;
+	}
+
+	static function removeSpaceBetweenTags(string $html): string {
+        // Eliminar espacios, tabs, saltos de linea entre etiquetas HTML
+        $pattern     = '/>(\s+)</';
+        $replacement = '><';
+        $html = preg_replace($pattern, $replacement, $html);
+
+        return $html;
+    }
+
+	static function replaceHTMLentities(string $page): string {
+        return html_entity_decode($page);
+    }
+
+	static function removeHTMLentities(string $html): string {
+        return preg_replace("/&#?[a-z0-9]+;/i","", $html);
+    }
+
+	static function removeDataAttr(string $page): string {
+        // Eliminar todas las ocurrencias de atributos data-* en HTML
+        $pattern = '/\s+data-[a-zA-Z0-9-]+=[\'"][^\'"]*[\'"]/i';
+        $page    = preg_replace($pattern, '', $page);
+
+        return $page;
+    }
+
+	// php.net
+	static function stripTags($text, $tags = null, $invert = FALSE)
+	{
+		if (!empty($tags)){
+			preg_match_all('/<(.+?)[\s]*\/?[\s]*>/si', trim($tags), $tags);
+		
+			$tags = array_unique($tags[1]);
+		}
+		   
+		if(is_array($tags) AND count($tags) > 0) {
+	  
+		  if($invert == FALSE) {
+			return preg_replace('@<(?!(?:'. implode('|', $tags) .')\b)(\w+)\b.*?>.*?</\1>@si', '', $text);
+		  }
+	  
+		  else {
+			return preg_replace('@<('. implode('|', $tags) .')\b.*?>.*?</\1>@si', '', $text);
+		  }
+		}
+	  
+		elseif($invert == FALSE) {
+		  return preg_replace('@<(\w+)\b.*?>.*?</\1>@si', '', $text);
+		}
+	  
+		return $text;
+	}
+
+	/*
+		String length in Kilo bytes
+	*/
+	static function getLengthInKB(string $str, bool $include_subfix = true){
+		return ((string) round(strlen($str) / (1024))) . ($include_subfix ? ' KB' : '') ;
+	}
+
+	/*
+		0 < $level < 8
+	*/
+	static function minimifyHTML($html, int $level = 5) : string {
+		if ($level >= 7){
+			$html = XML::stripTag($html, 'nav');
+            $html = XML::stripTag($html, 'img');
+			$html = XML::stripTag($html, 'footer');
+			$html = XML::HTML2Text($html);
+
+			// Replace multiple (one ore more) line breaks with a single one.
+			$html = preg_replace("/[\r\n]+/", "\n", $html);
+									
+			return $html;
+		}
+
+		$html = Strings::removeHTMLentities($html);
+		$html = XML::stripTag($html, 'head');
+		$html = XML::stripTag($html, 'footer');
+		$html = XML::stripTag($html, 'script');
+		$html = XML::stripTag($html, 'style');
+		$html = XML::stripTag($html, 'iframe');
+		$html = XML::stripTag($html, 'svg');		
+		$html = XML::removeHTMLAttributes($html, [
+			'onclick',
+			'ondblclick',
+			'onmousedown',
+			'onmouseup',
+			'onmousemove',
+			'onmouseover',
+			'onmouseout',
+			'onkeydown',
+			'onkeyup',
+			'onkeypress',
+			'onfocus',
+			'onblur',
+			'onchange',
+			'onsubmit',
+			'onreset',
+			'onselect',
+			'oninput',
+			'onload',
+			'onunload',
+			'onerror',
+			'onresize',
+			'onscroll'
+		]);
+
+		$html = XML::removeHTMLAttributes($html, ['style', 'class', 'rel', 'target', 'type']);
+		$html = Strings::removeMultiLineComments($html);
+		$html = XML::removeCSS($html);
+
+		if ($level >=2){
+			$html = XML::removeComments($html);
+		}
+
+		if ($level >=3){
+			$html = Strings::removeHTMLTextModifiers($html);
+		}
+
+		if ($level >= 4){
+			$html = XML::removeCSSClasses($html);			
+		}
+
+		if ($level >= 5){
+			$html = Strings::removeDataAttr($html); // bye data-*
+		}
+
+		$html = Strings::removeSpaceBetweenTags($html);
+		$html = Strings::removeMultipleSpacesInLines($html);
+		$html = Strings::wipeEmptyTags($html);		
+
+		
+		$html = static::afterIfContains($html, '<body>');
+
+		if (Strings::contains('</body>', $html)){
+			$html = static::beforeLast($html, '</body>');
+		}	
+
+		return $html;		
 	}
 }
 

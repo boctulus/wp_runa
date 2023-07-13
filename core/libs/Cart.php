@@ -132,7 +132,7 @@ class Cart
     }
 
 	/*
-		Devuelve identificador dentro del carrito
+		Devuelve identificador dentro del carrito para productos de tipo Simple
 	*/
 	static function findSimple($product_id){
 		$cart = static::getCart();
@@ -144,8 +144,9 @@ class Cart
 	}
 
 	/*
-		Devuelve identificador dentro del carrito
-	*/	static function findVariation($variation_id){
+		Devuelve identificador dentro del carrito para Variantes
+	*/	
+	static function findVariation($variation_id){
 		$cart = static::getCart();
 		$cart_items = $cart->get_cart();
 	
@@ -173,22 +174,14 @@ class Cart
 	}
 
 	static function getQuantity($product_id){
-		// Obtener la cantidad de cada producto en el carrito
 		$cart_item_quantities = WC()->cart->get_cart_item_quantities();
 
-		// Buscar el product_id en el array
 		if (isset($cart_item_quantities[$product_id])) {
-			// Devolver la cantidad correspondiente
 			return $cart_item_quantities[$product_id];
 		} else {
-			// Si el producto no está en el carrito, devolver 0
 			return 0;
 		}
 	}
-
-	/*
-		Funciona EXCEPTO con productos variables !
-	*/
 
 	static function setQuantity($product_id, int $qty)
 	{
@@ -238,11 +231,11 @@ class Cart
 		return static::add($product_id, 1);
 	}
 
-	// probar
-	static function decrement($product_id){
+	// substract N-units
+	static function sub($product_id, int $qty){
 		$prev_qty = static::getQuantity($product_id); 
 
-		$expected = $prev_qty - 1;
+		$expected = $prev_qty - $qty;
 
 		if ($expected <= 1){
 			return null;
@@ -259,6 +252,11 @@ class Cart
 		return true;
 	}
 
+	// decrementa en 1 unidad
+	static function decrement($product_id){
+		return static::sub($product_id, 1);
+	}
+
 	// delete
 	static function remove($product_id){
 		return static::setQuantity($product_id, 0);
@@ -272,6 +270,9 @@ class Cart
 		}
 	}
 
+	/*
+		Vacia completamente el carrito
+	*/
 	static function empty() 
 	{
 		$cart = static::getCart(); 

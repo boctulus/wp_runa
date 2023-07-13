@@ -51,17 +51,16 @@ class Router
 		}
 
 		$req = Request::getInstance();
-	
-		$config = config();
 			
 		if (php_sapi_name() != 'cli'){
-			$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-			$path = preg_replace('/(.*)\/index.php/', '/', $path);
+			$path     = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+			$path     = preg_replace('/(.*)\/index.php/', '/', $path);
+
+			$base_url = Url::getBaseUrl();
+			$base_url = Strings::addTrailingSlash($base_url);
 	
-			$config['base_url'] = Strings::addTrailingSlash($config['base_url']);
-	
-			if ($config['base_url'] != '/' && strpos($path, $config['base_url']) === 0) {
-				$path = substr($path, strlen($config['base_url']));
+			if ($base_url != '/' && strpos($path, $base_url) === 0) {
+				$path = substr($path, strlen($base_url));
 			}   
 	
 			if ($path === false || ! Url::urlCheck($_SERVER['REQUEST_URI']) ){

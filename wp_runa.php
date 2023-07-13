@@ -7,8 +7,9 @@ use boctulus\SW\core\libs\Files;
 /*
 	Plugin Name: WP RUNA
 	Description: WordPress-RUNA connector
-	Version: 0.0.1
+	Version: 1.1.0
 	Author: boctulus
+	Author URI: boctulus@gmail.com
 */
 
 if ( ! defined( 'ABSPATH' ) ) {

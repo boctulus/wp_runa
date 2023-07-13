@@ -28,7 +28,7 @@ if ($cfg["use_composer"] ?? true){
         throw new \Exception("Falta composer.json");
     }       
     
-    if (!file_exists(ROOT_PATH . 'vendor'. DIRECTORY_SEPARATOR .'autoload.php')){
+     if (!file_exists(ROOT_PATH . 'vendor'. DIRECTORY_SEPARATOR .'autoload.php')){
         chdir(__DIR__);
         exec("composer install --no-interaction");
         sleep(10);
@@ -37,11 +37,11 @@ if ($cfg["use_composer"] ?? true){
     require_once APP_PATH . 'vendor/autoload.php';
 }
 
-/*
-    Parse command line arguments into the $_GET variable <sep16@psu.edu>
-*/
+if ((php_sapi_name() === 'cli')){
+    /*
+        Parse command line arguments into the $_GET variable <sep16@psu.edu>
+    */
 
-if (php_sapi_name() == "cli"){
     parse_str(implode('&', array_slice($argv, 1)), $_GET);
 }
 
