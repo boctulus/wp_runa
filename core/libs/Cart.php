@@ -228,7 +228,7 @@ class Cart
 			return false;
 		}
 
-		Logger::dd(static::getQuantity($product_id), "Nueva cantidad para pid=$product_id en carrito");
+		// Logger::dd(static::getQuantity($product_id), "Nueva cantidad para pid=$product_id en carrito");
 
 		return true;
 	}
@@ -254,7 +254,7 @@ class Cart
 			return false;
 		}
 
-		Logger::dd(static::getQuantity($product_id), "Nueva cantidad para pid=$product_id en carrito");
+		// Logger::dd(static::getQuantity($product_id), "Nueva cantidad para pid=$product_id en carrito");
 
 		return true;
 	}

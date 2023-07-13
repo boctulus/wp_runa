@@ -75,8 +75,8 @@ use boctulus\SW\core\libs\Url;
                 return;
             }
 
-            console.log("Product ID:", pid);
-            console.log("Cantidad actual:", qty);
+            // console.log("Product ID:", pid);
+            // console.log("Cantidad actual:", qty);
 
             $.post(`/cart/decrement/${pid}`, function (data, status) {
                console.log(`DEC O.K. para PID=${pid}`);
@@ -101,8 +101,8 @@ use boctulus\SW\core\libs\Url;
                 return;
             }
 
-            console.log("Product ID:", pid);
-            console.log("Cantidad actual:", qty);
+            // console.log("Product ID:", pid);
+            // console.log("Cantidad actual:", qty);
 
             $.post(`/cart/increment/${pid}`, function (data, status) {
                console.log(`INC O.K. para PID=${pid}`);
