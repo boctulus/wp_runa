@@ -33,9 +33,10 @@ addEventListener("DOMContentLoaded", (event) => {
                 <!-- Name -->
                 <tr class="nom-wrap">
                     <th><label for="nom">Nombre <span class="description">(obligatorio)</span></label></th>
-                    <td><input type="text" name="nom" id="nom" class="regular-text" pattern="[a-zA-Z0-9 ñÑáéíóú]+" required > 
-                    <!-- <span class="description">Nombre completo o razón social</span> -->
-                </td>
+                    <td>
+                        <input type="text" name="nom" id="nom" class="regular-text" pattern="[a-zA-Z0-9 ñÑáéíóú]+" required > 
+                        <!-- <span class="description">Nombre completo o razón social</span> -->
+                    </td>
                 </tr>
 
                 <tr class="rut-wrap">
@@ -155,7 +156,7 @@ addEventListener("DOMContentLoaded", (event) => {
 
         const url = base_url + '/cart/quote'; /// apuntar al endpoint
 
-        //console.log(data);
+        // console.log(data);
 
         jQuery.ajax({
             url: url, 

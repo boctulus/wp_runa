@@ -29,25 +29,11 @@ class CartController
         ]);
     }
 
-    function set_qty($pid){       
+    function set_qty($pid, $qty){       
         try {
-
-            $req  = request();
-            $data = $req->as_array()->getBody();
-    
-            if (empty($data)){
-                error("Falta el body o esta vacio o el formato es incorrecto", 400);
-            }
-            
-            $qty = $data['qty'] ?? null;
-    
-            if (empty($qty)){
-                return error("Param 'qty' no puede omitise o estar vacio");
-            }
-
             $ok = Cart::setQuantity($pid, $qty);
 
-            if (!$ok){
+            if ($ok === false){
                 return error("No pudo seteare correctamente la cantidad");
             }
 
@@ -142,11 +128,11 @@ class CartController
         }   
     }
 
-    function decrement($pid){
+    function decrement($pid, $to_qty){
         try {
-            $ok = Cart::decrement($pid);
+            $ok = Cart::decrement($pid, $to_qty);
 
-            if (!$ok){
+            if ($ok === false){
                 error("No se pudo decrementar para pid=$pid  en el carrito");
             }
 
@@ -162,11 +148,11 @@ class CartController
         }   
     }
 
-    function increment($pid){
+    function increment($pid, $to_qty){
         try {
-            $ok = Cart::increment($pid);
+            $ok = Cart::increment($pid, $to_qty);
 
-            if (!$ok){
+            if ($ok === false){
                 error("No se pudo incrementar para pid=$pid  en el carrito");
             }
 
@@ -240,10 +226,12 @@ class CartController
 
         $products = [];
         foreach ($items as $ix => $item){
-            $p = Products::getProduct($item['id']);
+            Logger::dd($item, 'item');
+
+            $p = Products::getProduct($item['pid']);
 
             if (empty($p)){
-                error("Producto con ID={$item['id']} no encontrado", 404);
+                error("Producto con ID={$item['pid']} no encontrado", 404);
             }
 
             // https://stackoverflow.com/a/54375782/980631
@@ -251,7 +239,7 @@ class CartController
             $sale_price    = (float) $p->get_price(); // Active price (the "Sale price" when on-sale)
             
             $products[] = [
-                'pid' => $item['id'],
+                'pid' => $item['pid'],
                 'qty' => $item['qty']
             ];
 
@@ -334,7 +322,9 @@ class CartController
         
             $url = Url::buildUrl($url, $params);
         
-            $client = new ApiClient;
+            $client = ApiClient::instance()
+            ->logReq($cfg['log_requests'])
+            ->logRes($cfg['log_responses']);
         
             $client
             ->disableSSL()

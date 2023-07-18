@@ -10,13 +10,14 @@ use boctulus\SW\core\libs\ApiClient;
 
 class RunaSync 
 {
-
     static function get_xml(){
         $cfg = config();
     
         $url = $cfg['api_base_url'] . $cfg['endpoints']['stock_xml_gen'];
     
-        $client = ApiClient::instance();
+        $client = ApiClient::instance()
+        ->logReq($cfg['log_requests'])
+        ->logRes($cfg['log_responses']);
     
         $client
         ->disableSSL()
@@ -40,7 +41,9 @@ class RunaSync
     
         $url = $cfg['api_base_url'] . $cfg['endpoints']['stock_xml_get'];
     
-        $client = ApiClient::instance();
+        $client = ApiClient::instance()
+        ->logReq($cfg['log_requests'])
+        ->logRes($cfg['log_responses']);
     
         $client
         ->disableSSL()

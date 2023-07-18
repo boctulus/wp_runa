@@ -226,11 +226,6 @@ class Cart
 		return true;
 	}
 
-	// probar
-	static function increment($product_id){
-		return static::add($product_id, 1);
-	}
-
 	// substract N-units
 	static function sub($product_id, int $qty){
 		$prev_qty = static::getQuantity($product_id); 
@@ -252,9 +247,52 @@ class Cart
 		return true;
 	}
 
-	// decrementa en 1 unidad
-	static function decrement($product_id){
-		return static::sub($product_id, 1);
+	/* 
+		Incrementa en 1 unidad. 
+
+		@param 	int	$product_id
+		@param  int $to 			cantidad final esperada (opcional)
+	*/
+	static function increment($product_id, $to = null){
+		if ($to === null){
+			return static::add($product_id, 1);
+		}
+
+		$before = static::getQuantity($product_id);
+
+		if ($to > $before){
+			static::setQuantity($product_id, $to);
+
+			if (static::getQuantity($product_id) != $to){
+				return false;
+			}
+		}
+		
+		return null;
+	}
+		
+	/* 
+		Decrementa en 1 unidad. 
+
+		@param 	int	$product_id
+		@param  int $to 			cantidad final esperada (opcional)
+	*/
+	static function decrement($product_id, $to = null){
+		if ($to === null){
+			return static::sub($product_id, 1);
+		}
+
+		$before = static::getQuantity($product_id);
+
+		if ($to < $before){
+			static::setQuantity($product_id, $to);
+
+			if (static::getQuantity($product_id) != $to){
+				return false;
+			}
+		}
+		
+		return null;
 	}
 
 	// delete

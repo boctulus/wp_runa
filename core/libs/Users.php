@@ -245,15 +245,13 @@ class Users
         return $capabilities;
     }
 
-    /*
-        https://wordpress.stackexchange.com/a/111788/99153
-    */
     static function roleExists($role) {
-        if( ! empty( $role ) ) {
-            return $GLOBALS['wp_roles']->is_role( $role );
-        }
+        // busco en minusculas
+        $role  = strtolower($role);
 
-        return false;
+        $roles = array_keys(static::getRoleNames());
+        
+        return in_array($role, $roles);
     }
 
     static function createRole(string $role_name, $role_title = null, Array $capabilities = []){

@@ -78,12 +78,12 @@ use boctulus\SW\core\libs\Url;
             // console.log("Product ID:", pid);
             // console.log("Cantidad actual:", qty);
 
-            $.post(`/cart/decrement/${pid}`, function (data, status) {
-               console.log(`DEC O.K. para PID=${pid}`);
-            })
-            .fail(function (data) {
-                console.log("error", data);
-            });
+            // $.post(`/cart/decrement/${pid}/${qty}`, function (data, status) {
+            //    console.log(`DEC O.K. para PID=${pid}`);
+            // })
+            // .fail(function (data) {
+            //     console.log("error", data);
+            // });
         });
 
         // Actualizado 12/7/23
@@ -104,12 +104,12 @@ use boctulus\SW\core\libs\Url;
             // console.log("Product ID:", pid);
             // console.log("Cantidad actual:", qty);
 
-            $.post(`/cart/increment/${pid}`, function (data, status) {
-               console.log(`INC O.K. para PID=${pid}`);
-            })
-            .fail(function (data) {
-                console.log("error", data);
-            });
+            // $.post(`/cart/increment/${pid}/${qty}`, function (data, status) {
+            //    console.log(`INC O.K. para PID=${pid}`);
+            // })
+            // .fail(function (data) {
+            //     console.log("error", data);
+            // });
         });
 
 
@@ -307,13 +307,20 @@ use boctulus\SW\core\libs\Url;
         jQuery('td.product-name').each((index, td) => {
             const td_el = jQuery(td)
 
-            const id = td_el.data('pid');
-            const a = td_el.children('a');
+            const pid  = td_el.data('pid');
+            const a    = td_el.children('a');
             const text = a.text();
-            const qty = parseInt(td_el.parent().children('td.product-quantity').children('div').children('input.qty').val())
+            const qty  = parseInt(td_el.parent().children('td.product-quantity').children('div').children('input.qty').val())
+
+            $.post(`/cart/set_qty/${pid}/${qty}`, function (data, status) {
+            //    console.log(`INC O.K. para PID=${pid}`);
+            })
+            .fail(function (data) {
+                // console.log("error", data);
+            });
 
             cart_items.push({
-                id,
+                pid,
                 qty //, text
             })
         });

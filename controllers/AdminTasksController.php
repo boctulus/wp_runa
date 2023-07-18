@@ -6,7 +6,7 @@ use boctulus\SW\core\libs\DB;
 use boctulus\SW\core\libs\Users;
 use boctulus\SW\core\libs\Products;
 
-use function TranslatePress\file_get_html;
+use function TranslatePress\file_get_contents;
 
 class AdminTasksController
 {
@@ -17,17 +17,29 @@ class AdminTasksController
     }
 
     function index(){
-        dd('Hi Admin!'); 
+        dd('Hi Admin!!!'); 
+    }
+
+    function log(){
+        return file_exists(LOGS_PATH . 'log.txt') ? file_get_contents(LOGS_PATH . 'log.txt') : '--x--';
+    }
+
+    function error_log(){
+       return file_exists(LOGS_PATH . 'errors.txt') ? file_get_contents(LOGS_PATH . 'errors.txt') : '--x--';
     }
 
     function debug_log(){
         return file_exists(__DIR__ . '/../wp-content/debug.log') ? file_get_contents(__DIR__ . '/../wp-content/debug.log') : '--x--';
     }
 
-    function error_log(){
-       return file_exists(LOGS_PATH . 'errors.txt') ? file_get_html(LOGS_PATH . 'errors.txt') : '--x--';
+    function req(){
+        return file_exists(LOGS_PATH . 'req.txt') ? file_get_contents(LOGS_PATH . 'req.txt') : '--x--';
     }
 
+    function res(){
+        return file_exists(LOGS_PATH . 'res.txt') ? file_get_contents(LOGS_PATH . 'res.txt') : '--x--';
+    }
+    
     function adminer(){
         require_once __DIR__ . '/../scripts/adminer.php';
     }

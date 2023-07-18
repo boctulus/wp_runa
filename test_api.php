@@ -84,6 +84,10 @@ function test_runa(){
 	dd($url, 'API URL');
 
 	$client = new ApiClient;
+	
+	$client
+	->logReq()
+	->logRes();
 
 	$client
 	->disableSSL()

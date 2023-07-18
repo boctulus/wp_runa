@@ -17,6 +17,9 @@ return [
         'sync_productos' => '....???'
     ],
 
+    'log_requests'  => 'req.txt',
+    'log_responses' => 'res.txt',
+
     /*
         Permite deshabilitar /cart o /carrito
         y lo mismo para el checkout
