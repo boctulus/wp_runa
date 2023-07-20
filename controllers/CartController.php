@@ -248,7 +248,7 @@ class CartController
                 'can' => $item['qty'],
                 'pre' => $regular_price,
                 'des' => $regular_price - $sale_price,      
-                'tot' => $sale_price
+                'tot' => $sale_price * ((int) $item['qty'])
             ];
 
             $items[$ix] = $item;
@@ -312,6 +312,9 @@ class CartController
 	    $password = $cfg['api_token'];
     
         try {
+            if ($cfg['debug']){
+                Logger::dump($data, 'pedidos.txt');
+            }
 
             $data = XML::fromArray($arr, 'ped', false);
 

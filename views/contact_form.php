@@ -235,9 +235,14 @@ addEventListener("DOMContentLoaded", (event) => {
             return
         }
 
+        let contact_data = getFormData($("#quoter_contact_form"), false);
+
+        // Elimino puntos y guiones del RUT
+        contact_data.rut = contact_data.rut.replace(/[.-]/g, '');
+
         // obj
         let contact = {            
-            "contact" : getFormData($("#quoter_contact_form"), false)
+            "contact" : contact_data
         }
 
         ///////////////////////////////////// 

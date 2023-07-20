@@ -52,7 +52,7 @@ class ApiClient
     // Logs
     protected $log_req = false;
     protected $log_res = false;
-    protected $logger_fn    = 'log';
+    protected $logger_fn    = 'dump';
 
     // Extras
     protected $query_params = [];

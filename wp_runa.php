@@ -7,7 +7,7 @@ use boctulus\SW\core\libs\Files;
 /*
 	Plugin Name: WP RUNA
 	Description: WordPress-RUNA connector
-	Version: 1.2.1
+	Version: 1.2.9
 	Author: boctulus
 	Author URI: boctulus@gmail.com
 */

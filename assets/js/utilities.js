@@ -79,23 +79,28 @@ const var_decode = (prop_id) => {
 
         getFormData($("#quoter_contact_form"), false, 'col-')
 */
+
 const getFormData = (formElem, use_id = true, prefix = null) => {
-    const serialized = jQuery(formElem).serializeArray();
     const jsonData = {};
 
-    serialized.forEach((item) => {
-        let field  = use_id ? item.id : item.name;
+    formElem.find(':input').each((_, input) => {
+        const name = use_id ? input.id : input.name;
 
-        if (prefix != null && field.startsWith(prefix)){
-            field = field.substr(prefix.length);
+        if (prefix != null && name.startsWith(prefix)) {
+            name = name.substr(prefix.length);
         }
 
-        jsonData[field] = item.value
-        
+        if (input.type === 'select-one') {
+            const selectedOption = formElem.find(`[name="${input.name}"] option:selected`);
+            jsonData[name] = selectedOption.attr('id');
+        } else {
+            jsonData[name] = input.value;
+        }
     });
 
     return jsonData;
-}
+};
+
 
 /*
     Los elementos del formulario poseen cierta clase de css,
