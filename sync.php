@@ -44,6 +44,9 @@ if (php_sapi_name() == "cli"){
 	}
 } 
 
+
+long_exec();
+
 RunaSync::init($codes ?? null);
 
 

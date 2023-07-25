@@ -10,6 +10,9 @@ use boctulus\SW\core\libs\ApiClient;
 
 class RunaSync 
 {
+    /*
+        Devuelve stocks
+    */
     static function get_xml(){
         $cfg = config();
     
