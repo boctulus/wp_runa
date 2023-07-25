@@ -324,4 +324,23 @@ addEventListener("DOMContentLoaded", (event) => {
 
         do_ajax_call(data);
     });
+
+    const clearContactForm = () => {
+        fillForm({
+            "nom": "",
+            "rut": "",
+            "gir": "",
+            "fon": "",
+            "ema": "",
+            "dir": "",
+            "com": ""
+        })
+
+        toStorage({contact: null})
+    }
+
+    // Solo util para testing
+    const wipeContactInfo = () => {
+        toStorage({contact: null})
+    }
 </script>
