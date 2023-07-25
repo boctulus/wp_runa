@@ -69,12 +69,25 @@ addEventListener("DOMContentLoaded", (event) => {
         }
 
         /*
-            Para evitar inconcistencias dado que la cantidad en el carrito
-            cambia por Ajax, mejor lo oculto o destruyo el contador
+            El chequeo de cantidad se puede hacer desde el backend y seria mas eficiente
         */
+       
+        let items_count = parseInt(jQuery(jQuery("span.et-cart-quantity.et-quantity")[0]).text().trim());
 
-        jQuery(jQuery("span.et-cart-quantity.et-quantity")[0]).remove()
-        
+        if (items_count === 0){
+            Swal.fire({
+                title: "Carrito vacio",
+                text: "Será enviado a la tienda",
+                icon: "info",  // "warning", "error", "success" and "info"
+            }).then((result) => {
+                window.location.replace('/tienda')
+                return
+            });
+
+            window.location.replace('/tienda')
+            return
+        }
+
         // Rueditas de carga
         $('.elementor-element-65cdc8a').hide()
         $('.elementor-element-54380b0').hide()
@@ -316,6 +329,9 @@ addEventListener("DOMContentLoaded", (event) => {
                 */
                 $.post(`/cart/empty`, function (data, status) {
                     console.log('Carrito borrado');
+
+                    // Tambien borro items del localstorage
+                    toStorage({cart_items: null})
                 })
                 .fail(function (data) {
                     console.log("Error al intentar borrar carrito", data);
@@ -323,11 +339,19 @@ addEventListener("DOMContentLoaded", (event) => {
                 
                 //setNotification("Gracias por tu mensaje. Ha sido enviado.");
 
-                swal({
+                Swal.fire({
                     title: "Enviado!",
                     text: "Recibirá la cotización en su correo",
                     icon: "success",
+                }).then((result) => {
+                    // Redireccion
+                    window.location.replace('/tienda')
+                    return;
                 });
+
+                // Redireccion (en caso de que escape del modal)
+                window.location.replace('/tienda')
+                return;
             },
             error: function(res) {
                 clearAjaxNotification();
@@ -339,7 +363,7 @@ addEventListener("DOMContentLoaded", (event) => {
                 console.log('RES ERROR', res);
                 //setNotification("Hubo un error. Inténtelo más tarde.");
 
-                swal({
+                Swal.fire({
                     title: "Error",
                     text: "Hubo un error. Intente más tarde.",
                     icon: "warning", // "warning", "error", "success" and "info"
