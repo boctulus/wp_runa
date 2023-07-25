@@ -11,6 +11,19 @@ class Posts
     static $post_type   = 'post';
     static $cat_metakey = 'category';
 
+    static function getPostType($post_id) {
+        // Obtener el objeto del post usando el ID
+        $post = get_post($post_id);
+    
+        // Comprobar si se encontró el post y obtener el post_type
+        if ($post) {
+            $post_type = $post->post_type;
+            return $post_type;
+        } else {
+            return false; // Si el post no existe, puedes manejarlo de acuerdo a tus necesidades.
+        }
+    }
+
     /*
         Puede que no sea la mejor forma porque se salta el mecanismo de cache
     */

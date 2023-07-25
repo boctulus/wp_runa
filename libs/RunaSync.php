@@ -113,10 +113,17 @@ class RunaSync
             }
         }
         
-        $processed = 0;
+        $processed       = 0;
+        $processed_codes = [];
+
         foreach ($prods as $p){
             $sku   = $p['cod'];
             $stock = $p['can'];
+
+            // Parche porque RUNA envia duplicados para mitigar en algo el esfuerzo
+            if (in_array($sku, $processed_codes)){
+                continue;
+            }
 
             try {
                 $pid = Products::getProductIdBySKU($sku);
@@ -133,6 +140,7 @@ class RunaSync
                     // ..
                 }
 
+                $processed_codes[] = $sku;
                 $processed++;
 
             } catch (\Exception $e){
