@@ -143,6 +143,9 @@ add_filter( 'woocommerce_product_single_add_to_cart_text', 'woocommerce_add_to_c
 ///////////////////////////////////////////////////////////////
 
 
+
+
+
 // Page::replaceContent(function(&$content){
 //     // $content = preg_replace('/Mi cuenta/', "CuentaaaaaaaX", $content);
 // });

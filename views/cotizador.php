@@ -14,6 +14,13 @@ $is_logged = Users::isLogged();
             $ = jQuery
         }
 
+        /*
+            Para evitar inconcistencias dado que la cantidad en el carrito
+            cambia por Ajax, mejor lo oculto o destruyo el contador
+        */
+
+        jQuery(jQuery("span.et-cart-quantity.et-quantity")[0]).remove()
+
         // Rueditas de carga
         $('.elementor-element-65cdc8a').hide()
         $('.elementor-element-54380b0').hide()

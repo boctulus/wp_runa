@@ -68,6 +68,13 @@ addEventListener("DOMContentLoaded", (event) => {
             $ = jQuery
         }
 
+        /*
+            Para evitar inconcistencias dado que la cantidad en el carrito
+            cambia por Ajax, mejor lo oculto o destruyo el contador
+        */
+
+        jQuery(jQuery("span.et-cart-quantity.et-quantity")[0]).remove()
+        
         // Rueditas de carga
         $('.elementor-element-65cdc8a').hide()
         $('.elementor-element-54380b0').hide()
@@ -303,6 +310,16 @@ addEventListener("DOMContentLoaded", (event) => {
                 clearAjaxNotification();
 
                 console.log('RES', res);
+
+                /*
+                    Ahora borro el carrito
+                */
+                $.post(`/cart/empty`, function (data, status) {
+                    console.log('Carrito borrado');
+                })
+                .fail(function (data) {
+                    console.log("Error al intentar borrar carrito", data);
+                });
                 
                 //setNotification("Gracias por tu mensaje. Ha sido enviado.");
 
