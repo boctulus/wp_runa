@@ -287,7 +287,13 @@ class CartController
         );
         
 
-        $quoted_order = Orders::create($products, $billing_address, $shipping_address);
+        if (Users::isLogged()){
+            $order_attrs = [
+                '_customer_user' => Users::getCurrentUserId(),
+            ];
+        }        
+
+        $quoted_order = Orders::create($products, $billing_address, $shipping_address, $order_attrs ?? []);
         $order_id     = trim(str_replace('#', '', $quoted_order->get_order_number()));
 
 
