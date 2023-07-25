@@ -1,6 +1,10 @@
 <?php
 
 use boctulus\SW\core\libs\Url;
+use boctulus\SW\core\libs\Users;
+use boctulus\SW\core\libs\Strings;
+
+$is_logged = Users::isLogged();
 
 ?>
 
@@ -173,6 +177,7 @@ use boctulus\SW\core\libs\Url;
                         </td>
 
                         <td class="product-price" data-title="Precio">
+                            <?= $is_logged ? Strings::formatNumber($item['price']) : '' ?>
                         </td>
 
                         <td class="product-sku" data-title="SKU" data-pid="<?= $item['id'] ?>">
@@ -189,6 +194,7 @@ use boctulus\SW\core\libs\Url;
                             </div>
                         </td>
                         <td class="product-subtotal" data-title="Subtotal">
+                            <?= $is_logged ? Strings::formatNumber($item['qty'] * $item['price']) : '' ?>
                         </td>
                     </tr>
 
