@@ -8,6 +8,7 @@ use boctulus\SW\core\libs\Logger;
 use boctulus\SW\core\libs\Products;
 use boctulus\SW\core\libs\ApiClient;
 use boctulus\SW\core\libs\FileCache;
+use ElementorPro\Modules\Woocommerce\Documents\Product;
 
 class RunaSync 
 {
@@ -128,12 +129,18 @@ class RunaSync
             try {
                 $pid = Products::getProductIdBySKU($sku);
 
+                $post_type = Products::getPostType($pid);
+
+                if ($post_type == 'product_variation'){
+                    $parent_pid = wp_get_post_parent_id($pid);
+                }
+
                 if (!empty($pid)){
                     /*
                         SI existe, actualizo
                     */   
 
-                    debug("Actualizando producto existente con SKU= '$sku' | pid= $pid");
+                    debug("Actualizando producto existente con SKU= '$sku' | pid=$pid" . (isset($parent_pid) ? " (variation of pid=$parent_pid)" : '') );
                     wc_update_product_stock($pid, $stock);                     
 
                 } else {
