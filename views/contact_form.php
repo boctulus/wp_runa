@@ -87,7 +87,7 @@ addEventListener("DOMContentLoaded", (event) => {
                     <th><label for="nom">Nombre <span class="description">(obligatorio)</span></label></th>
                     <td>
                         <input type="text" name="nom" id="nom" class="regular-text" pattern="[a-zA-Z0-9 ñÑáéíóú]+" required > 
-                        <!-- <span class="description">Nombre completo o razón social</span> -->
+                        <span class="validation-error" style="color: red; display: block;"></span>
                     </td>
                 </tr>
 
@@ -108,23 +108,34 @@ addEventListener("DOMContentLoaded", (event) => {
                     </th>
                     <td>
                         <input type="text" name="gir" id="gir" class="regular-text" required>
+                        <span class="validation-error" style="color: red; display: block;"></span>
                     </td>
                 </tr>
 
                 <tr class="fon-wrap">
-                    <th><label for="fon">Teléfono <span class="description">(obligatorio)</span></label></th>
-                    <td><input type="tel" name="fon" id="fon" class="regular-text" required></td>
+                    <th>
+                        <label for="fon">Teléfono <span class="description">(obligatorio)</span></label>
+                    </th>
+                    <td>
+                        <input type="tel" name="fon" id="fon" class="regular-text" required>
+                        <span class="validation-error" style="color: red; display: block;"></span>
+                    </td>
                 </tr>
 
                 <tr class="email-wrap">
                     <th><label for="ema">E-mail <span class="description">(obligatorio)</span></label></th>
-                    <td><input type="email" name="ema" id="ema" class="regular-text" placeholder="Su correo @ lo-que-sea" required ></td>
-                    <span class="validation-error" style="color: red; display: block;"></span>
+                    <td>
+                        <input type="email" name="ema" id="ema" class="regular-text" placeholder="Su correo @ lo-que-sea" required >
+                        <span class="validation-error" style="color: red; display: block;"></span>
+                    </td>                    
                 </tr>
 
                 <tr class="dir-wrap">
                     <th><label for="dir">Dirección <span class="description">(obligatorio)</span></label></th>
-                    <td><input type="text" name="dir" id="dir" class="regular-text" required></td>
+                    <td>
+                        <input type="text" name="dir" id="dir" class="regular-text" required>
+                        <span class="validation-error" style="color: red; display: block;"></span>
+                    </td>
                 </tr>
 
                 <tr class="user-display-com-wrap">
@@ -139,6 +150,7 @@ addEventListener("DOMContentLoaded", (event) => {
                                 <option id="<?= $com['codigo'] ?>"><?= $com['comuna'] ?></option>
                             <?php endforeach; ?>
                         </select>
+                        <span class="validation-error" style="color: red; display: block;"></span>
                     </td>
                 </tr>
 
