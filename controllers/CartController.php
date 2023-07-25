@@ -287,6 +287,7 @@ class CartController
         );
         
 
+        // Si esta logueado, linkeo al usuario
         if (Users::isLogged()){
             $order_attrs = [
                 '_customer_user' => Users::getCurrentUserId(),

@@ -7,6 +7,7 @@ use boctulus\SW\core\libs\Files;
 use boctulus\SW\core\libs\Logger;
 use boctulus\SW\core\libs\Products;
 use boctulus\SW\core\libs\ApiClient;
+use boctulus\SW\core\libs\FileCache;
 
 class RunaSync 
 {
@@ -83,15 +84,24 @@ class RunaSync
         if (!empty($codes)){
             $codes = explode(',', $codes);
         }
-
-        $stock_xml = static::get_xml();
         
+        $stock_xml = FileCache::get('xml_stock_cached');
+
+        if (empty($stock_xml)){
+            $stock_xml = static::get_xml();
+            FileCache::put('xml_stock_cached', $stock_xml, config()['cache_exp']);
+        } else {
+            //dd("Usando data de cache. Cache file: " . FileCache::getCachePath('cache_exp'));
+        }
+       
         if (empty($stock_xml)){
             throw new \Exception("No stock?");
         }
         
         $data  = XML::toArray($stock_xml);
         $prods = $data['art'];
+
+        // dd($prods, 'PRODS');
 
         // Purga en caso de que haya filtrado por codigo (sku)
 

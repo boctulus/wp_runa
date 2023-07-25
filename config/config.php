@@ -20,6 +20,8 @@ return [
     'log_requests'  => 'req.txt',
     'log_responses' => 'res.txt',
 
+    'cache_exp'     => env('CHACHE_EXP'),
+
     /*
         Permite deshabilitar /cart o /carrito
         y lo mismo para el checkout
