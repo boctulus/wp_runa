@@ -95,7 +95,7 @@ addEventListener("DOMContentLoaded", (event) => {
                     <th><label for="rut">RUT <span class="description">(obligatorio)</span></label></th>
                     <td>
                         <input type="text" name="rut" id="rut" class="regular-text" required>
-                        <span class="validation-error rut-error-message" style="color:red;display:none;"></span>
+                        <span class="validation-error <?= \boctulus\SW\libs\RUT::$rut_err_class ?>" style="color: red; display: none;"></span>
                     </td>                
                 </tr>
 
@@ -119,6 +119,7 @@ addEventListener("DOMContentLoaded", (event) => {
                 <tr class="email-wrap">
                     <th><label for="ema">E-mail <span class="description">(obligatorio)</span></label></th>
                     <td><input type="email" name="ema" id="ema" class="regular-text" placeholder="Su correo @ lo-que-sea" required ></td>
+                    <span class="validation-error" style="color: red; display: block;"></span>
                 </tr>
 
                 <tr class="dir-wrap">
@@ -150,7 +151,8 @@ addEventListener("DOMContentLoaded", (event) => {
                             <a class="button-quote btn bordered" href="<?= get_permalink(wc_get_page_id('shop')) ?>">Volve a la tienda</a>
                         </div>        
                        
-                        <a class="button-quote btn bordered" href="#" id="ajax_call_btn">Obtener cotización</a>
+                        <a class="button-quote btn bordered" href="javascript:void(0)" id="ajax_call_btn">Obtener cotización</a>
+
 
                          <!-- validation container -->
                          <div class="" id="validation container" role="alert" ><!-- woocommerce-message message-wrapper -->
@@ -204,6 +206,95 @@ addEventListener("DOMContentLoaded", (event) => {
     */
     function do_ajax_call(data) 
     {
+        const contact = data.contact
+
+         // Validation checks
+        if (!contact.nom || contact.nom.trim() === '') {
+            swal({
+                title: "Error",
+                text: "Por favor, ingresa tu nombre.",
+                icon: "warning",
+            });
+            return;
+        }
+
+        if (!contact.rut || contact.rut.trim() === '') {
+            swal({
+                title: "Error",
+                text: "Por favor, ingresa tu RUT.",
+                icon: "warning",
+            });
+            return;
+        }
+
+        // Validate RUT using the provided JavaScript function
+        const rutField = document.getElementById("rut");
+        const rut = rutField.value;
+        
+        if (!validar_rut(rut)) {
+            const error_message = document.querySelector('.<?= \boctulus\SW\libs\RUT::$rut_err_class ?>');
+            error_message.textContent = "Por favor, ingrese un RUT válido.";
+            error_message.style.display = "block";
+            return;
+        }
+
+        if (!contact.gir || contact.gir.trim() === '') {
+            swal({
+                title: "Error",
+                text: "Por favor, ingresa tu giro.",
+                icon: "warning",
+            });
+            return;
+        }
+
+        if (!contact.fon || contact.fon.trim() === '') {
+            swal({
+                title: "Error",
+                text: "Por favor, ingresa tu teléfono.",
+                icon: "warning",
+            });
+            return;
+        }
+
+        if (!contact.ema || contact.ema.trim() === '') {
+            swal({
+                title: "Error",
+                text: "Por favor, ingresa tu correo electrónico.",
+                icon: "warning",
+            });
+            return;
+        }
+
+        // Validate email format using regular expression
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        if (!emailRegex.test(contact.ema)) {
+            swal({
+                title: "Error",
+                text: "Por favor, ingresa un correo electrónico válido.",
+                icon: "warning",
+            });
+            return;
+        }
+
+        if (!contact.dir || contact.dir.trim() === '') {
+            swal({
+                title: "Error",
+                text: "Por favor, ingresa tu dirección.",
+                icon: "warning",
+            });
+            return;
+        }
+
+        if (!contact.com || contact.com.trim() === '') {
+            swal({
+                title: "Error",
+                text: "Por favor, selecciona tu comuna.",
+                icon: "warning",
+            });
+            return;
+        }
+
         loadingAjaxNotification()
 
         const url = base_url + '/cart/quote'; /// apuntar al endpoint
