@@ -129,6 +129,8 @@ class RunaSync
             try {
                 $pid = Products::getProductIdBySKU($sku);
 
+                dd($pid, $sku);
+
                 $post_type = Products::getPostType($pid);
 
                 if ($post_type == 'product_variation'){
