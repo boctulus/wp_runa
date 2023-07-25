@@ -140,6 +140,18 @@ const getFormDataByClassName = (elem_class, use_id = true, prefix = null) => {
 
     Ej:
 
+    fillForm({
+        "nom": "Pablo Gabriel Bozzolo",
+        "rut": "807110417",
+        "gir": "bla bla",
+        "fon": "07541919915",
+        "ema": "boctulus@gmail.com",
+        "dir": "9, The Circle",
+        "com": "4470000"
+    })
+
+    Ej:
+
         fillForm(obj, 'col-')
 
     Funciona tambien usando como datasource un storage
@@ -147,14 +159,49 @@ const getFormDataByClassName = (elem_class, use_id = true, prefix = null) => {
     Ej:
 
         fillForm(fromStorage().form.contact)
+
+
+    Nota: tuvo que implementarse con JS vanilla porque jQuery
+    falla para setear un OPTION de un SELECT !!! 
 */
-const fillForm = (data_obj, prefix = null) => {
-    if (typeof data_obj !== 'object'){
+function fillForm(data_obj, prefix = null) {
+    if (typeof data_obj !== 'object') {
         return;
     }
 
     for (const [key, value] of Object.entries(data_obj)) {
-        jQuery('#' + (prefix == null ? '' : prefix) + key).val(value)
+        const selector = '#' + (prefix == null ? '' : prefix) + key;
+        const inputElem = document.querySelector(selector);
+
+        if (!inputElem) {
+            continue; // Skip if the element is not found
+        }
+
+        if (inputElem.tagName === 'INPUT' || inputElem.tagName === 'TEXTAREA') {
+            inputElem.value = value;
+        } else if (inputElem.tagName === 'SELECT') {
+            const optionToSelect = inputElem.querySelector(`option[id="${value}"]`);
+
+            if (optionToSelect) {
+                const option_val = optionToSelect.value;
+
+                const options = inputElem.querySelectorAll('option');
+                options.forEach((option) => {
+                    option.selected = false;
+                });
+
+                inputElem.value = option_val;
+                optionToSelect.selected = true;
+                inputElem.dispatchEvent(new Event('change')); // Trigger change event for SELECT
+            } else {
+                console.warn(`Option with ID "${value}" not found in SELECT with selector "${selector}".`);
+            }
+        } else {
+            console.warn(`Element with selector "${selector}" is not an input or select element.`);
+        }
     }
 }
+
+
+
 

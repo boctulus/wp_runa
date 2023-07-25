@@ -8,9 +8,61 @@ js_file('contact_form.js');
 
 RUT::formateador();
 
+$user_id = get_current_user_id();
+
+if (!empty($user_id)){
+    // Obtener el último pedido del usuario
+    // $orders = wc_get_orders(array(
+    //     'customer' => $user_id,
+    //     'limit' => 1,
+    //     'orderby' => 'date',
+    //     'order' => 'DESC',
+    // ));
+
+    // if (!empty($orders)) {
+    //     // Si el usuario tiene al menos un pedido, obtener la información del último pedido
+    //     $last_order      = reset($orders); // Obtiene el primer elemento del array, que es el último pedido
+
+    //     $billing_first_name = $order->get_billing_first_name();
+    //     $billing_last_name  = $order->get_billing_last_name();
+    //     $billing_company    = $order->get_billing_company();
+
+    //     $billing_phone      = $last_order->get_billing_phone();
+    //     $billing_email      = $last_order->get_billing_email();
+    //     $billing_address    = $last_order->get_address('billing'); // Devuelve un array con la dirección de facturación
+
+    //     $user_full_name = !empty($billing_company) ? $billing_company : "$billing_first_name  $billing_last_name";
+    // } else {
+        $current_user = wp_get_current_user();
+
+        $first_name      = $current_user->user_firstname;
+        $last_name       = $current_user->user_lastname;
+        $user_full_name  = "$first_name $last_name";
+
+        $billing_phone   = get_user_meta($user_id, 'billing_phone', true);
+        $billing_email   = get_user_meta($user_id, 'billing_email', true);
+        $billing_address = [
+            'address_1' => get_user_meta($user_id, 'billing_address_1', true),
+            'address_2' => get_user_meta($user_id, 'billing_address_2', true),
+            'city'      => get_user_meta($user_id, 'billing_city', true),
+            'state'     => get_user_meta($user_id, 'billing_state', true),
+            'postcode'  => get_user_meta($user_id, 'billing_postcode', true),
+            'country'   => get_user_meta($user_id, 'billing_country', true),
+        ];
+    // }   
+}
 ?>
 
 <script>
+
+let backend_userdata = {
+    name:    "<?= $user_full_name ?>",
+    phone:   "<?= $billing_phone ?>",
+    email:   "<?= $billing_email ?>",
+    address: "<?= $billing_address['address_1'] ?>",
+    zipcode: "<?= $billing_address['postcode'] ?>",
+}
+
 addEventListener("DOMContentLoaded", (event) => {
         if (typeof $ === 'undefined' && typeof jQuery !== 'undefined') {
             $ = jQuery
@@ -207,8 +259,20 @@ addEventListener("DOMContentLoaded", (event) => {
     */
     window.addEventListener("DOMContentLoaded", (event) => {
         let contact_data = fromStorage()?.contact
+
+        // Si no hay nada.... intento recuperar de info en el backend
+        if (contact_data == '' || contact_data == null || contact_data == {}){
+            contact_data = {}
+            contact_data.nom = backend_userdata.name
+            contact_data.fon = backend_userdata.phone       
+            contact_data.ema = backend_userdata.email
+            contact_data.dir = backend_userdata.address
+            contact_data.com = backend_userdata.zipcode
+
+            toStorage(contact_data)
+        }  
     
-        if (contact_data != '' || contact_data != null){
+        if (contact_data != '' && contact_data != null && contact_data != {}){
             // re-populate form
             fillForm(contact_data)
         }  
