@@ -100,9 +100,6 @@ addEventListener("DOMContentLoaded", (event) => {
                 </tr>
 
                 <tr class="gir-wrap">
-                    <!-- <th><label for="gir">gir</label></th>
-                    <td><input type="text" name="gir" id="gir" class="regular-text"></td> -->
-
                     <th>
                         <label for="gir">Giro<span class="description">(obligatorio)</span></label>
                     </th>
@@ -122,7 +119,7 @@ addEventListener("DOMContentLoaded", (event) => {
                     </td>
                 </tr>
 
-                <tr class="email-wrap">
+                <tr class="ema-wrap">
                     <th><label for="ema">E-mail <span class="description">(obligatorio)</span></label></th>
                     <td>
                         <input type="email" name="ema" id="ema" class="regular-text" placeholder="Su correo @ lo-que-sea" required >
@@ -138,7 +135,7 @@ addEventListener("DOMContentLoaded", (event) => {
                     </td>
                 </tr>
 
-                <tr class="user-display-com-wrap">
+                <tr class="com-wrap">
                     <th>
                         <label for="com">Comuna <span class="description">(obligatorio)</span></label>
                     </th>
@@ -221,90 +218,72 @@ addEventListener("DOMContentLoaded", (event) => {
         const contact = data.contact
 
          // Validation checks
-        if (!contact.nom || contact.nom.trim() === '') {
-            swal({
-                title: "Error",
-                text: "Por favor, ingresa tu nombre.",
-                icon: "warning",
-            });
-            return;
-        }
-
-        if (!contact.rut || contact.rut.trim() === '') {
-            swal({
-                title: "Error",
-                text: "Por favor, ingresa tu RUT.",
-                icon: "warning",
-            });
-            return;
-        }
-
-        // Validate RUT using the provided JavaScript function
-        const rutField = document.getElementById("rut");
-        const rut = rutField.value;
-        
-        if (!validar_rut(rut)) {
-            const error_message = document.querySelector('.<?= \boctulus\SW\libs\RUT::$rut_err_class ?>');
-            error_message.textContent = "Por favor, ingrese un RUT válido.";
-            error_message.style.display = "block";
-            return;
-        }
-
-        if (!contact.gir || contact.gir.trim() === '') {
-            swal({
-                title: "Error",
-                text: "Por favor, ingresa tu giro.",
-                icon: "warning",
-            });
-            return;
-        }
-
-        if (!contact.fon || contact.fon.trim() === '') {
-            swal({
-                title: "Error",
-                text: "Por favor, ingresa tu teléfono.",
-                icon: "warning",
-            });
-            return;
-        }
-
-        if (!contact.ema || contact.ema.trim() === '') {
-            swal({
-                title: "Error",
-                text: "Por favor, ingresa tu correo electrónico.",
-                icon: "warning",
-            });
-            return;
-        }
+        const validations = {
+            'nom': 'Nombre',
+            'rut': 'RUT',
+            'gir': 'Giro',
+            'fon': 'Teléfono',
+            'ema': 'E-mail',
+            'dir': 'Dirección',
+            'com': 'Comuna',
+        };
 
         // Validate email format using regular expression
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         
-        if (!emailRegex.test(contact.ema)) {
-            swal({
-                title: "Error",
-                text: "Por favor, ingresa un correo electrónico válido.",
-                icon: "warning",
-            });
-            return;
-        }
+        let error_message = {};
 
-        if (!contact.dir || contact.dir.trim() === '') {
-            swal({
-                title: "Error",
-                text: "Por favor, ingresa tu dirección.",
-                icon: "warning",
-            });
-            return;
-        }
+        let hasErrors = false;
+        for (const field in validations) 
+        { 
+            const inputType = document.querySelector(`[name="${field}"]`).type;
+        
+            /*
+                Validacion de campo tipo email
+            */
+            if (inputType === 'email'){
+                if (!emailRegex.test(contact.ema)) {
+                    error_message = document.querySelector(`.${field}-wrap .validation-error`);
+                    error_message.textContent = `Por favor, ingrese ${validations[field]}.`;
+                    error_message.style.display = "block";
+                    hasErrors = true;
+                    continue;
+                }
+            }
 
-        if (!contact.com || contact.com.trim() === '') {
-            swal({
-                title: "Error",
-                text: "Por favor, selecciona tu comuna.",
-                icon: "warning",
-            });
-            return;
+            /*
+                Validacion de campo personalizdo tipo RUT chileno
+            */
+            if (field == 'rut'){
+                if (!validar_rut(contact.rut)) {
+                    error_message = document.querySelector('.<?= \boctulus\SW\libs\RUT::$rut_err_class ?>');
+                    error_message.textContent = "Por favor, ingrese un RUT válido.";
+                    error_message.style.display = "block";
+                    hasErrors = true;
+                    continue;
+                }
+            }
+
+            /*
+                Resto de validaciones
+            */
+            if (typeof contact[field] === 'undefined' || contact[field].trim() === "") {
+                hasErrors = true;
+                error_message = document.querySelector(`.${field}-wrap .validation-error`);
+                if (error_message) {
+                    error_message.textContent = `Por favor, ingrese ${validations[field]}.`;
+                    error_message.style.display = "block";
+                }
+            } else {
+                error_message = document.querySelector(`.${field}-wrap .validation-error`);
+                if (error_message) {
+                    error_message.style.display = "none";
+                }
+            }
+        }   
+
+        if (hasErrors) {
+            return; // Return early if there are validation errors
         }
 
         loadingAjaxNotification()
