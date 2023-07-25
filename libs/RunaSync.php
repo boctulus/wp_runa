@@ -129,7 +129,7 @@ class RunaSync
             try {
                 $pid = Products::getProductIdBySKU($sku);
 
-                dd($pid, $sku);
+                debug($pid, $sku);
 
                 $post_type = Products::getPostType($pid);
 

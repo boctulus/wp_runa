@@ -35,7 +35,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $pid = 2736;
 
-$post_type = Posts::getPostType($pid);
+$post_type = wc_get_product_id_by_sku($pid);
 
 dd(
 	$post_type
@@ -45,4 +45,4 @@ if ($post_type == 'product_variation'){
 	$pid = wp_get_post_parent_id($pid);
 }
 
-dd(Posts::getPostType($pid), $pid);
+dd(wc_get_product_id_by_sku($pid), $pid);
