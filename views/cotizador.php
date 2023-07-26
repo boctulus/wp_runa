@@ -1,10 +1,19 @@
 <?php
 
+use boctulus\SW\core\libs\Cart;
 use boctulus\SW\core\libs\Url;
 use boctulus\SW\core\libs\Users;
 use boctulus\SW\core\libs\Strings;
 
 $is_logged = Users::isLogged();
+
+$cart_items = Cart::getItems();
+
+foreach ($cart_items as $item){
+    dd($item['stock_quantity'], $item['sku']);
+}
+
+exit;
 
 ?>
 

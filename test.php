@@ -33,16 +33,72 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /////////////////////////////////////////////////
 
-$pid = 2736;
+$pid   = 3827; 
+$stock = 1111;
 
-$post_type = wc_get_product_id_by_sku($pid);
+// Products::setStock($pid, $qty);
+
+$key = '_stock';
+Products::setMeta($pid, $key, $stock);
+
+$product = wc_get_product($pid);
 
 dd(
-	$post_type
+	$product->get_stock_quantity(), 'STOCK NATIVO'
 );
 
-if ($post_type == 'product_variation'){
-	$pid = wp_get_post_parent_id($pid);
-}
+exit;
 
-dd(wc_get_product_id_by_sku($pid), $pid);
+$key = '_stock';
+
+Products::setMeta($pid, $key, $stock);
+
+dd(
+	Products::getMeta($pid, $key)
+, 'STOCK COMO CUSTOM METADATO');
+
+$product = wc_get_product($pid);
+
+/*
+	--| Stock
+	D:\www\woo6\wp-content\plugins\wp_runa\core\libs\VarDump.php:49:
+	NULL
+*/
+dd(
+	$product->get_stock_quantity(), 'STOCK NATIVO'
+);
+
+exit;
+/////////////////////
+
+$pid   = 3827; // simple
+$stock = 999;
+
+wc_update_product_stock($pid, $stock);  
+$product = wc_get_product($pid);
+
+/*
+	--| Stock
+	D:\www\woo6\wp-content\plugins\wp_runa\core\libs\VarDump.php:49:
+	NULL
+*/
+dd(
+	$product->get_stock_quantity(), 'Stock'
+);
+
+
+
+$pid   = 2736; // variant
+$stock = 999;
+
+wc_update_product_stock($pid, $stock);  
+$product = wc_get_product($pid);
+
+/*
+	--| Stock
+	D:\www\woo6\wp-content\plugins\wp_runa\core\libs\VarDump.php:49:
+	NULL
+*/
+dd(
+	$product->get_stock_quantity(), 'Stock'
+);

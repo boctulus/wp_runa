@@ -243,8 +243,7 @@ class Products extends Posts
     {
         $stock_staus = $qty > 0 ? 'instock' : 'outofstock';
 
-        // 1. Updating the stock quantity
-        update_post_meta($product_id, '_stock', $qty);
+        static::setMeta($product_id, '_stock', $qty);
 
         // 2. Updating the stock quantity
         update_post_meta( $product_id, '_stock_status', wc_clean( $stock_staus ) );

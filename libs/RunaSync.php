@@ -102,6 +102,9 @@ class RunaSync
         $data  = XML::toArray($stock_xml);
         $prods = $data['art'];
 
+        // Logger::varExport($prods, ETC_PATH . 'stock.php');
+        // exit;
+
         // dd($prods, 'PRODS');
 
         // Purga en caso de que haya filtrado por codigo (sku)
@@ -143,7 +146,11 @@ class RunaSync
                     */   
 
                     debug("Actualizando producto existente con SKU= '$sku' | pid=$pid" . (isset($parent_pid) ? " (variation of pid=$parent_pid)" : '') );
-                    wc_update_product_stock($pid, $stock);                     
+                    
+                    wc_update_product_stock($pid, $stock);  
+                    
+                    $product = Products::getProduct($pid);
+                    $product->set_manage_stock(true);
 
                 } else {
                     // ..
@@ -161,7 +168,7 @@ class RunaSync
         } // end foreach
 
         
-        dd("Se procesaron $processed productos.");
+        debug("Se procesaron $processed productos.");
     }
 
 }

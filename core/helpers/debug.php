@@ -53,11 +53,11 @@ function debug($val, $msg = null, bool $only_admin = false){
 		_dd($val, $msg);
 	}
 
-	if (!empty($msg)){
-		Logger::log($msg. ': '. var_export($val, true));
-	} else {
-		Logger::log(var_export($val, true));
-	}	
+	// if (!empty($msg)){
+	// 	Logger::log($msg. ': '. var_export($val, true));
+	// } else {
+	// 	Logger::log(var_export($val, true));
+	// }	
 }
 
 function console_log($val, $msg = null, bool $only_admin = false){

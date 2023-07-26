@@ -62,23 +62,32 @@ class Cart
 				// Find the first variation with an image
 				foreach ($variations as $variation) {
 					if ($variation['variation_id'] == $p['id']){
-						$p['sku']           = $variation['sku'];
-						$p['attrs']         = $variation['attributes'] ?? [];
-						$p['color']         = $variation['attributes']['attribute_pa_color'] ?? null;
-						$p['img_url']       = $variation['image']['gallery_thumbnail_src'];	
-						$p['description']   = $variation['variation_description'];
-						$p['weight']		= $variation['weight'];
-						$p['dimensions']    = $variation['dimensions'];
-						$p['in_stock']		= $variation['is_in_stock'];
+						// dd($variation);
+						// exit;
+
+						$p['sku']            = $variation['sku'];
+						$p['attrs']          = $variation['attributes'] ?? [];
+						$p['color']          = $variation['attributes']['attribute_pa_color'] ?? null;
+						$p['img_url']        = $variation['image']['gallery_thumbnail_src'];	
+						$p['description']    = $variation['variation_description'];
+						$p['weight']		 = $variation['weight'];
+						$p['dimensions']     = $variation['dimensions'];
+						$p['in_stock']		 = $variation['is_in_stock'];
+
+						// Get stock quantity for variation
+                        $p['stock_quantity'] = $variation['stock_quantity'];
 					}
 				}
-			} else {
-				$p['sku']			= get_post_meta($item['product_id'] , '_sku', true);
-				$p['title']         = $prod->get_title();
-				$p['description']   = $prod->get_description();
-				$p['weight']		= $prod->get_weight();
-				$p['dimensions']    = $prod->get_dimensions();
-				$p['in_stock']		= $prod->is_in_stock();
+			} else { 
+				$p['sku']			 = get_post_meta($item['product_id'] , '_sku', true);
+				$p['title']          = $prod->get_title();
+				$p['description']    = $prod->get_description();
+				$p['weight']		 = $prod->get_weight();
+				$p['dimensions']     = $prod->get_dimensions();
+				$p['in_stock']		 = $prod->is_in_stock();
+
+				// Get stock quantity for simple product
+                $p['stock_quantity'] = $prod->get_stock_quantity();
 			}
 
             $p['title']         = $prod->get_title();
