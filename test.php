@@ -34,12 +34,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 /////////////////////////////////////////////////
 
 $pid   = 3827; 
-$stock = 1111;
+$stock = 21111;
 
-// Products::setStock($pid, $qty);
+Products::setStock($pid, $qty);
 
-$key = '_stock';
-Products::setMeta($pid, $key, $stock);
+// $key = '_stock';
+// Products::setMeta($pid, $key, $stock);
 
 $product = wc_get_product($pid);
 
