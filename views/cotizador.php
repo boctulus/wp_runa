@@ -198,7 +198,7 @@ foreach ($cart_items as $ix => $cart_item) {
                     // $variation = Products::getProduct($pid_no_stock);
                     // $title     = $variation->get_formatted_name(); 
 
-                    $title     = "{$my_item['title']} ({$my_item['color']}) -{$my_item['no_stock']}-";
+                    $title     = "{$my_item['title']} ({$my_item['color']}) -{$my_item['sku']}-";
                 } else {
                     $title     = Products::getName($pid_no_stock); 
                 }

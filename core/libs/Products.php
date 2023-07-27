@@ -267,18 +267,40 @@ class Products extends Posts
         return $product->is_purchasable;
     }
 
+    /*
+        Para el caso de productos variables usar getTitle()
+        excepto que se quiera solo el texto de la pura variacion 
+
+        Ej:
+
+        Yellow
+    */
     static function getName($product_id)
     {
         $product = wc_get_product($product_id);
         return $product->get_name();
     }
 
+    /*
+        Devuelve algo como:
+
+        Antillas -06te502yel- Color: Yellow
+    */
     static function getTitle($product_id, bool $html = false){
         if (Products::getPostType($product_id) == 'product_variation'){
             $variation = Products::getProduct($product_id);
             $title     = $variation->get_formatted_name(); 
         } else {
-            $title     = Products::getName($product_id); 
+            $product = wc_get_product($product_id);
+            $title   = $product->get_name();
+        }
+
+        if ($html === false){
+            $title = str_replace(['(', ')'], '-', $title);
+            $title = str_replace([
+                    '<span class="description">',
+                    '</span>'
+            ], ' ', $title);
         }
 
         return $title;

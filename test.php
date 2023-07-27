@@ -34,15 +34,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /////////////////////////////////////////////////
 
 
-$sku = '06te502yel';
-$pid = Products::getProductIDBySKU($sku);
-
-
-dd(
-	Products::getTitle($pid)
-);
-
-exit;
+$sku   = '06te502saf';
 $stock = 0;
 
 $pid = Products::getProductIDBySKU($sku);
