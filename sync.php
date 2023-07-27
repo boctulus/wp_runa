@@ -1,14 +1,7 @@
 <?php
 
-use boctulus\SW\libs\Alia;
-use boctulus\SW\core\libs\XML;
 use boctulus\SW\libs\RunaSync;
-use boctulus\SW\core\libs\Date;
-use boctulus\SW\core\libs\Files;
 use boctulus\SW\core\libs\Strings;
-use boctulus\SW\core\libs\ApiClient;
-use boctulus\SW\core\libs\Validator;
-use boctulus\SW\libs\AliaBotQuestions;
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
