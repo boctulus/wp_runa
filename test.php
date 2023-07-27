@@ -34,11 +34,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 /////////////////////////////////////////////////
 
 
-$pid   = 2736; // variant
-$stock = 9991;
+$sku   = '06te502yel';
+$stock = 0;
+
+$pid = Products::getProductIDBySKU($sku);
+
+$post_type = Products::getPostType($pid);
+$sku       = $sku ?? Products::getSKUFromProductID($pid);
+
+if ($post_type == 'product_variation'){
+	$parent_pid = wp_get_post_parent_id($pid);
+}
+
+dd(Products::getName($pid), "SKU= '$sku' | pid=$pid" . (isset($parent_pid) ? " (variation of pid=$parent_pid)" : '' ));
 
 Products::setStock($pid, $stock);
 
 dd(
-	Products::getStock($pid), 'STOCK NATIVO'
+	Products::getStock($pid), 'STOCK'
+);
+
+dd(
+	Products::getMeta($pid, '_stock_status'), 'DISP?'
 );

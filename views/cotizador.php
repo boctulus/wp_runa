@@ -25,30 +25,34 @@ $cart_items = Cart::getItems();
 
 $no_stock = [];
 $stocks   = [];
-foreach ($cart_items as $ix => $item) {
-    $pid    = $item['id'];
-    $sku    = $item['sku'];
+foreach ($cart_items as $ix => $cart_item) {
+    $pid    = $cart_item['id'];
+    $sku    = $cart_item['sku'];
     $_stock = Products::getStock($pid);
-    
-    // dd(Products::getStock($pid), $item['sku']);
 
-    if ($_stock == 0){
-        /*
-            Remuevo del carrito
-        */
-        Cart::remove($pid);
-
+    if ($_stock === 0){
         /*
             Elimino de la visualizacion de items de carrito
         */
-        $pos = array_search($pid, $items);
-        unset($items[$pos]);
+        foreach ($items as $ix => $item){
+            if ($item['sku'] === $sku){
+                unset($items[$ix]);
+            }
+        }
 
         $no_stock[] = [
             'pid'   => $pid,
-            'title' => $item['title'],
-            'color' => $item['color']
+            'sku'   => $sku,
+            'title' => $cart_item['title'],
+            'color' => $cart_item['color']
         ];
+
+        /*
+            Remuevo del carrito
+        */
+        
+        Cart::remove($pid);
+
     }
 
     $stocks[$sku] = $_stock;    
@@ -184,17 +188,17 @@ foreach ($cart_items as $ix => $item) {
     -->
     <form class="woocommerce-cart-form" id="quote-cart-form">
 
-        <?php foreach($no_stock as $item): ?>
+        <?php foreach($no_stock as $my_item): ?>
             
 
             <?php
-                $pid_no_stock = $item['pid'];
+                $pid_no_stock = $my_item['pid'];
                 
                 if (Products::getPostType($pid_no_stock) == 'product_variation'){
                     // $variation = Products::getProduct($pid_no_stock);
                     // $title     = $variation->get_formatted_name(); 
 
-                    $title     = "{$item['title']} ({$item['color']})";
+                    $title     = "{$my_item['title']} ({$my_item['color']}) -{$my_item['no_stock']}-";
                 } else {
                     $title     = Products::getName($pid); 
                 }

@@ -252,10 +252,19 @@ class Products extends Posts
         wc_delete_product_transients( $product_id ); // Clear/refresh the variation cache
     }
 
-    static function getStock($product_id)
+    static function getStock($product)
     {
-        $product = wc_get_product($product_id);
+        $product = static::getProduct($product);
         return $product->get_stock_quantity();
+    }
+
+    /*
+        Depende de si tiene stock (para productos no-virtuales) y acepta o no backorders
+    */
+    static function isPurchasable($product){
+        $product = static::getProduct($product);
+
+        return $product->is_purchasable;
     }
 
     static function getName($product_id)
