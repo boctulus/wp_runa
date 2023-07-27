@@ -30,6 +30,10 @@ foreach ($cart_items as $ix => $cart_item) {
     $sku    = $cart_item['sku'];
     $_stock = Products::getStock($pid);
 
+    // dd(
+    //     $_stock
+    // , "STOCK para SKU=$sku");
+
     if ($_stock === 0){
         /*
             Elimino de la visualizacion de items de carrito
@@ -230,6 +234,9 @@ foreach ($cart_items as $ix => $cart_item) {
                         <?php
                         // dd($item);                      
                         // exit;
+
+                            $sku   = $item['sku'];
+                            $stock = $stocks[ $sku ] ?? null;                        
                         ?>
 
                         <tr class="woocommerce-cart-form__cart-item cart_item st-item-meta">
@@ -270,7 +277,11 @@ foreach ($cart_items as $ix => $cart_item) {
                                 <div class="quantity">
                                     <span class="minus"><i class="minus et-icon et-minus"></i></span> <label class="screen-reader-text"><?= $item['sku'] . ' ' . $item['title'] ?></label>
 
-                                    <input type="number" class="input-text qty text" step="1" min="1" value="<?= $item['qty'] ?>" title="Cantidad" size="4" placeholder="" inputmode="numeric" autocomplete="off" data-pid="<?= $item['id'] ?>"><label class="screen-reader-text"><?= $item['sku'] . ' ' . $item['title'] ?></label>
+                                    <input type="number" class="input-text qty text" 
+                                    step="1" 
+                                    min="1"
+                                    max="<?= $stock ?? 99999999 ?>" 
+                                    value="<?= $item['qty'] ?>" title="Cantidad" size="4" placeholder="" inputmode="numeric" autocomplete="off" data-pid="<?= $item['id'] ?>"><label class="screen-reader-text"><?= $item['sku'] . ' ' . $item['title'] ?></label>
 
                                     <span class="plus"><i class="plus et-icon et-plus"></i></span>
                                 </div>

@@ -152,8 +152,8 @@ class RunaSync
                     
                     Products::setStock($pid, $stock);
                     
-                    // $product = Products::getProduct($pid);
-                    // $product->set_manage_stock(true);
+                    $product = Products::getProduct($pid);
+                    $product->set_manage_stock(true);
 
                 } else {
                     // ..
