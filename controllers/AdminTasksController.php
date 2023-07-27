@@ -22,9 +22,16 @@ class AdminTasksController
     }
 
     function plugin_dir(){
-        dd(
-            realpath(__DIR__ . DIRECTORY_SEPARATOR . '..')
-        ); 
+        return realpath(__DIR__ . DIRECTORY_SEPARATOR . '..'); 
+    }
+
+    /*
+        Devuelve algo como
+
+        D:\www\woo6\wp-content\plugins\wp_runa\sync.php
+    */
+    function cron_dir(){
+        return realpath(__DIR__ . DIRECTORY_SEPARATOR . '../sync.php');
     }
 
     function log(){
