@@ -9,7 +9,7 @@ use boctulus\SW\core\libs\Request;
 class TestController
 {
     function index(){
-        $this->test_send();
+        view('test_notices.php');
     }
 
     function test_xml_fn(){

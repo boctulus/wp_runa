@@ -236,12 +236,14 @@ class Products extends Posts
 
     static function setStock($product_id, $qty)
     {
+        $qty = (int) $qty;
+
         $stock_staus = $qty > 0 ? 'instock' : 'outofstock';
 
         static::setMeta($product_id, '_stock', $qty);
 
         // 2. Updating the stock quantity
-        update_post_meta( $product_id, '_stock_status', wc_clean( $stock_staus ) );
+        update_post_meta( $product_id, '_stock_status', $stock_staus);
 
         // 3. Updating post term relationship
         wp_set_post_terms( $product_id, $stock_staus, 'product_visibility', true );
@@ -254,6 +256,12 @@ class Products extends Posts
     {
         $product = wc_get_product($product_id);
         return $product->get_stock_quantity();
+    }
+
+    static function getName($product_id)
+    {
+        $product = wc_get_product($product_id);
+        return $product->get_name();
     }
 
     /*

@@ -1,24 +1,55 @@
 <?php
 
+use boctulus\SW\core\libs\Arrays;
 use boctulus\SW\core\libs\Cart;
 use boctulus\SW\core\libs\Url;
 use boctulus\SW\core\libs\Users;
 use boctulus\SW\core\libs\Strings;
 use boctulus\SW\core\libs\Products;
 
+
 css_file('css/my_notices.css');
 
+// FontAwesome
+
+css_file('third_party/fontawesome5/all.min.css');
+js_file('third_party/fontawesome5/fontawesome_kit.js');
 
 $is_logged  = Users::isLogged();
 $cart_items = Cart::getItems();
 
-foreach ($cart_items as $item){
-    $pid = $item['id'];
+$no_stock = [];
+$stocks   = [];
+foreach ($cart_items as $ix => $item) {
+    $pid    = $item['id'];
+    $sku    = $item['sku'];
+    $_stock = Products::getStock($pid);
     
-    dd(Products::getStock($pid), $item['sku']);
+    // dd(Products::getStock($pid), $item['sku']);
+
+    if ($_stock == 0){
+        Cart::remove($pid);
+
+        $pos = array_search($pid, $items);
+        unset($items[$pos]);
+
+        // dd([
+        //     'pid'    => $pid,
+        //     'parent' => wp_get_post_parent_id($pid),
+        //     'sku'    => $sku
+        // ]);
+
+        $no_stock[] = [
+            'pid'   => $pid,
+            'title' => $item['title'],
+            'color' => $item['color']
+        ];
+    }
+
+    $stocks[$sku] = $_stock;    
 }
 
-// exit;
+
 
 ?>
 
@@ -39,37 +70,37 @@ foreach ($cart_items as $item){
         $('.elementor-element-65cdc8a').hide()
         $('.elementor-element-54380b0').hide()
 
-        $('#clear-cart-button').click(function (e) {
+        $('#clear-cart-button').click(function(e) {
             e.preventDefault();
 
-            $.post(`/cart/empty`, function (data, status) {
-               $('.remove-item').closest('tr').remove(); // Elimina todos los elementos del carrito
-               console.log('Carrito borrado');
-            })
-            .fail(function (data) {
-                console.log("error", data);
-            });
+            $.post(`/cart/empty`, function(data, status) {
+                    $('.remove-item').closest('tr').remove(); // Elimina todos los elementos del carrito
+                    console.log('Carrito borrado');
+                })
+                .fail(function(data) {
+                    console.log("error", data);
+                });
 
             return false;
         });
 
         // Actualizado 7/7/23
-        $('.remove-item').click(function (e) {
+        $('.remove-item').click(function(e) {
             e.preventDefault();
-            let a  = $(this);
+            let a = $(this);
             let tr = a.closest('tr');
 
             let pid = a.data('pid');
 
             console.log(pid);
 
-            $.get(`/cart/delete/${pid}`, function (data, status) {
-                console.log("Data: " + data + "\nStatus: " + status);
-                tr.remove();
-            })
-            .fail(function (data) {
-                console.log("error", data);
-            });
+            $.get(`/cart/delete/${pid}`, function(data, status) {
+                    console.log("Data: " + data + "\nStatus: " + status);
+                    tr.remove();
+                })
+                .fail(function(data) {
+                    console.log("error", data);
+                });
         });
 
         /*
@@ -82,13 +113,13 @@ foreach ($cart_items as $item){
             El cuerpo de la solicitud puede contener los detalles necesarios para disminuir la cantidad.
         */
 
-        $('.minus').click(function (e) {
+        $('.minus').click(function(e) {
             e.preventDefault();
             let input = $(this).parent().find('input.qty');
             let qty = parseInt(input.val());
 
             if (qty <= 1) {
-                return;    
+                return;
             }
 
             qty--;
@@ -96,7 +127,7 @@ foreach ($cart_items as $item){
 
             var pid = input.data("pid");
 
-            if (typeof pid === 'undefined'){
+            if (typeof pid === 'undefined') {
                 return;
             }
 
@@ -112,7 +143,7 @@ foreach ($cart_items as $item){
         });
 
         // Actualizado 12/7/23
-        $('.plus').click(function (e) {
+        $('.plus').click(function(e) {
             e.preventDefault();
             let input = $(this).parent().find('input.qty');
             let qty = parseInt(input.val());
@@ -122,7 +153,7 @@ foreach ($cart_items as $item){
 
             var pid = input.data("pid");
 
-            if (typeof pid === 'undefined'){
+            if (typeof pid === 'undefined') {
                 return;
             }
 
@@ -150,9 +181,30 @@ foreach ($cart_items as $item){
         El id "quote-cart-form" es utilizado para bindear el form --conservar--
     -->
     <form class="woocommerce-cart-form" id="quote-cart-form">
-        <div class="my-notice my-notice-info" id="my-custom-notice">
-            <p>Producto XXX sin stock	</p>
-        </div>
+
+        <?php foreach($no_stock as $item): ?>
+            
+
+            <?php
+                $pid_no_stock = $item['pid'];
+                
+                if (Products::getPostType($pid_no_stock) == 'product_variation'){
+                    // $variation = Products::getProduct($pid_no_stock);
+                    // $title     = $variation->get_formatted_name(); 
+
+                    $title     = "{$item['title']} ({$item['color']})";
+                } else {
+                    $title     = Products::getName($pid); 
+                }
+
+            ?>
+
+            <div class="message-box message-box-warn">
+                <i class="fa fas fa-warning fa-2x"></i>
+                <span class="message-text"><strong>Agotado:</strong> <?= $title ?></span>
+                <i class="fa fas fa-times fa-2x exit-button "></i>
+            </div>
+        <?php endforeach; ?>       
 
         <div class="table-responsive">
             <table class="shop_table shop_table_responsive cart woocommerce-cart-form__contents" cellspacing="0">
@@ -167,75 +219,75 @@ foreach ($cart_items as $item){
                 </thead>
                 <tbody>
                     <!-- foreach -->
-                    <?php foreach($items as $key => $item): ?>
+                    <?php foreach ($items as $key => $item) : ?>
 
-                    <?php 
+                        <?php
                         // dd($item);                      
                         // exit;
-                    ?>
+                        ?>
 
-                    <tr class="woocommerce-cart-form__cart-item cart_item st-item-meta">
-                        <td class="product-name" data-title="Producto" data-pid="<?= $item['id'] ?>">
-                            <div class="product-thumbnail">
-                                <a href="<?= $item['url'] ?>">
-                                    <img width="100" height="100" src="<?= $item['img_url'] ?>" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="">
-                                    
-                                </a>
-                            </div>
-                        </td>
-                        <td class="product-details">
-                            <div class="cart-item-details">
-                                <a href="<?= $item['url'] ?>" data-pid="<?= $item['id'] ?>"><?= $item['title'] ?></a> <label class="screen-reader-text"><?= $item['sku'] . ' '. $item['title'] ?></label>
-                                
-                                <dl class="variation">
-                                    <dt class="variation-Color" style="display:none;">Color</dt>
-                                    <dd class="variation-Color">
-                                        <p><?= ucfirst($item['color']) ?></p>
-                                    </dd>
-                                </dl>
+                        <tr class="woocommerce-cart-form__cart-item cart_item st-item-meta">
+                            <td class="product-name" data-title="Producto" data-pid="<?= $item['id'] ?>">
+                                <div class="product-thumbnail">
+                                    <a href="<?= $item['url'] ?>">
+                                        <img width="100" height="100" src="<?= $item['img_url'] ?>" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="">
 
-                                <!-- boton de borrado OK -->
-                                <a href="#" aria-label="Borrar este artículo" data-pid="<?= $item['id'] ?>" data-product_sku="<?= $item['sku'] ?>"  class="remove-item text-underline" title="Eliminar este artículo">Eliminar</a>
-                                <span class="mobile-price sf-hidden"></span>
-                            </div>
-                        </td>
+                                    </a>
+                                </div>
+                            </td>
+                            <td class="product-details">
+                                <div class="cart-item-details">
+                                    <a href="<?= $item['url'] ?>" data-pid="<?= $item['id'] ?>"><?= $item['title'] ?></a> <label class="screen-reader-text"><?= $item['sku'] . ' ' . $item['title'] ?></label>
 
-                        <td class="product-price" data-title="Precio">
-                            <?= $is_logged ? Strings::formatNumber($item['price']) : '' ?>
-                        </td>
+                                    <dl class="variation">
+                                        <dt class="variation-Color" style="display:none;">Color</dt>
+                                        <dd class="variation-Color">
+                                            <p><?= ucfirst($item['color']) ?></p>
+                                        </dd>
+                                    </dl>
 
-                        <td class="product-sku" data-title="SKU" data-pid="<?= $item['id'] ?>">
-                            <?= $item['sku'] ?> 
-                        </td>
+                                    <!-- boton de borrado OK -->
+                                    <a href="#" aria-label="Borrar este artículo" data-pid="<?= $item['id'] ?>" data-product_sku="<?= $item['sku'] ?>" class="remove-item text-underline" title="Eliminar este artículo">Eliminar</a>
+                                    <span class="mobile-price sf-hidden"></span>
+                                </div>
+                            </td>
 
-                        <td class="product-quantity" data-title="Cantidad">
-                            <div class="quantity">
-                                <span class="minus"><i class="minus et-icon et-minus"></i></span> <label class="screen-reader-text"><?= $item['sku'] . ' '. $item['title'] ?></label>
-                                
-                                <input type="number" class="input-text qty text" step="1" min="1" value="<?= $item['qty'] ?>" title="Cantidad" size="4" placeholder="" inputmode="numeric" autocomplete="off" data-pid="<?= $item['id'] ?>"><label class="screen-reader-text"><?= $item['sku'] . ' '. $item['title'] ?></label>
+                            <td class="product-price" data-title="Precio">
+                                <?= $is_logged ? Strings::formatNumber($item['price']) : '' ?>
+                            </td>
 
-                                <span class="plus"><i class="plus et-icon et-plus"></i></span>
-                            </div>
-                        </td>
-                        <td class="product-subtotal" data-title="Subtotal">
-                            <?= $is_logged ? Strings::formatNumber($item['qty'] * $item['price']) : '' ?>
-                        </td>
-                    </tr>
+                            <td class="product-sku" data-title="SKU" data-pid="<?= $item['id'] ?>">
+                                <?= $item['sku'] ?>
+                            </td>
+
+                            <td class="product-quantity" data-title="Cantidad">
+                                <div class="quantity">
+                                    <span class="minus"><i class="minus et-icon et-minus"></i></span> <label class="screen-reader-text"><?= $item['sku'] . ' ' . $item['title'] ?></label>
+
+                                    <input type="number" class="input-text qty text" step="1" min="1" value="<?= $item['qty'] ?>" title="Cantidad" size="4" placeholder="" inputmode="numeric" autocomplete="off" data-pid="<?= $item['id'] ?>"><label class="screen-reader-text"><?= $item['sku'] . ' ' . $item['title'] ?></label>
+
+                                    <span class="plus"><i class="plus et-icon et-plus"></i></span>
+                                </div>
+                            </td>
+                            <td class="product-subtotal" data-title="Subtotal">
+                                <?= $is_logged ? Strings::formatNumber($item['qty'] * $item['price']) : '' ?>
+                            </td>
+                        </tr>
 
                     <?php endforeach; ?>
-                    <!-- endforeach -->     
-                    
-                    <?php if (count($items) == 0): ?>
-                    <tr class="woocommerce-cart-form__cart-item cart_item st-item-meta">    
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td class="product-name" data-title="Producto">                           
-                            No hay productos para cotizar en su cesta                          
-                        </td>
-                        <td></td>
-                    </tr>
+                    <!-- endforeach -->
+
+                    <?php if (count($items) == 0) : ?>
+                        <tr class="woocommerce-cart-form__cart-item cart_item st-item-meta">
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td class="product-name" data-title="Producto">
+                                No hay productos para cotizar en su cesta
+                            </td>
+                            <td></td>
+                        </tr>
                     <?php endif; ?>
 
                 </tbody>
@@ -243,26 +295,26 @@ foreach ($cart_items as $item){
         </div>
 
         <div class="actions clearfix">
-            <div class="col-md-12 col-sm-12 mob-center">       
-                    
-                    <div class="pull-right text-right" style="margin-right: -15px;"> 
-                        <?php
-                            if (empty($items)):
-                        ?>        
-                            <a class="button-quote btn bordered" href="<?= get_permalink(wc_get_page_id('shop')) ?>">Volve a la tienda</a>
-                        <?php
-                            else:
-                        ?>
+            <div class="col-md-12 col-sm-12 mob-center">
+
+                <div class="pull-right text-right" style="margin-right: -15px;">
+                    <?php
+                    if (empty($items)) :
+                    ?>
+                        <a class="button-quote btn bordered" href="<?= get_permalink(wc_get_page_id('shop')) ?>">Volve a la tienda</a>
+                    <?php
+                    else :
+                    ?>
 
                         <a class="button-quote btn bordered" href="#" id="to_contact">Complete sus datos</a>
 
-                        <?php
-                            endif;
-                        ?>
-                    </div>
-                
-                    <div class="pull-left text-left" style="margin-left: -15px;">      
-                        <a class="clear-cart btn bordered" <?= (count($items) == 0 ? 'disabled' : '');  ?> id="clear-cart-button">
+                    <?php
+                    endif;
+                    ?>
+                </div>
+
+                <div class="pull-left text-left" style="margin-left: -15px;">
+                    <a class="clear-cart btn bordered" <?= (count($items) == 0 ? 'disabled' : '');  ?> id="clear-cart-button">
 
                         <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 24 24" style="enable-background:new 0 0 24 24" xml:space="preserve" width=".8em" height=".8em" fill="currentColor">
                             <g>
@@ -300,14 +352,14 @@ foreach ($cart_items as $item){
                             </g>
                         </svg>
                         Borrar carrito</a>
-                    </div>
+                </div>
 
                 <button type="submit" class="btn gray medium bordered hidden wp-element-button sf-hidden" name="update_cart" value="Update cart" disabled="" aria-disabled="true">Update cart</button>
             </div>
         </div>
-        
+
     </form>
-    
+
 
 </div>
 
@@ -337,17 +389,17 @@ foreach ($cart_items as $item){
         jQuery('td.product-name').each((index, td) => {
             const td_el = jQuery(td)
 
-            const pid  = td_el.data('pid');
-            const a    = td_el.children('a');
+            const pid = td_el.data('pid');
+            const a = td_el.children('a');
             const text = a.text();
-            const qty  = parseInt(td_el.parent().children('td.product-quantity').children('div').children('input.qty').val())
+            const qty = parseInt(td_el.parent().children('td.product-quantity').children('div').children('input.qty').val())
 
-            $.post(`/cart/set_qty/${pid}/${qty}`, function (data, status) {
-            //    console.log(`INC O.K. para PID=${pid}`);
-            })
-            .fail(function (data) {
-                // console.log("error", data);
-            });
+            $.post(`/cart/set_qty/${pid}/${qty}`, function(data, status) {
+                    //    console.log(`INC O.K. para PID=${pid}`);
+                })
+                .fail(function(data) {
+                    // console.log("error", data);
+                });
 
             cart_items.push({
                 pid,

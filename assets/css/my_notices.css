@@ -1,36 +1,49 @@
-/* Estilos para la notificación */
-.my-notice {
-	position: relative;
-	padding-top: 12px;
-	padding-bottom: 0px;
-	padding-left: 1em;
-	padding-right: 1em;
-	border: 1px solid;
-	border-radius: 4px;
-	font-size: 14px;
-  }
-  
-  /* Estilos para diferentes tipos de notificación */
-  .my-notice-success {
-	background-color: #d4edda;
-	border-color: #c3e6cb;
-	color: #155724;
-  }
-  
-  .my-notice-error {
-	background-color: #f8d7da;
-	border-color: #f5c6cb;
-	color: #721c24;
-  }
-  
-  .my-notice-info {
-	background-color: #d1ecf1;
-	border-color: #bee5eb;
-	color: #0c5460;
-  }
-  
-  .my-notice-warning {
-	background-color: #fff3cd;
-	border-color: #ffeeba;
-	color: #856404;
-  }
+/*
+	@author https://www.codewithrandom.com/2022/11/21/css-alert-notifications/
+*/
+
+.message-box {
+  border-radius: 6px;
+  margin: 20px auto;
+  padding: auto 0;
+  position: relative;
+}
+.message-box i {
+  vertical-align: middle;
+  padding: 20px;
+}
+.message-box i.exit-button {
+  float: right;
+  opacity: 0.4;
+}
+.message-box i.exit-button:hover {
+  opacity: 0.8;
+}
+
+.message-text {
+  vertical-align: middle;
+}
+
+.message-box-info {
+  background-color: #CDE8F6;
+  border: #2697d1 2px solid;
+  color: #447EAF;
+}
+
+.message-box-warn {
+  background-color: #F8F4D5;
+  border: #e9dd7e 2px solid;
+  color: #96722E;
+}
+
+.message-box-error {
+  background-color: #ECC8C5;
+  border: #d37f78 2px solid;
+  color: #B83C37;
+}
+
+.message-box-success {
+  background-color: #DDF3D5;
+  border: #9ddc86 2px solid;
+  color: #597151;
+}
