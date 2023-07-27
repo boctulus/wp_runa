@@ -4,8 +4,9 @@ namespace boctulus\SW\controllers;
 
 use boctulus\SW\core\libs\DB;
 use boctulus\SW\core\libs\Users;
-use boctulus\SW\core\libs\Products;
+use boctulus\SW\core\libs\Plugins;
 
+use boctulus\SW\core\libs\Products;
 use function TranslatePress\file_get_contents;
 
 class AdminTasksController
@@ -18,6 +19,12 @@ class AdminTasksController
 
     function index(){
         dd('Hi Admin!!!'); 
+    }
+
+    function plugin_dir(){
+        dd(
+            realpath(__DIR__ . DIRECTORY_SEPARATOR . '..')
+        ); 
     }
 
     function log(){
