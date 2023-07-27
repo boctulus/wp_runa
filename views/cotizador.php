@@ -7,6 +7,11 @@ use boctulus\SW\core\libs\Users;
 use boctulus\SW\core\libs\Strings;
 use boctulus\SW\core\libs\Products;
 
+/*
+    Notificaciones emebebidas en el frontoffice
+
+    (requieren de FontAwesome)
+*/
 
 css_file('css/my_notices.css');
 
@@ -28,16 +33,16 @@ foreach ($cart_items as $ix => $item) {
     // dd(Products::getStock($pid), $item['sku']);
 
     if ($_stock == 0){
+        /*
+            Remuevo del carrito
+        */
         Cart::remove($pid);
 
+        /*
+            Elimino de la visualizacion de items de carrito
+        */
         $pos = array_search($pid, $items);
         unset($items[$pos]);
-
-        // dd([
-        //     'pid'    => $pid,
-        //     'parent' => wp_get_post_parent_id($pid),
-        //     'sku'    => $sku
-        // ]);
 
         $no_stock[] = [
             'pid'   => $pid,
@@ -48,9 +53,6 @@ foreach ($cart_items as $ix => $item) {
 
     $stocks[$sku] = $_stock;    
 }
-
-
-
 ?>
 
 <script>
