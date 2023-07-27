@@ -200,7 +200,7 @@ foreach ($cart_items as $ix => $cart_item) {
 
                     $title     = "{$my_item['title']} ({$my_item['color']}) -{$my_item['no_stock']}-";
                 } else {
-                    $title     = Products::getName($pid); 
+                    $title     = Products::getName($pid_no_stock); 
                 }
 
             ?>

@@ -273,6 +273,17 @@ class Products extends Posts
         return $product->get_name();
     }
 
+    static function getTitle($product_id, bool $html = false){
+        if (Products::getPostType($product_id) == 'product_variation'){
+            $variation = Products::getProduct($product_id);
+            $title     = $variation->get_formatted_name(); 
+        } else {
+            $title     = Products::getName($product_id); 
+        }
+
+        return $title;
+    }
+
     /*
         Setea cantidades de 9999 para todos los productos a fines de poder hacer pruebas
     */
