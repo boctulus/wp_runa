@@ -33,72 +33,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /////////////////////////////////////////////////
 
-$pid   = 3827; 
-$stock = 21111;
-
-Products::setStock($pid, $qty);
-
-// $key = '_stock';
-// Products::setMeta($pid, $key, $stock);
-
-$product = wc_get_product($pid);
-
-dd(
-	$product->get_stock_quantity(), 'STOCK NATIVO'
-);
-
-exit;
-
-$key = '_stock';
-
-Products::setMeta($pid, $key, $stock);
-
-dd(
-	Products::getMeta($pid, $key)
-, 'STOCK COMO CUSTOM METADATO');
-
-$product = wc_get_product($pid);
-
-/*
-	--| Stock
-	D:\www\woo6\wp-content\plugins\wp_runa\core\libs\VarDump.php:49:
-	NULL
-*/
-dd(
-	$product->get_stock_quantity(), 'STOCK NATIVO'
-);
-
-exit;
-/////////////////////
-
-$pid   = 3827; // simple
-$stock = 999;
-
-wc_update_product_stock($pid, $stock);  
-$product = wc_get_product($pid);
-
-/*
-	--| Stock
-	D:\www\woo6\wp-content\plugins\wp_runa\core\libs\VarDump.php:49:
-	NULL
-*/
-dd(
-	$product->get_stock_quantity(), 'Stock'
-);
-
-
 
 $pid   = 2736; // variant
-$stock = 999;
+$stock = 9991;
 
-wc_update_product_stock($pid, $stock);  
-$product = wc_get_product($pid);
+Products::setStock($pid, $stock);
 
-/*
-	--| Stock
-	D:\www\woo6\wp-content\plugins\wp_runa\core\libs\VarDump.php:49:
-	NULL
-*/
 dd(
-	$product->get_stock_quantity(), 'Stock'
+	Products::getStock($pid), 'STOCK NATIVO'
 );

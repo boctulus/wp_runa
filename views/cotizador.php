@@ -4,16 +4,21 @@ use boctulus\SW\core\libs\Cart;
 use boctulus\SW\core\libs\Url;
 use boctulus\SW\core\libs\Users;
 use boctulus\SW\core\libs\Strings;
+use boctulus\SW\core\libs\Products;
 
-$is_logged = Users::isLogged();
+css_file('css/my_notices.css');
 
+
+$is_logged  = Users::isLogged();
 $cart_items = Cart::getItems();
 
 foreach ($cart_items as $item){
-    dd($item['stock_quantity'], $item['sku']);
+    $pid = $item['id'];
+    
+    dd(Products::getStock($pid), $item['sku']);
 }
 
-exit;
+// exit;
 
 ?>
 
@@ -136,7 +141,6 @@ exit;
     });
 </script>
 
-
 <div id="runa_container" style="margin-bottom:5vh">
 
 
@@ -146,6 +150,10 @@ exit;
         El id "quote-cart-form" es utilizado para bindear el form --conservar--
     -->
     <form class="woocommerce-cart-form" id="quote-cart-form">
+        <div class="my-notice my-notice-info" id="my-custom-notice">
+            <p>Producto XXX sin stock	</p>
+        </div>
+
         <div class="table-responsive">
             <table class="shop_table shop_table_responsive cart woocommerce-cart-form__contents" cellspacing="0">
                 <thead>

@@ -1,6 +1,11 @@
 <?php
 
 return [
+    /*
+        Bodega a utilizar para el stock
+    */
+    'warehouse'   => '01',
+
     // Dejar vacio ('') para no cambiarlo
     'add_to_cart_button_text' => 'Cotizar', // 'Agregar al carrito'
 

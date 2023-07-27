@@ -234,11 +234,6 @@ class Products extends Posts
         return $p->get_price();
     }
 
-    /*
-        Basado en 
-
-        https://stackoverflow.com/a/51940564/980631
-    */
     static function setStock($product_id, $qty)
     {
         $stock_staus = $qty > 0 ? 'instock' : 'outofstock';
@@ -253,6 +248,12 @@ class Products extends Posts
 
         // And finally (optionally if needed)
         wc_delete_product_transients( $product_id ); // Clear/refresh the variation cache
+    }
+
+    static function getStock($product_id)
+    {
+        $product = wc_get_product($product_id);
+        return $product->get_stock_quantity();
     }
 
     /*

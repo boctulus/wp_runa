@@ -82,6 +82,8 @@ class RunaSync
     */
     static function init($codes = null)
     {   
+        $warehouse = config()['warehouse'];
+
         if (!empty($codes)){
             $codes = explode(',', $codes);
         }
@@ -118,18 +120,19 @@ class RunaSync
         }
         
         $processed       = 0;
-        $processed_codes = [];
 
         foreach ($prods as $p){
-            $sku   = $p['cod'];
-            $stock = $p['can'];
-
-            // Parche porque RUNA envia duplicados para mitigar en algo el esfuerzo
-            if (in_array($sku, $processed_codes)){
-                continue;
-            }
-
             try {
+                $sku        = $p['cod'];
+                $stock      = $p['can'];
+                $current_wh = $p['sec']; // current wherehouse
+
+                if ($current_wh !== $warehouse){
+                    continue;
+                }
+
+                // dd($p, 'P');
+
                 $pid = Products::getProductIdBySKU($sku);
 
                 debug($pid, $sku);
@@ -147,16 +150,15 @@ class RunaSync
 
                     debug("Actualizando producto existente con SKU= '$sku' | pid=$pid" . (isset($parent_pid) ? " (variation of pid=$parent_pid)" : '') );
                     
-                    wc_update_product_stock($pid, $stock);  
+                    Products::setStock($pid, $stock);
                     
-                    $product = Products::getProduct($pid);
-                    $product->set_manage_stock(true);
+                    // $product = Products::getProduct($pid);
+                    // $product->set_manage_stock(true);
 
                 } else {
                     // ..
                 }
 
-                $processed_codes[] = $sku;
                 $processed++;
 
             } catch (\Exception $e){
