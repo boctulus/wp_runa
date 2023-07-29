@@ -6,8 +6,19 @@ return [
     */
     'warehouse'   => '01',
 
-    // Dejar vacio ('') para no cambiarlo
-    'add_to_cart_button_text' => 'Cotizar', // 'Agregar al carrito'
+    /*
+        CronJob
+
+        Intervalo en segundos
+
+        Ej:
+
+        3600 * 6  // para cada 6 horas
+
+        (para el caso de querer utilizar CronJobs de WordPress)
+    */
+
+    'cronjob_interval' => 3600 * 12,
 
     /*
         API
@@ -35,6 +46,10 @@ return [
     'disable_cart'     => true,
     'disable_checkout' => true,
     
+    
+    // Dejar vacio ('') para no cambiarlo
+    'add_to_cart_button_text' => 'Cotizar', // 'Agregar al carrito'
+
 
     // No editar desde aqui -->
 

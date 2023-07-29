@@ -202,7 +202,9 @@ addEventListener("DOMContentLoaded", (event) => {
 
 
     <!-- id es usado por JS, favor de conservar -->
-    <div id="loading-text"></div>
+    <div class="loading_parent">
+        <div class="loading_centered" id="loading-text"></div>
+    </div>
     
 </div>
 

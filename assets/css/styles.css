@@ -10,13 +10,21 @@
 }
 
 /*
-Extras que podria utilizar
+	loading 
 */
 
-#loading-text {
-	margin-top: -30px;
+.loading_parent{
+    width:100vw;
+    height:100vh;
+    position: relative;
 }
 
-.danger-color {
-	color: #FF4500;
+.loading_centered{
+    text-align: center;
+    position: fixed;
+    top: 50%;
+    left: 0;
+    right: 0;
+    margin: auto;
+    transform: translateY(-50%);
 }

@@ -15,7 +15,8 @@ use boctulus\SW\core\libs\Template;
     By boctulus
 */
 
-// Template::set('kadence');
+require_once __DIR__ . '/wp_crons.php';
+
 
 $quoter_slug = '/cotizador';
 $quoter_stp2 = '/contact';   

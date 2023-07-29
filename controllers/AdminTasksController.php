@@ -34,6 +34,10 @@ class AdminTasksController
         return realpath(__DIR__ . DIRECTORY_SEPARATOR . '../sync.php');
     }
 
+    function cron_cmd(){
+        return 'php ' . $this->cron_dir() . '  > /dev/null 2>&1';
+    }
+
     function log(){
         return file_exists(LOGS_PATH . 'log.txt') ? file_get_contents(LOGS_PATH . 'log.txt') : '--x--';
     }
