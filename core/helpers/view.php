@@ -2,6 +2,11 @@
 
 use boctulus\SW\core\libs\Strings;
 use boctulus\SW\core\libs\Files;
+use boctulus\SW\core\libs\Plugins;
+
+function get_shortcode($tag){
+    return do_shortcode("[$tag]");
+}
 
 function plugin_path(){
     return realpath(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..');
@@ -36,7 +41,7 @@ function asset(string $resource){
     return assets_url($resource);
 }
 
-function css_file(string $src){
+function css_file(string $src, $dependencies = [], $version = null, $media = 'all'){
 	$src    = ltrim($src, '/\\');
 	$handle = $src;
 
@@ -44,13 +49,15 @@ function css_file(string $src){
 		$src = asset($src);
 	}
 
-	wp_register_style($handle, $src);
+    if ($version === null && !Strings::contains('third_party', $src)){
+        $version = 'asset-' . Plugins::getVersion();
+    }
+    
+	wp_register_style($handle, $src, $dependencies, $version, $media);
 	wp_enqueue_style($handle);
 }
 
-function js_file(string $src, bool $in_head = false){
-    #debug(__FUNCTION__ . " < $src"); //
-
+function js_file(string $src, bool $in_head = false, $dependencies = [], $version = null){
 	$src    = ltrim($src, '/\\');
 	$handle = $src;
 
@@ -58,16 +65,55 @@ function js_file(string $src, bool $in_head = false){
 		$src = asset($src);
 	}
 
-	wp_register_script($handle, $src, [], false, !$in_head);
+    if ($version === null && !Strings::contains('third_party', $src)){
+        $version = 'asset-' . Plugins::getVersion();
+    }
+
+	wp_register_script($handle, $src, $dependencies, $version, !$in_head);
 	wp_enqueue_script($handle);
 }
 
-function enqueue(string $fn_name, $priority = null){
-    add_action('wp_enqueue_scripts', $fn_name, $priority);
+// Función para agregar código JavaScript inline en temas y plugins
+function js($code, $script_name = 'my_js', $is_plugin = false) {
+    if ($is_plugin) {
+        // Si es un plugin, utilizamos wp_enqueue_scripts
+        add_action('wp_enqueue_scripts', function() use ($code, $script_name) {
+            wp_add_inline_script($script_name, $code);
+        });
+    } else {
+        // Si es un tema, utilizamos wp_print_scripts
+        add_action('wp_print_scripts', function() use ($code) {
+            echo '<script>' . $code . '</script>';
+        });
+    }
 }
 
-function enqueue_admin(string $fn_name, $priority = 10, $accepted_args =1){
-    add_action('admin_enqueue_scripts', $fn_name, $priority, $accepted_args);
+// Función para agregar CSS inline en temas y plugins
+function css($css_code, $style_id = 'my_css', $is_plugin = false) {
+    if ($is_plugin) {
+        // Si es un plugin, utilizamos wp_enqueue_scripts
+        add_action('wp_enqueue_scripts', function() use ($css_code, $style_id) {
+            wp_add_inline_style($style_id, $css_code);
+        });
+    } else {
+        // Si es un tema, utilizamos wp_print_styles para frontoffice
+        add_action('wp_print_styles', function() use ($css_code) {
+            echo '<style>' . $css_code . '</style>';
+        });
+
+        // Utilizamos admin_enqueue_scripts para el panel de administración
+        add_action('admin_enqueue_scripts', function() use ($css_code) {
+            echo '<style>' . $css_code . '</style>';
+        });
+    }
+}
+
+function enqueue(string $fn_name, $priority = 10, $accepted_args =1){
+    add_action('wp_enqueue_scripts', $fn_name, $priority, $accepted_args);
+}
+
+function enqueue_admin($callback, $priority = 10, $accepted_args =1){
+    add_action('admin_enqueue_scripts', $callback, $priority, $accepted_args);
 }
 
 function include_no_render(string $path, ?Array $vars = null){
@@ -103,14 +149,9 @@ function view(string $view_path, array $vars  = null){
         extract($vars);
     }      
 
-    ob_start();
-    include VIEWS_PATH . $view_path;
-    
-    $content = ob_get_contents();
-    ob_end_clean();
-
     include get_view_src($view_path);
 }
+
 
 /*
     Antes llamada encodeProp()
@@ -118,5 +159,5 @@ function view(string $view_path, array $vars  = null){
 function var_encode($name, $value){
     $encoded = base64_encode(is_array($value) ? '--array--' . json_encode($value) : $value);
 
-    return "<input type=\"hidden\" name=\"$name-encoded\" id=\"comunas-encoded\" value=\"$encoded\">";
+    return "<input type=\"hidden\" name=\"$name-encoded\" id=\"$name-encoded\" value=\"$encoded\">";
 }

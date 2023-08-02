@@ -34,6 +34,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 /////////////////////////////////////////////////
 
 
+dd(
+	Plugins::getVersion('imagify')
+);
+
+
+exit;
+
+
 Logger::log(__FILE__);
 exit;
 
