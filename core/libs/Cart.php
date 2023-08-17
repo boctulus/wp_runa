@@ -48,13 +48,8 @@ class Cart
 
             $p['id']  = $item['data']->get_id();
 
-			// accepts 2 arguments ( size, attr )
-            $p['img']  = $prod->get_image();
-
-			$empty_img = Strings::contains('woocommerce-placeholder-', $p['img']);
-		
 			// Check if the product is a variable product and the parent product doesn't have an image
-			if ($prod->is_type('variable') && $empty_img) 
+			if ($prod->is_type('variable')) 
 			{	
 				// Get variations of the parent product
 				$variations = $prod->get_available_variations();
@@ -88,6 +83,11 @@ class Cart
 
 				// Get stock quantity for simple product
                 $p['stock_quantity'] = $prod->get_stock_quantity();
+
+				// accepts 2 arguments ( size, attr )
+				$p['img_url']  = $prod->get_image();
+
+				// $empty_img = Strings::contains('woocommerce-placeholder-', $p['img_url']);	
 			}
 
             $p['title']         = $prod->get_title();

@@ -34,17 +34,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 /////////////////////////////////////////////////
 
 
-dd(
-	Plugins::getVersion('imagify')
-);
-
-
-exit;
-
-
-Logger::log(__FILE__);
-exit;
-
 
 $sku   = '06te502saf';
 $stock = 0;

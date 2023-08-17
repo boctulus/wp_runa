@@ -23,6 +23,9 @@ js_file('third_party/fontawesome5/fontawesome_kit.js');
 $is_logged  = Users::isLogged();
 $cart_items = Cart::getItems();
 
+// dd($cart_items);
+// exit;
+
 $no_stock = [];
 $stocks   = [];
 foreach ($cart_items as $ix => $cart_item) {
@@ -266,7 +269,7 @@ foreach ($cart_items as $ix => $cart_item) {
                             </td>
 
                             <td class="product-price" data-title="Precio">
-                                <?= $is_logged ? Strings::formatNumber($item['price']) : '' ?>
+                                <?= $is_logged ? Strings::formatNumber($item['price']) : '' ?> + IVA
                             </td>
 
                             <td class="product-sku" data-title="SKU" data-pid="<?= $item['id'] ?>">
