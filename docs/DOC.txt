@@ -26,13 +26,29 @@ Resumiendo, el plugin requiere:
 - El paquete spatie/array-to-xml (1)
 - WordPress
 - WooCommerce 
-- El tema Flatsome se recomienda al menos para testear el plugin.
+- El tema Flatsome se uso inicialmente para desarrollar. Luego se actualizo a XSTORE
 - Que el IVA este aplicado (2) 
 
 Notas:
 
 1. Instalar Composer y luego spatie/array-to-xml mediante "composer require spatie/array-to-xml" 
 2. Esto se hace desde ajustes de impuestos en WooCommerce.
+
+
+# Configuracion
+
+Para pruebas.... se han definido unas variables extra:
+
+    EMPTY_CART=true|false
+    MOCK_REQUEST=true|true
+    REDIRECT=true|false
+
+Se pueden agregar al .env
+o a un archivo .dev-env que si existe le gana en prioridad al .env
+
+EMPTY_CART si es false ...... no borra el carrito
+MOCK_REQUEST si es true........ simula el envio a RUNA... con lo cual es mas rapido para ver validaciones
+REDIRECT si es false no redirije a /tienda
 
 
 Licencia:
