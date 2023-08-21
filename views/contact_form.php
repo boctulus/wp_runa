@@ -455,8 +455,8 @@ addEventListener("DOMContentLoaded", (event) => {
         */
         
         if (prev_data['ema'] == ''){
-            jQuery('.message-container').text('E-mail es requerido')
-            return
+            // jQuery('.message-container').text('E-mail es requerido')
+            // return
         }
 
         let contact_data = getFormData($("#quoter_contact_form"), false);
