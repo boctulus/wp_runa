@@ -51,9 +51,14 @@ if (!empty($user_id)){
         ];
     // }   
 }
+
 ?>
 
 <script>
+
+const empty_cart   = <?= config()['empty_cart']   !== "false" && config()['empty_cart']   != "" ? 'true' : 'false'; ?>;
+const mock_request = <?= config()['mock_request'] !== "false" && config()['mock_request'] != "" ? 'true' : 'false'; ?>;
+const redirect     = <?= config()['redirect']     !== "false" && config()['redirect']     != "" ? 'true' : 'false'; ?>;
 
 let backend_userdata = {
     name:    "<?= $user_full_name ?>",
@@ -314,6 +319,28 @@ addEventListener("DOMContentLoaded", (event) => {
 
         // console.log(data);
 
+        if (mock_request){
+
+            setTimeout(function() {
+                Swal.fire({
+                    title: "Enviado!",
+                    text: "Recibirá la cotización en su correo",
+                    icon: "success",
+                }).then((result) => {
+                    // Redireccion
+                    if (redirect){
+                        window.location.replace('/tienda')
+                    }
+
+                    return;
+                });
+
+                clearAjaxNotification();
+            }, 250);
+           
+            return;
+        }
+
         jQuery.ajax({
             url: url, 
             type: "POST",
@@ -327,17 +354,20 @@ addEventListener("DOMContentLoaded", (event) => {
                 console.log('RES', res);
 
                 /*
-                    Ahora borro el carrito
+                    Ahora borro el carrito (sino esta deshabilitada la funcionalidad)
                 */
-                $.post(`/cart/empty`, function (data, status) {
-                    console.log('Carrito borrado');
+                if (empty_cart)
+                {
+                    $.post(`/cart/empty`, function (data, status) {
+                        console.log('Carrito borrado');
 
-                    // Tambien borro items del localstorage
-                    toStorage({cart_items: null})
-                })
-                .fail(function (data) {
-                    console.log("Error al intentar borrar carrito", data);
-                });
+                        // Tambien borro items del localstorage
+                        toStorage({cart_items: null})
+                    })
+                    .fail(function (data) {
+                        console.log("Error al intentar borrar carrito", data);
+                    });
+                }
                 
                 //setNotification("Gracias por tu mensaje. Ha sido enviado.");
 
@@ -347,12 +377,17 @@ addEventListener("DOMContentLoaded", (event) => {
                     icon: "success",
                 }).then((result) => {
                     // Redireccion
-                    window.location.replace('/tienda')
+                    if (redirect){
+                        window.location.replace('/tienda')
+                    }
                     return;
                 });
 
                 // Redireccion (en caso de que escape del modal)
-                window.location.replace('/tienda')
+                if (redirect){
+                    window.location.replace('/tienda')
+                }
+
                 return;
             },
             error: function(res) {

@@ -50,6 +50,24 @@ return [
     // Dejar vacio ('') para no cambiarlo
     'add_to_cart_button_text' => 'Cotizar', // 'Agregar al carrito'
 
+    /*
+        Redireccion a /tienda al enviar
+    */
+
+    'redirect'         => env('REDIRECT', true), 
+
+    /*
+        Solo para hacer pruebas si se dejara en false,
+        evitaria que se limpiar el carrito
+    */
+    'empty_cart'        => env('EMPTY_CART', true),  
+
+    /*
+        Mock request -solo para pruebas-
+    */
+
+    'mock_request'      => env('MOCK_REQUEST', false),  
+ 
 
     // No editar desde aqui -->
 

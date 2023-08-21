@@ -42,7 +42,10 @@ if ((php_sapi_name() === 'cli')){
         Parse command line arguments into the $_GET variable <sep16@psu.edu>
     */
 
-    parse_str(implode('&', array_slice($argv, 1)), $_GET);
+    if (!empty($_GET)){
+        parse_str(implode('&', array_slice($argv, 1)), $_GET); 
+    }
+    
 }
 
 /* Helpers */
