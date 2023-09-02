@@ -336,6 +336,23 @@ addEventListener("DOMContentLoaded", (event) => {
                 });
 
                 clearAjaxNotification();
+
+                /*
+                    Ahora borro el carrito -- mock mode --
+                */
+                if (empty_cart)
+                {
+                    $.post(`/cart/empty`, function (data, status) {
+                        console.log('Carrito borrado');
+
+                        // Tambien borro items del localstorage
+                        toStorage({cart_items: null})
+                    })
+                    .fail(function (data) {
+                        console.log("Error al intentar borrar carrito", data);
+                    });
+                }
+
             }, 250);
            
             return;

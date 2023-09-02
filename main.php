@@ -21,7 +21,6 @@ require_once __DIR__ . '/wp_crons.php';
 $quoter_slug = '/cotizador';
 $quoter_stp2 = '/contact';   
 
-
 /*
     Es requisito de RUNA que el IVA este aplicado
 */
@@ -65,6 +64,14 @@ function sw_init_session() {
 
 require_once __DIR__ . '/shortcodes.php'; 
 
+add_action( 'woocommerce_after_single_product', function(){
+    ?>
+        <script>
+            <?= file_get_contents(ROOT_PATH . 'assets/js/min-max.js') ?>
+        </script>
+    <?php
+}, 10, 0 );
+
 // ok
 function assets(){
 	// css_file('/third_party/bootstrap/bootstrap.min.css');
@@ -77,6 +84,44 @@ function assets(){
     if (Page::isCart()){
         css_file('/css/cotizador.css'); 
     }
+    
+    // if (Page::isPage('product') || Page::isPage('cotizador')){
+        // css_file('/css/xstore_cart/xstore_cart.min.css');
+        // css_file('/css/xstore_cart/elementor.min.css');
+        // css_file('/css/xstore_cart/slick.min.css');
+        // css_file('/css/xstore_cart/breadcrumbs.min.css');
+        // css_file('/css/xstore_cart/back-top.min.css');
+        // css_file('/css/xstore_cart/mobile-panel.min.css');
+        // css_file('/css/xstore_cart/global.min.css');
+        // css_file('/css/xstore_cart/archive.min.css');
+        // css_file('/css/xstore_cart/swatches.min.css');
+        // css_file('/css/xstore_cart/single-product-builder.min.css');
+        // css_file('/css/xstore_cart/single-product-elements.min.css');
+        // css_file('/css/xstore_cart/star-rating.min.css');
+        // css_file('/css/xstore_cart/comments.min.css');
+        // css_file('/css/xstore_cart/meta.min.css');
+        // css_file('/css/xstore_cart/contact-forms.min.css');
+        // css_file('/css/xstore_cart/menu.min.css');
+        // css_file('/css/xstore_cart/search.min.css');
+        // css_file('/css/xstore_cart/product-view-default.min.css');
+        // css_file('/css/xstore_cart/blog-global.min.css');
+        // css_file('/css/xstore_cart/portfolio.min.css');
+        // css_file('/css/xstore_cart/kirki-styles.css');
+        // css_file('/css/xstore_cart/style.css');
+        // css_file('/css/xstore_cart/categories-carousel.min.css');
+        // css_file('/css/xstore_cart/navigation.min.css');
+        // css_file('/css/xstore_cart/ajax-search.min.css');
+        // css_file('/css/xstore_cart/full-width-search.min.css');
+        // css_file('/css/xstore_cart/categories-carousel.min.css');
+        // css_file('/css/xstore_cart/off-canvas.min.css');
+        // css_file('/css/xstore_cart/cart-widget.min.css');
+        // css_file('/css/xstore_cart/mobile-menu.min.css');
+        // css_file('/css/xstore_cart/toggles-by-arrow.min.css');
+        // css_file('/css/xstore_cart/tabs.min.css');
+        // css_file('/css/xstore_cart/navigation.min.css');
+        // css_file('/css/xstore_cart/etheme-icon-list.min.css');
+        // css_file('/css/xstore_cart/photoswipe.min.css');
+    // }
     
     js_file('/third_party/sweetalert2/sweetalert.js'); 
 

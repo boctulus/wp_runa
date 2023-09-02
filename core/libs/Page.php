@@ -4,10 +4,21 @@ namespace boctulus\SW\core\libs;
 
 class Page
 {
-    // is the Post, a Page?
-    static function isPage(string $page = ''){
-        return is_page($page);
-    }
+    /*
+        Busca por coincidencias en url actual en page={page} y /page
+    */
+    static function isPage(string $page = ''): bool {
+        if (!empty($page)) {
+            $keyword = "page=" . $page;
+            return (strpos($_SERVER['REQUEST_URI'], $keyword) !== false) ||  (strpos($_SERVER['REQUEST_URI'], "/$page") !== false);
+        } else {
+            return strpos($_SERVER['REQUEST_URI'], 'page=') !== false;
+        }
+    }  
+
+    static function pageContains(string $page): bool {
+        return Strings::contains("page=" . $page, $_SERVER['REQUEST_URI']);
+    }  
     
     static function isArchive(){
         return is_archive();
