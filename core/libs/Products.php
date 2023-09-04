@@ -212,6 +212,16 @@ class Products extends Posts
         return $result_ay[0]['ID'];
     }    
 
+    static function getProductBySKU($sku){
+        global $wpdb;
+
+        $product_id = $wpdb->get_var(
+            $wpdb->prepare("SELECT post_id FROM $wpdb->postmeta WHERE meta_key='_sku' AND meta_value='%s'", $sku)
+        );
+
+        return static::getProduct($product_id);
+    }    
+
     static function getIdBySKU($sku, $post_status = null){
         $pid = wc_get_product_id_by_sku($sku);
 

@@ -1,6 +1,8 @@
 /*  
   Corrige implementacion trunca de <input type="number"> donde el max=""
   solo se retringe con las flechas pero no al ingresar por teclado
+
+  Version con JQuery
 */
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -36,8 +38,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       });
     });
-
-
     
 });
 

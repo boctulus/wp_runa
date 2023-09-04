@@ -155,13 +155,19 @@ foreach ($cart_items as $ix => $cart_item) {
             // });
         });
 
-        // Actualizado 12/7/23
+        // Actualizado 4/09/23
         $('.plus').click(function(e) {
             e.preventDefault();
             let input = $(this).parent().find('input.qty');
             let qty = parseInt(input.val());
 
-            qty++;
+            // Obtén el valor del atributo "max"
+            let max = parseInt(input.attr('max'));
+
+            if (qty < max){
+                qty++;
+            }
+           
             input.val(qty);
 
             var pid = input.data("pid");

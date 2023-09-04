@@ -25,6 +25,18 @@ class AdminTasksController
         return realpath(__DIR__ . DIRECTORY_SEPARATOR . '..'); 
     }
 
+    function inventario(){
+        $pids = Products::getIDs();	
+
+        foreach ($pids as $pid){
+            $p = Products::getProduct($pid);
+            $p->set_manage_stock(true);
+            $p->save();
+        }
+
+        dd("Inventarios actualizados");
+    }
+
     /*
         Devuelve algo como
 

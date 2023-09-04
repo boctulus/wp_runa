@@ -34,6 +34,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 /////////////////////////////////////////////////
 
 
+$sku = '23te213cam';
+$p = Products::getProductBySKU($sku);
+
+$p->set_manage_stock(true);
+$p->save();
+
+exit;
+
 
 $sku   = '06te502saf';
 $stock = 0;
