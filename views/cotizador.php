@@ -6,6 +6,7 @@ use boctulus\SW\core\libs\Url;
 use boctulus\SW\core\libs\Users;
 use boctulus\SW\core\libs\Strings;
 use boctulus\SW\core\libs\Products;
+use boctulus\SW\core\libs\Templates;
 
 /*
     Notificaciones emebebidas en el frontoffice
@@ -65,6 +66,24 @@ foreach ($cart_items as $ix => $cart_item) {
     $stocks[$sku] = $_stock;    
 }
 ?>
+
+<style>
+    <?php
+        /* 
+            Por alguna razon no se ven los iconos de los botones en por ejemplo.... Flatsome
+        */
+        if (Templates::currentName() == 'flatsome'){
+            echo 'div.quantity > span {
+                color: black;
+                background-color: grey;
+                opacity: 1; 
+                z-index: 999;
+                display: block; /* Para mostrar el botón si estaba oculto con "none" */
+                visibility: visible; /* Para mostrar el botón si estaba oculto con "hidden" */
+            }';
+        }
+    ?>
+</style>
 
 <script>
     addEventListener("DOMContentLoaded", (event) => {

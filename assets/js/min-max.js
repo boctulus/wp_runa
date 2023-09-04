@@ -1,44 +1,78 @@
-/*  
+/*
   Corrige implementacion trunca de <input type="number"> donde el max=""
   solo se retringe con las flechas pero no al ingresar por teclado
 
-  Version con JQuery
+  @author Pablo Bozzolo < boctulus@gmail.com >
+
+  Version con JS vanilla
+  
+  Uso:
+
+  - En pagina invidual de productos
+
+    add_action( 'woocommerce_after_single_product', function(){
+      ?>
+          < script >
+              <!-- ruta al archivo .js -->
+              <?= file_get_contents(ROOT_PATH . 'assets/js/min-max.js') ?>
+          < /script >
+      <?php
+    }, 10, 0 );
+
+
+  - En una "vista" cualquiera se puede colocar al final:
+
+    < script >
+        <!-- ruta al archivo .js -->
+        <?= file_get_contents(ROOT_PATH . 'assets/js/min-max.js') ?>
+    < /script >
 */
 
 document.addEventListener('DOMContentLoaded', function() {
+  const numberInputsWithMax = document.querySelectorAll('input[type="number"][max]');
+  const numberInputsWithMin = document.querySelectorAll('input[type="number"][min]');
 
-    setTimeout(function(){
-      const inputElementsWithMax = jQuery('input[type="number"][max]');
-    
-      inputElementsWithMax.each(function() {
-        const $input = jQuery(this);
-        // Buscar out-of-stock no deberia ser necesario
-        const max = $('p').hasClass("out-of-stock") ? 0 : parseInt($input.attr('max'));
-    
-        $input.on('change keyup keydown input', function() {
-          const currentValue = parseInt($input.val());
-          if (!isNaN(currentValue) && currentValue > max) {
-            $input.val(max); 
-          }
-        });
-      });  
+  numberInputsWithMin.forEach(function(input) {
+    input.addEventListener('keyup', function() {
+      const currentValue = parseInt(input.value);
+      const min = parseInt(input.getAttribute('min'));
 
-    }, 700)
+      if (!isNaN(currentValue)) {
+        if (currentValue < min){
+          input.value = min;
 
-    // Aplico otra tecnica
-    jQuery('body').on('keyup keydown','input[type="number"][max]',function(){
-      const $input = jQuery(this);
-      // Buscar out-of-stock no deberia ser necesario
-      const max = $('p').hasClass("out-of-stock") ? 0 : parseInt($input.attr('max'));
-  
-      $input.on('change keyup keydown input', function() {
-        const currentValue = parseInt($input.val());
-        if (!isNaN(currentValue) && currentValue > max) {
-          $input.val(max); 
+          // Bloqueo el control por 300 ms para evitar errores por parte del usuario
+          input.setAttribute('readonly', 'readonly');
+
+          setTimeout(function() {
+            input.removeAttribute('readonly');
+          }, 300);
+
         }
-      });
+      }
     });
-    
+  });
+
+  numberInputsWithMax.forEach(function(input) {
+    input.addEventListener('keyup', function() {
+      const currentValue = parseInt(input.value);
+      const max = parseInt(input.getAttribute('max'));
+
+      if (!isNaN(currentValue)) {
+        if (currentValue > max){
+          input.value = max;
+
+          // Bloqueo el control por 300 ms para evitar errores por parte del usuario
+          input.setAttribute('readonly', 'readonly');
+
+          setTimeout(function() {
+            input.removeAttribute('readonly');
+          }, 300);
+        }
+      }
+    });
+  });
 });
+
 
       
