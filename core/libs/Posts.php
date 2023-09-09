@@ -371,40 +371,72 @@ class Posts
 
     /*
         Retorna posts contienen determinado valor en una meta_key
+
+        Uso:
+
+            Posts::getByMeta('_Quiz name', 'examen-clase-b', 'sfwd-question')
+            Posts::getByMeta('_Quiz name', 'examen-clase-b', 'sfwd-question', null, 2, null, 'RAND()')
+            etc.
+
+        Genera query como:
+
+            SELECT p.*, pm.* FROM wp_postmeta pm
+            LEFT JOIN wp_posts p ON p.ID = pm.post_id 
+            WHERE  
+                pm.meta_key   = '_Quiz name' 
+            AND pm.meta_value = 'examen-clase-b'
+            AND p.post_type   = 'sfwd-question'
+            AND p.post_status = 'publish'            
+    
     */
-    static function getByMeta($meta_key, $meta_value, $post_type = null, $post_status = null ) {
+    static function getByMeta($meta_key, $meta_value, $post_type = null, $post_status = null, $limit = null, $offset = null, $order_by = null) {
         global $wpdb;
 
         if ($post_type == null){
             $post_type = static::$post_type;
         }
 
+        $limit_clause = '';
+        if ($limit !== null){
+            $limit_clause = "LIMIT $limit";
+        }
+
+        $offset_clause = '';
+        if ($offset !== null){
+            $offset_clause = "OFFSET $offset";
+        }
+
+        $order_clause = '';
+        if ($order_by !== null){
+            $order_clause = "ORDER BY $order_by";
+        }
+
         if (!Strings::startsWith('_', $meta_key)){
             $meta_key = '_' . $meta_key;
         }
 
-        /*
-            SELECT p.*, pm.* FROM wp_postmeta pm
-            LEFT JOIN wp_posts p ON p.ID = pm.post_id 
-            WHERE p.post_type = 'product' 
-            AND pm.meta_key = '_forma_farmaceutica' 
-            AND pm.meta_value='triangulo'
-            AND p.post_status = 'publish'
-            ;
-        */
-
         $sql = "SELECT p.*, pm.* FROM {$wpdb->prefix}postmeta pm
         LEFT JOIN {$wpdb->prefix}posts p ON p.ID = pm.post_id 
-        WHERE p.post_type = '%s' 
-        AND pm.meta_key = '%s' 
-        AND pm.meta_value='%s'
-        ";
+        WHERE  
+        pm.meta_key = '%s' 
+        AND pm.meta_value='%s'";
 
-        if ($post_status !== null){
-            $sql .= " AND p.post_status = '$post_status'";
+        $sql_params = array($meta_key, $meta_value);
+
+        if ($post_type !== null) {
+            $sql .= " AND p.post_type = %s";
+            $sql_params[] = $post_type;
         }
 
-        $r = $wpdb->get_results($wpdb->prepare($sql, $post_type, $meta_key, $meta_value), ARRAY_A);
+        if ($post_status !== null) {
+            $sql .= " AND p.post_status = %s";
+            $sql_params[] = $post_status;
+        }
+
+        $sql .= " $order_clause $limit_clause $offset_clause";
+
+        $r = $wpdb->get_results($wpdb->prepare($sql, $sql_params), ARRAY_A);
+
     
         return $r;
     }

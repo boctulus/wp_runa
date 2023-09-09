@@ -414,7 +414,7 @@ addEventListener("DOMContentLoaded", (event) => {
                 //     setNotification(res['message']);
                 // }
 
-                console.log('RES ERROR', res);
+                console.log('RES ERROR!', res);
                 //setNotification("Hubo un error. Inténtelo más tarde.");
 
                 Swal.fire({
