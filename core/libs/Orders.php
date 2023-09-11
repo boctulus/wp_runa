@@ -18,6 +18,90 @@ use boctulus\SW\core\libs\Products;
 */
 class Orders 
 {
+    static function getOrderId(\WC_Order $order){
+        // return $order->get_id();
+        return trim(str_replace('#', '', $order->get_order_number()));
+    }
+
+    static function getOrderById($order_id) : \WC_Order {
+        // Get an instance of the WC_Order object (same as before)
+         return wc_get_order($order_id);
+    }
+
+    static function orderExists($order_id) : bool {
+        return wc_get_order($order_id) !== false;
+    }
+
+    // https://stackoverflow.com/a/46690009/980631
+    static function getLastOrderId(){
+        global $wpdb;
+        $statuses = array_keys(wc_get_order_statuses());
+        $statuses = implode( "','", $statuses );
+    
+        // Getting last Order ID (max value)
+        $results = $wpdb->get_col( "
+            SELECT MAX(ID) FROM {$wpdb->prefix}posts
+            WHERE post_type = 'shop_order'
+            AND post_status IN ('$statuses')
+        " );
+        return reset($results);
+    }
+
+    static function getLastOrderById(){
+        $id = static::getLastOrderId();
+
+        if (empty($id)){
+            return;
+        }
+
+        return static::getOrderById($id);
+    }
+
+    static function getLastOrder(){
+        return \wc_get_order(
+            static::getLastOrderId()
+        );
+    }
+
+    /*
+        Utilizar para obtener la cantidad de unidades vendidas a precio Plus de cierto producto 
+    */
+    static function getRecentOrders($days = 30, $user_id = null){
+        $args = array(            
+            'date_created' => '>' . ( time() - (DAY_IN_SECONDS * $days)),
+            'limit' => '-1'
+        );
+
+        if ($user_id !== null){
+            $args['customer_id'] = $user_id;
+        }
+        
+        $orders = wc_get_orders( $args );
+
+        return $orders;
+    }
+
+    static function getOrderItems(\Automattic\WooCommerce\Admin\Overrides\Order $order_object){
+        return $order_object->get_items();
+    }
+
+    static function getOrderData(\Automattic\WooCommerce\Admin\Overrides\Order $order_object){
+        $order_data = $order_object->get_data(); // The Order data
+
+        $order_status   = $order_data['status'];
+        $order_currency = $order_data['currency'];
+        $order_payment_method = $order_data['payment_method'];
+        $order_payment_method_title = $order_data['payment_method_title'];
+
+        return [
+            'status' => $order_status,
+            'currency' => $order_currency,
+            'payment_method' => $order_payment_method,
+            'payment_method_title' => $order_payment_method_title
+        ];
+    }
+
+
     /*
         Ej. de params:
 
@@ -88,7 +172,7 @@ class Orders
 
         if (!empty($attributes)){
             foreach ($attributes as $att_name => $att_value){
-                update_post_meta($order->id, $att_name, $att_value);
+                update_post_meta($order->get_id(), $att_name, $att_value);
             }
         }
         
@@ -175,88 +259,6 @@ class Orders
 
     static function setCustomerId($order, $user_id){
         $order->set_customer_id($user_id);
-    }
-
-    static function getOrderId(\WC_Order $order){
-        return trim(str_replace('#', '', $order->get_order_number()));
-    }
-
-    static function getOrderById($order_id) : \WC_Order {
-        // Get an instance of the WC_Order object (same as before)
-         return wc_get_order($order_id);
-    }
-
-    static function orderExists($order_id) : bool {
-        return wc_get_order($order_id) !== false;
-    }
-
-    // https://stackoverflow.com/a/46690009/980631
-    static function getLastOrderId(){
-        global $wpdb;
-        $statuses = array_keys(wc_get_order_statuses());
-        $statuses = implode( "','", $statuses );
-    
-        // Getting last Order ID (max value)
-        $results = $wpdb->get_col( "
-            SELECT MAX(ID) FROM {$wpdb->prefix}posts
-            WHERE post_type = 'shop_order'
-            AND post_status IN ('$statuses')
-        " );
-        return reset($results);
-    }
-
-    static function getLastOrderById(){
-        $id = static::getLastOrderId();
-
-        if (empty($id)){
-            return;
-        }
-
-        return static::getOrderById($id);
-    }
-
-    static function getLastOrder(){
-        return \wc_get_order(
-            static::getLastOrderId()
-        );
-    }
-
-    /*
-        Utilizar para obtener la cantidad de unidades vendidas a precio Plus de cierto producto 
-    */
-    static function getRecentOrders($days = 30, $user_id = null){
-        $args = array(            
-            'date_created' => '>' . ( time() - (DAY_IN_SECONDS * $days)),
-            'limit' => '-1'
-        );
-
-        if ($user_id !== null){
-            $args['customer_id'] = $user_id;
-        }
-        
-        $orders = wc_get_orders( $args );
-
-        return $orders;
-    }
-
-    static function getOrderItems(\Automattic\WooCommerce\Admin\Overrides\Order $order_object){
-        return $order_object->get_items();
-    }
-
-    static function getOrderData(\Automattic\WooCommerce\Admin\Overrides\Order $order_object){
-        $order_data = $order_object->get_data(); // The Order data
-
-        $order_status   = $order_data['status'];
-        $order_currency = $order_data['currency'];
-        $order_payment_method = $order_data['payment_method'];
-        $order_payment_method_title = $order_data['payment_method_title'];
-
-        return [
-            'status' => $order_status,
-            'currency' => $order_currency,
-            'payment_method' => $order_payment_method,
-            'payment_method_title' => $order_payment_method_title
-        ];
     }
 
     static function getShippingCosts(\Automattic\WooCommerce\Admin\Overrides\Order $order){
