@@ -43,12 +43,14 @@ add_action('wp_loaded', function(){
 
     if (defined('WC_ABSPATH') && !is_admin())
 	{
-        if (config()['disable_cart']){
-            Cart::cartRedirect($quoter_slug);
-        }
-
-        if (config()['disable_checkout']){
-            Cart::checkoutRedirect($quoter_stp2);
+        if (!is_cli()){
+            if (config()['disable_cart']){
+                Cart::cartRedirect($quoter_slug);
+            }
+    
+            if (config()['disable_checkout']){
+                Cart::checkoutRedirect($quoter_stp2);
+            }
         }
     }    
 });
